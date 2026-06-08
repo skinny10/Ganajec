@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:provider/provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/router/app_router.dart';
+import 'core/providers/auth_providers.dart';
+
+class GanajecApp extends StatelessWidget {
+  const GanajecApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ...authProviders,
+      ],
+      child: Builder(
+        builder: (context) {
+          return MaterialApp.router(
+            title: 'GANAJEC',
+            debugShowCheckedModeBanner: false,
+            useInheritedMediaQuery: true,
+            locale: DevicePreview.locale(context),
+            builder: DevicePreview.appBuilder,
+            theme: AppTheme.light(context),
+            darkTheme: AppTheme.dark(context),
+            themeMode: ThemeMode.system,
+            routerConfig: AppRouter.router,
+          );
+        },
+      ),
+    );
+  }
+}
