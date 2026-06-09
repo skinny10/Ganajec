@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/auth_providers.dart';
+import 'core/providers/ganadero_providers.dart';
 
 class GanajecApp extends StatelessWidget {
   const GanajecApp({super.key});
@@ -13,6 +14,7 @@ class GanajecApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ...authProviders,
+        ...ganaderoProviders,
       ],
       child: Builder(
         builder: (context) {
