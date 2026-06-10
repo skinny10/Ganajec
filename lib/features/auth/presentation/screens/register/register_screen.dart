@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/auth_viewmodel.dart';
-import '../../widgets/auth_button.dart';
-import '../../widgets/auth_error_text.dart';
+import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_button.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_error_text.dart';
 import 'register_components.dart';
 
 class RegisterScreen extends StatefulWidget {

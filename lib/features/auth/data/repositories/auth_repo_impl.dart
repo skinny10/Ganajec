@@ -1,6 +1,6 @@
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_ds.dart';
+import 'package:ganajec/features/auth/domain/entities/user.dart';
+import 'package:ganajec/features/auth/domain/repositories/auth_repository.dart';
+import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;

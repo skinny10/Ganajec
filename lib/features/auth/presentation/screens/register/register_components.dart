@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../widgets/auth_text_field.dart';
-import '../../widgets/auth_role_card.dart';
+import 'package:ganajec/core/constants/app_strings.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_role_card.dart';
 
 class RegisterFormFields extends StatelessWidget {
   final TextEditingController nameController;

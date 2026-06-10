@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/home_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/home_viewmodel.dart';
 import 'home_components.dart';
+
+enum HomeTab { inicio, buscar, registrar, reportes, perfil }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +22,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onTabSelected(int index) {
+    final tab = HomeTab.values[index];
+    switch (tab) {
+      case HomeTab.inicio:
+        break;
+      case HomeTab.buscar:
+        // context.push('/buscar');
+        break;
+      case HomeTab.registrar:
+        context.push('/registro-bovino');
+      case HomeTab.reportes:
+        // context.push('/reportes');
+        break;
+      case HomeTab.perfil:
+        // context.push('/perfil');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<HomeViewModel>();
@@ -32,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRefresh: () => context.read<HomeViewModel>().cargarDatos(),
                 child: CustomScrollView(
                   slivers: [
-                    // AppBar
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -84,37 +105,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-
-                    // Contenido
                     SliverPadding(
                       padding: const EdgeInsets.all(24),
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
-                          // Resumen
                           HomeResumen(resumen: vm.resumen),
                           const SizedBox(height: 16),
-
-                          // Alertas
                           HomeAlertas(alertas: vm.alertas),
                           const SizedBox(height: 8),
-
-                          // Mi hato
                           HomeMiHato(
                             animales: vm.animales,
                             alertas: vm.alertas,
                             onVerTodos: () {},
                           ),
                           const SizedBox(height: 16),
-
-                          // Botón registrar síntomas
                           ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () =>
+                                context.push('/registro-bovino'),
                             icon: const Icon(Icons.add),
-                            label: const Text('Registrar síntomas'),
+                            label: const Text('Registrar bovino'),
                           ),
                           const SizedBox(height: 16),
-
-                          // Predicciones
                           HomePredicciones(
                             predicciones: vm.predicciones,
                             onVerHistorial: () {},
@@ -129,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
+        onDestinationSelected: _onTabSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

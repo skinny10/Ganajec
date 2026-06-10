@@ -1,5 +1,5 @@
-import '../entities/user.dart';
-import '../repositories/auth_repository.dart';
+import 'package:ganajec/features/auth/domain/entities/user.dart';
+import 'package:ganajec/features/auth/domain/repositories/auth_repository.dart';
 
 class RegisterUseCase {
   final AuthRepository repository;

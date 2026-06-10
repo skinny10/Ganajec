@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/core/domain/entities/alerta.dart';
 import 'package:ganajec/core/domain/entities/animal.dart';
 import 'package:ganajec/core/domain/entities/prediccion.dart';
-import '../../widgets/alerta_banner.dart';
-import '../../widgets/animal_list_tile.dart';
-import '../../widgets/prediccion_tile.dart';
-import '../../widgets/resumen_card.dart';
+import 'package:ganajec/features/ganadero/presentation/widgets/alerta_banner.dart';
+import 'package:ganajec/features/ganadero/presentation/widgets/animal_list_tile.dart';
+import 'package:ganajec/features/ganadero/presentation/widgets/prediccion_tile.dart';
+import 'package:ganajec/features/ganadero/presentation/widgets/resumen_card.dart';
 
 class HomeResumen extends StatelessWidget {
   final Map<String, int> resumen;

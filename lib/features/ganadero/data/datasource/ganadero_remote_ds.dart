@@ -1,19 +1,17 @@
-import '../models/animal_model.dart';
-import '../models/alerta_model.dart';
-import '../models/prediccion_model.dart';
+import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
+import 'package:ganajec/features/ganadero/data/models/alerta_model.dart';
+import 'package:ganajec/features/ganadero/data/models/prediccion_model.dart';
 
 abstract class GanaderoRemoteDataSource {
   Future<List<AnimalModel>> getAnimales();
   Future<List<PrediccionModel>> getUltimasPredicciones();
   Future<List<AlertaModel>> getAlertas();
   Future<Map<String, int>> getResumenHato();
+  Future<AnimalModel> crearAnimal(Animal animal);
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
-  // Aquí irá Dio cuando conectes la API
-  // final Dio dio;
-  // GanaderoRemoteDataSourceImpl(this.dio);
-
   @override
   Future<List<AnimalModel>> getAnimales() async {
     await Future.delayed(const Duration(milliseconds: 800));
@@ -125,5 +123,24 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
       'en_buen_estado': 9,
       'con_alertas': 3,
     };
+  }
+
+  @override
+  Future<AnimalModel> crearAnimal(Animal animal) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return AnimalModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      ranchoId: 'r1',
+      ganaderoId: 'g1',
+      nombre: animal.nombre,
+      raza: animal.raza,
+      sexo: animal.sexo,
+      fechaNacimiento: animal.fechaNacimiento,
+      pesoKg: animal.pesoKg,
+      idExterno: animal.idExterno.isEmpty
+          ? 'ID-${DateTime.now().millisecondsSinceEpoch}'
+          : animal.idExterno,
+      creadoEn: DateTime.now(),
+    );
   }
 }

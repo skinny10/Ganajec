@@ -7,4 +7,5 @@ abstract class GanaderoRepository {
   Future<List<Prediccion>> getUltimasPredicciones();
   Future<List<Alerta>> getAlertas();
   Future<Map<String, int>> getResumenHato();
+  Future<Animal> crearAnimal(Animal animal);
 }

@@ -1,4 +1,4 @@
-import '../repositories/auth_repository.dart';
+import 'package:ganajec/features/auth/domain/repositories/auth_repository.dart';
 
 class LogoutUseCase {
   final AuthRepository repository;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/usecase/login_usecase.dart';
-import '../../domain/usecase/logout_usecase.dart';
-import '../../domain/usecase/register_usecase.dart';
+import 'package:ganajec/features/auth/domain/entities/user.dart';
+import 'package:ganajec/features/auth/domain/usecase/login_usecase.dart';
+import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
+import 'package:ganajec/features/auth/domain/usecase/register_usecase.dart';
 
 enum AuthStatus { idle, loading, success, error }
 

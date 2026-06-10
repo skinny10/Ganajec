@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../../core//constants/app_strings.dart';
-import '../../widgets/auth_text_field.dart';
-import '../../widgets/auth_button.dart';
-import '../../widgets/auth_error_text.dart';
+import 'package:ganajec/core/constants/app_strings.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_button.dart';
+import 'package:ganajec/features/auth/presentation/widgets/auth_error_text.dart';
 
 class LoginFormFields extends StatelessWidget {
   final TextEditingController emailController;

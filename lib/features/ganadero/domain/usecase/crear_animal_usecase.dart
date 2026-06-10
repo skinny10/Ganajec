@@ -1,9 +1,9 @@
 import 'package:ganajec/core/domain/entities/animal.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 
-class GetAnimalesUseCase {
+class CrearAnimalUseCase {
   final GanaderoRepository repository;
-  const GetAnimalesUseCase(this.repository);
+  const CrearAnimalUseCase(this.repository);
 
-  Future<List<Animal>> call() => repository.getAnimales();
+  Future<Animal> call(Animal animal) => repository.crearAnimal(animal);
 }

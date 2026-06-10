@@ -30,4 +30,29 @@ class AppStrings {
   static const String passwordShort = 'Mínimo 6 caracteres';
   static const String nameRequired = 'El nombre es requerido';
   static const String passwordsNoMatch = 'Las contraseñas no coinciden';
+
+  // Registro bovino
+  static const String registrarBovino = 'Registrar bovino';
+  static const String registraTuBovino = 'Registra tu bovino';
+  static const String nombreAnimal = 'NOMBRE DEL ANIMAL';
+  static const String nombreAnimalHint = 'Ej. Lupita, Canela, Estrella';
+  static const String idArete = 'ID / NÚMERO DE ARETE (OPCIONAL)';
+  static const String idAreteHint = 'Ej. ID-0021';
+  static const String idAreteHelper = 'Si no tiene, el sistema generará uno automáticamente.';
+  static const String categoriaAnimal = 'CATEGORÍA DEL ANIMAL';
+  static const String proposito = 'PROPÓSITO';
+  static const String raza = 'RAZA';
+  static const String seleccionaRaza = 'Selecciona la raza';
+  static const String edadAnios = 'EDAD (AÑOS)';
+  static const String edadHint = 'Ej. 4';
+  static const String pesoKg = 'PESO (KG)';
+  static const String pesoHint = 'Ej. 480';
+  static const String agregarDatosOpcionales = 'Agregar datos opcionales';
+  static const String cancelar = 'Cancelar';
+  static const String siguiente = 'Siguiente';
+  static const String nombreRequerido = 'El nombre es requerido';
+  static const String edadInvalida = 'Edad no válida';
+  static const String pesoInvalido = 'Peso no válido';
+  static const String razaRequerida = 'Selecciona una raza';
+  static const String categoriaRequerida = 'Selecciona una categoría';
 }

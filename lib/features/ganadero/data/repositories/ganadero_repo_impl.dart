@@ -2,7 +2,7 @@ import 'package:ganajec/core/domain/entities/alerta.dart';
 import 'package:ganajec/core/domain/entities/animal.dart';
 import 'package:ganajec/core/domain/entities/prediccion.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
-import '../datasource/ganadero_remote_ds.dart';
+import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
 
 class GanaderoRepositoryImpl implements GanaderoRepository {
   final GanaderoRemoteDataSource remoteDataSource;
@@ -22,4 +22,8 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
   @override
   Future<Map<String, int>> getResumenHato() =>
       remoteDataSource.getResumenHato();
+
+  @override
+  Future<Animal> crearAnimal(Animal animal) =>
+     remoteDataSource.crearAnimal(animal);
 }

@@ -4,7 +4,9 @@ import 'package:ganajec/features/ganadero/data/repositories/ganadero_repo_impl.d
 import 'package:ganajec/features/ganadero/domain/usecase/get_alertas_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/get_animales_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/get_predicciones_usecase.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/crear_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/home_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/registro_bovino_viewmodel.dart';
 
 List<ChangeNotifierProvider> ganaderoProviders = [
   ChangeNotifierProvider<HomeViewModel>(
@@ -16,6 +18,13 @@ List<ChangeNotifierProvider> ganaderoProviders = [
         GanaderoRepositoryImpl(GanaderoRemoteDataSourceImpl()),
       ),
       getPredicciones: GetPredicionesUseCase(
+        GanaderoRepositoryImpl(GanaderoRemoteDataSourceImpl()),
+      ),
+    ),
+  ),
+  ChangeNotifierProvider<RegistroBovinoViewModel>(
+    create: (_) => RegistroBovinoViewModel(
+      crearAnimal: CrearAnimalUseCase(
         GanaderoRepositoryImpl(GanaderoRemoteDataSourceImpl()),
       ),
     ),

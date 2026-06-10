@@ -1,7 +1,8 @@
 import 'package:go_router/go_router.dart';
-import '../../features/auth/presentation/screens/login/login_screen.dart';
-import '../../features/auth/presentation/screens/register/register_screen.dart';
-import '../../features/ganadero/presentation/screens/home/home_screen.dart';
+import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
+import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -20,6 +21,10 @@ class AppRouter {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/registro-bovino',
+        builder: (context, state) => const RegistroBovinoScreen(),
       ),
     ],
   );
