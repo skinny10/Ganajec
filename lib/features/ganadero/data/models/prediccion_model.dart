@@ -1,4 +1,4 @@
-import '../../domain/entities/prediccion.dart';
+import 'package:ganajec/core/domain/entities/prediccion.dart';
 
 class PrediccionModel extends Prediccion {
   const PrediccionModel({

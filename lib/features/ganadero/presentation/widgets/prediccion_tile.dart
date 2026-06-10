@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/prediccion.dart';
+import 'package:ganajec/core/domain/entities/prediccion.dart';
 
 class PrediccionTile extends StatelessWidget {
   final Prediccion prediccion;

@@ -1,4 +1,4 @@
-import '../../domain/entities/historial_productivo.dart';
+import 'package:ganajec/core/domain/entities/historial_productivo.dart';
 
 class HistorialProductivoModel extends HistorialProductivo {
   const HistorialProductivoModel({

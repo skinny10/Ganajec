@@ -1,4 +1,4 @@
-import '../entities/animal.dart';
+import 'package:ganajec/core/domain/entities/animal.dart';
 import '../repositories/ganadero_repository.dart';
 
 class GetAnimalesUseCase {

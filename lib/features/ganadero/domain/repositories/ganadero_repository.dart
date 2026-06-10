@@ -1,6 +1,6 @@
-import '../entities/animal.dart';
-import '../entities/alerta.dart';
-import '../entities/prediccion.dart';
+import 'package:ganajec/core/domain/entities/alerta.dart';
+import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/core/domain/entities/prediccion.dart';
 
 abstract class GanaderoRepository {
   Future<List<Animal>> getAnimales();

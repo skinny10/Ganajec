@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/alerta.dart';
-import '../../../domain/entities/animal.dart';
-import '../../../domain/entities/prediccion.dart';
+import 'package:ganajec/core/domain/entities/alerta.dart';
+import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/core/domain/entities/prediccion.dart';
 import '../../widgets/alerta_banner.dart';
 import '../../widgets/animal_list_tile.dart';
 import '../../widgets/prediccion_tile.dart';

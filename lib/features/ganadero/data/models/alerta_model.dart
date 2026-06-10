@@ -1,4 +1,4 @@
-import '../../domain/entities/alerta.dart';
+import 'package:ganajec/core/domain/entities/alerta.dart';
 
 class AlertaModel extends Alerta {
   const AlertaModel({
