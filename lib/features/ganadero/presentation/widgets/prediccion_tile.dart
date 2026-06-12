@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ganajec/core/domain/entities/prediccion.dart';
+import 'package:ganajec/share/domain/entities/prediccion.dart';
 
 class PrediccionTile extends StatelessWidget {
   final Prediccion prediccion;
@@ -49,7 +49,6 @@ class PrediccionTile extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(

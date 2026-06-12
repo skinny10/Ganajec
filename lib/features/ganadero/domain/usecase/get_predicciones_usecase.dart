@@ -1,4 +1,4 @@
-import 'package:ganajec/core/domain/entities/prediccion.dart';
+import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 
 class GetPredicionesUseCase {

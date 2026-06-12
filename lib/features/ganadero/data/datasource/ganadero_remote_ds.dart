@@ -1,4 +1,4 @@
-import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
 import 'package:ganajec/features/ganadero/data/models/alerta_model.dart';
 import 'package:ganajec/features/ganadero/data/models/prediccion_model.dart';

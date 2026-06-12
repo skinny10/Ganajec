@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ganajec/core/domain/entities/animal.dart';
-import 'package:ganajec/core/domain/entities/alerta.dart';
-import 'package:ganajec/core/domain/entities/prediccion.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/alerta.dart';
+import 'package:ganajec/share/domain/entities/prediccion.dart';
 import '../../domain/usecase/get_animales_usecase.dart';
 import '../../domain/usecase/get_alertas_usecase.dart';
 import '../../domain/usecase/get_predicciones_usecase.dart';

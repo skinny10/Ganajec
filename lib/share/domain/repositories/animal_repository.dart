@@ -1,4 +1,4 @@
-import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 
 abstract class AnimalRepository {
   Future<List<Animal>> getAnimales();

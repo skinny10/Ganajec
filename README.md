@@ -192,6 +192,68 @@ Ejemplos:
 - `lib/core/providers/auth_providers.dart`
 - `lib/core/router/app_router.dart`
 
+## Funcionalidad Rancher y registro de bovinos
+
+La nueva sección de `rancher` agrega soporte para que un ganadero pueda registrar un bovino dentro de la aplicación.
+
+### Rutas importantes
+
+- `/home` muestra la pantalla principal del ganadero.
+- `/registro-bovino` abre `RegistroBovinoScreen` para crear un nuevo animal.
+
+### Pantalla `RegistroBovinoScreen`
+
+Esta pantalla usa un `Form` con varios campos:
+- `nombre` del animal
+- `idArete` como identificación externa
+- `categoria` seleccionada de un conjunto de opciones
+- `proposito` (por ejemplo, leche, carne, doble propósito)
+- `raza` elegida desde un dropdown
+- `edad` en años
+- `pesoKg` en kilogramos
+
+También muestra un botón de `Cancelar` y un botón de `Siguiente` que se desactiva mientras `vm.isLoading` es verdadero.
+
+La pantalla usa `Provider` para acceder a `RegistroBovinoViewModel`. Cuando el registro es exitoso, se cierra la pantalla con `context.pop()`.
+
+### Widgets clave de registro
+
+- `RbTextField`: widget reutilizable para campos de texto con etiqueta, hint y validación.
+- `RbCategoriaSelector`: muestra las categorías de animal en una cuadrícula seleccionable.
+- `RbPropositoSelector`: muestra chips que el usuario puede activar o desactivar para elegir uno o más propósitos.
+- `RbRazaDropdown`: lista desplegable con razas de bovinos, obligatoria para continuar.
+- `RbEdadPesoRow`: organiza los campos de edad y peso en una sola fila, con validación numérica.
+
+Estos widgets mantienen la pantalla ordenada y permiten cambiar la presentación sin tocar la lógica de la pantalla principal.
+
+### `RegistroBovinoViewModel`
+
+Este `ChangeNotifier` gestiona el estado de registro:
+- `RegistroStatus.idle`
+- `RegistroStatus.loading`
+- `RegistroStatus.success`
+- `RegistroStatus.error`
+
+Métodos importantes:
+- `registrar(...)`: crea una entidad `Animal` y llama a `CrearAnimalUseCase`.
+- `_sexoPorCategoria(...)`: calcula el sexo del animal según la categoría seleccionada.
+- `resetStatus()`: reinicia el estado para volver a usar la pantalla.
+
+### Caso de uso `CrearAnimalUseCase`
+
+Este caso de uso recibe una entidad `Animal` y la pasa al repositorio:
+- `GanaderoRepositoryImpl(GanaderoRemoteDataSourceImpl())`
+
+La lógica real de guardado está en el repositorio y el datasource, lo que mantiene la pantalla y el ViewModel aislados de los detalles de datos.
+
+### Proveedores
+
+En `lib/core/providers/ganadero_providers.dart` se registra:
+- `HomeViewModel` para la pantalla principal del ganadero.
+- `RegistroBovinoViewModel` para la pantalla de registro de bovinos.
+
+Así, la pantalla obtiene sus dependencias de forma centralizada y fácil de probar.
+
 ## Notas finales
 
 - El flujo actual es local/mock, pero la estructura ya está preparada para integrar backend real.

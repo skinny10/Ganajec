@@ -1,6 +1,6 @@
-import 'package:ganajec/core/domain/entities/alerta.dart';
-import 'package:ganajec/core/domain/entities/animal.dart';
-import 'package:ganajec/core/domain/entities/prediccion.dart';
+import 'package:ganajec/share/domain/entities/alerta.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
 

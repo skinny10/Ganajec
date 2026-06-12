@@ -5,6 +5,7 @@ import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dar
 import 'package:ganajec/features/auth/presentation/widgets/auth_button.dart';
 import 'package:ganajec/features/auth/presentation/widgets/auth_error_text.dart';
 import 'register_components.dart';
+import 'package:ganajec/core/router/app_router.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       role: _selectedRole,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go('/home');
+      context.go(AppRoutes.home);
     }
   }
 

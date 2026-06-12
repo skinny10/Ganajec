@@ -1,4 +1,4 @@
-import 'package:ganajec/core/domain/entities/alerta.dart';
+import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 
 class GetAlertasUseCase {

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/home_viewmodel.dart';
 import 'home_components.dart';
+import 'package:ganajec/core/router/app_router.dart';
 
 enum HomeTab { inicio, buscar, registrar, reportes, perfil }
 
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // context.push('/buscar');
         break;
       case HomeTab.registrar:
-        context.push('/registro-bovino');
+        context.push(AppRoutes.registroBovino);
       case HomeTab.reportes:
         // context.push('/reportes');
         break;
@@ -120,8 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton.icon(
-                            onPressed: () =>
-                                context.push('/registro-bovino'),
+                              onPressed: () => context.push(AppRoutes.registroBovino),
                             icon: const Icon(Icons.add),
                             label: const Text('Registrar bovino'),
                           ),

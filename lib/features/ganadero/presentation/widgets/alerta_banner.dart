@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ganajec/core/domain/entities/alerta.dart';
+import 'package:ganajec/share/domain/entities/alerta.dart';
 
 class AlertaBanner extends StatelessWidget {
   final Alerta alerta;

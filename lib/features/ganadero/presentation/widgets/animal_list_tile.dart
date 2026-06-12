@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 
 class AnimalListTile extends StatelessWidget {
   final Animal animal;

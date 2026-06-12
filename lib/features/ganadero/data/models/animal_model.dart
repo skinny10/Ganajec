@@ -1,4 +1,4 @@
-import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 
 class AnimalModel extends Animal {
   const AnimalModel({

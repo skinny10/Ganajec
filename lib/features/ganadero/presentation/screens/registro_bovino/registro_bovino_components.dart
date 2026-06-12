@@ -293,7 +293,6 @@ class RbRazaDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: selected,
           hint: Row(
             children: [
               Icon(Icons.schedule_outlined,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ganajec/core/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/crear_animal_usecase.dart';
 
 enum RegistroStatus { idle, loading, success, error }

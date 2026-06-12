@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'login_components.dart';
+import 'package:ganajec/core/router/app_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go('/home');
+      context.go(AppRoutes.home);
     }
   }
 
@@ -195,8 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? vm.errorMessage
                                     : null,
                                 onLogin: _onLogin,
-                                onGoRegister: () =>
-                                    context.push('/register'),
+                                  onGoRegister: () => context.push(AppRoutes.register),
                               ),
                             ],
                           ),
