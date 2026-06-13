@@ -9,7 +9,7 @@ class CasoCriticoTile extends StatelessWidget {
   Color _colorSeveridad(BuildContext context) {
     switch (caso.severidad.toLowerCase()) {
       case 'alta':
-        return Theme.of(context).colorScheme.error;
+        return const Color(0xFFBA1A1A);
       case 'moderada':
         return const Color(0xFFE65100);
       default:
@@ -26,7 +26,7 @@ class CasoCriticoTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: colorSev, width: 4)),
         boxShadow: [
@@ -39,7 +39,17 @@ class CasoCriticoTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.pets, size: 36, color: Color(0xFF805611)),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5EDE0),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Center(
+              child: Text('\ud83d\udc04', style: TextStyle(fontSize: 22)),
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -53,7 +63,7 @@ class CasoCriticoTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${caso.raza} · ${caso.animalId}',
+                  '${caso.raza} \u00b7 ${caso.animalId}',
                   style: TextStyle(
                     fontSize: 12,
                     color: colors.onSurface.withValues(alpha: 0.6),
@@ -62,11 +72,13 @@ class CasoCriticoTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.person_outline, size: 12, color: colors.primary),
+                    Icon(Icons.person_outline,
+                        size: 12, color: colors.primary),
                     const SizedBox(width: 4),
                     Text(
                       caso.ganaderoNombre,
-                      style: TextStyle(fontSize: 11, color: colors.primary),
+                      style:
+                          TextStyle(fontSize: 11, color: colors.primary),
                     ),
                   ],
                 ),

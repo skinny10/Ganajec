@@ -63,8 +63,9 @@ class GanaderoAvatarChip extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            ganadero.nombre.split(' ').first,
+            ganadero.nombre,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
           ),
           Text(
             '${ganadero.totalBovinos} bovinos',

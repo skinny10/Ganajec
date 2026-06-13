@@ -28,10 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final vm = context.watch<DashboardViewModel>();
 
     return Scaffold(
-      backgroundColor: Theme.of(context)
-          .colorScheme
-          .surfaceContainerHighest
-          .withValues(alpha: 0.3),
+      backgroundColor: const Color(0xFFFAFAF7),
       body: SafeArea(
         child: _buildBody(vm),
       ),
@@ -94,6 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       currentIndex: _selectedIndex,
       onTap: (i) => setState(() => _selectedIndex = i),
       type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
       selectedItemColor: Theme.of(context).colorScheme.primary,
       unselectedItemColor: Colors.grey,
       items: const [

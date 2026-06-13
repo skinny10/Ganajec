@@ -18,7 +18,7 @@ class ProduccionLecheCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -34,12 +34,13 @@ class ProduccionLecheCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.water_drop_outlined, color: Color(0xFF805611)),
+              const Icon(Icons.water_drop_outlined,
+                  color: Color(0xFF805611)),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (esPositivo ? colors.tertiary : colors.error)
+                  color: (esPositivo ? const Color(0xFF4CAF50) : colors.error)
                       .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -48,7 +49,8 @@ class ProduccionLecheCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: esPositivo ? colors.tertiary : colors.error,
+                    color:
+                        esPositivo ? const Color(0xFF4CAF50) : colors.error,
                   ),
                 ),
               ),
@@ -69,28 +71,14 @@ class ProduccionLecheCard extends StatelessWidget {
             ],
           ),
           Text(
-            'Produccion total hoy',
+            'Producci\u00f3n total hoy',
             style: TextStyle(
               fontSize: 11,
               color: colors.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (litrosHoy / 200).clamp(0.0, 1.0),
-              minHeight: 8,
-              backgroundColor: colors.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                litrosHoy < 80
-                    ? colors.error
-                    : litrosHoy < 140
-                        ? const Color(0xFFE65100)
-                        : colors.tertiary,
-              ),
-            ),
-          ),
+          _buildSegmentedBar(),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -110,7 +98,7 @@ class ProduccionLecheCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Excelente',
+                'Anomal\u00edas',
                 style: TextStyle(
                   fontSize: 10,
                   color: colors.onSurface.withValues(alpha: 0.5),
@@ -119,6 +107,36 @@ class ProduccionLecheCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSegmentedBar() {
+    const total = 200.0;
+    final normal = (80 / total).clamp(0.0, 1.0);
+    final buena = ((140 - 80) / total).clamp(0.0, 1.0);
+    final anomalia = ((total - 140) / total).clamp(0.0, 1.0);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: SizedBox(
+        height: 8,
+        child: Row(
+          children: [
+            Expanded(
+              flex: (normal * 100).toInt().clamp(1, 100),
+              child: Container(color: const Color(0xFF4CAF50)),
+            ),
+            Expanded(
+              flex: (buena * 100).toInt().clamp(1, 100),
+              child: Container(color: const Color(0xFFF9A825)),
+            ),
+            Expanded(
+              flex: (anomalia * 100).toInt().clamp(1, 100),
+              child: Container(color: const Color(0xFFBA1A1A)),
+            ),
+          ],
+        ),
       ),
     );
   }

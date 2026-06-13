@@ -21,9 +21,9 @@ class KpiCard extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -42,9 +42,11 @@ class KpiCard extends StatelessWidget {
               icono,
               if (badge != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: (badgeColor ?? colors.tertiary).withValues(alpha: 0.15),
+                    color: (badgeColor ?? colors.tertiary)
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -73,6 +75,7 @@ class KpiCard extends StatelessWidget {
               fontSize: 11,
               color: colors.onSurface.withValues(alpha: 0.6),
             ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

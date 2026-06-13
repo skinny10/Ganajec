@@ -28,7 +28,7 @@ class DashboardHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Buenos dias,',
+              'Buenos d\u00edas,',
               style: TextStyle(
                 fontSize: 13,
                 color: colors.onSurface.withValues(alpha: 0.6),
@@ -84,7 +84,6 @@ class KpiGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<DashboardViewModel>();
     final dashboard = vm.dashboard!;
-    final colors = Theme.of(context).colorScheme;
 
     return GridView.count(
       crossAxisCount: 2,
@@ -97,30 +96,33 @@ class KpiGrid extends StatelessWidget {
         KpiCard(
           valor: '${dashboard.totalAnimales}',
           etiqueta: 'Bovinos en el rancho',
-          icono: Icon(Icons.pets, color: colors.onSurface.withValues(alpha: 0.5)),
+          icono: const Text('\ud83d\udc04', style: TextStyle(fontSize: 24)),
           badge: 'Total',
-          badgeColor: colors.onSurface.withValues(alpha: 0.4),
+          badgeColor: const Color(0xFF805611),
         ),
         KpiCard(
           valor: '${dashboard.animalesConAlerta}',
           etiqueta: 'Con alertas activas',
-          icono: Icon(Icons.warning_amber_rounded, color: colors.error),
+          icono: const Icon(Icons.warning_amber_rounded,
+              color: Color(0xFFF9A825), size: 24),
           badge: '+${dashboard.animalesConAlerta}',
-          badgeColor: colors.error,
+          badgeColor: const Color(0xFFBA1A1A),
         ),
         KpiCard(
           valor: '${dashboard.animalesSanos}',
           etiqueta: 'En buen estado',
-          icono: Icon(Icons.check_circle_outline, color: colors.tertiary),
+          icono: const Icon(Icons.check_circle_outline,
+              color: Color(0xFF4CAF50), size: 24),
           badge: '+3',
-          badgeColor: colors.tertiary,
+          badgeColor: const Color(0xFF4CAF50),
         ),
         KpiCard(
           valor: '${dashboard.ganadoresEnCampo}',
           etiqueta: 'Ganaderos en campo',
-          icono: Icon(Icons.person_outline, color: colors.primary),
+          icono: const Icon(Icons.person_outline,
+              color: Color(0xFF805611), size: 24),
           badge: 'Activos',
-          badgeColor: colors.primary,
+          badgeColor: const Color(0xFF805611),
         ),
       ],
     );
@@ -142,7 +144,7 @@ class SeccionCasosCriticos extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Casos criticos',
+              'Casos cr\u00edticos',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton(
