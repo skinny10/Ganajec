@@ -2,6 +2,7 @@ import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
+import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
 
@@ -43,4 +44,8 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
   @override
   Future<void> eliminarAnimal(String animalId) =>
       remoteDataSource.eliminarAnimal(animalId);
+
+  @override
+  Future<Prediccion> registrarSintomas(RegistroSintomas registro) =>
+      remoteDataSource.registrarSintomas(registro);
 }

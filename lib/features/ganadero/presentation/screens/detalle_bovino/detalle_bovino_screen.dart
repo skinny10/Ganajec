@@ -117,7 +117,13 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
                     ],
                   ),
                 ),
-      bottomNavigationBar: DetalleBottomCta(animal: widget.animal),
+      bottomNavigationBar: DetalleBottomCta(
+        animal: widget.animal,
+        onRegistrarSintomas: () => context.push(
+          AppRoutes.registrarSintomas,
+          extra: widget.animal,
+        ),
+      ),
     );
   }
 }

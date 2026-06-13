@@ -1,4 +1,5 @@
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
 import 'package:ganajec/features/ganadero/data/models/alerta_model.dart';
 import 'package:ganajec/features/ganadero/data/models/historial_productivo_model.dart';
@@ -14,6 +15,7 @@ abstract class GanaderoRemoteDataSource {
   Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId);
   Future<AnimalModel> actualizarAnimal(Animal animal);
   Future<void> eliminarAnimal(String animalId);
+  Future<PrediccionModel> registrarSintomas(RegistroSintomas registro);
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
@@ -271,5 +273,46 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
   Future<void> eliminarAnimal(String animalId) async {
     // Cuando tengas API: DELETE /animales/:id
     await Future.delayed(const Duration(seconds: 1));
+  }
+
+  @override
+  Future<PrediccionModel> registrarSintomas(RegistroSintomas registro) async {
+    // Cuando tengas API: POST /sintomas con NLP + Isolation Forest
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Mock: derivar diagnóstico a partir de severidad calculada localmente
+    final sinCount = registro.sintomas.length;
+    final temp = registro.temperatura;
+    final leche = registro.litrosLeche;
+    final textoLen = registro.descripcion.length;
+
+    int score = 0;
+    score += sinCount >= 4 ? 3 : sinCount >= 2 ? 2 : sinCount >= 1 ? 1 : 0;
+    score += temp > 40 ? 3 : temp > 39 ? 1 : 0;
+    score += leche <= 5 ? 2 : leche <= 10 ? 1 : 0;
+    score += textoLen > 20 ? 1 : 0;
+
+    final String enfermedad;
+    final double confianza;
+
+    if (score >= 6) {
+      enfermedad = 'Mastitis';
+      confianza = 0.87;
+    } else if (score >= 3) {
+      enfermedad = 'Laminitis leve';
+      confianza = 0.72;
+    } else {
+      enfermedad = 'Sin enfermedad detectada';
+      confianza = 0.91;
+    }
+
+    return PrediccionModel(
+      id: 'pred_${DateTime.now().millisecondsSinceEpoch}',
+      animalId: registro.animalId,
+      animalNombre: '',
+      enfermedad: enfermedad,
+      confianza: confianza,
+      fecha: DateTime.now(),
+    );
   }
 }

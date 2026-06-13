@@ -8,6 +8,11 @@ import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/r
 import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/editar_bovino/editar_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/perfil/perfil_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/registrar_sintomas/registrar_sintomas_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/registrar_sintomas_viewmodel.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/registrar_sintomas_usecase.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/resultado_prediccion/resultado_prediccion_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/resultado_prediccion/resultado_prediccion_args.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -31,6 +36,8 @@ class AppRoutes {
   static const String detalleBovino = '/detalle-bovino';
   static const String editarBovino = '/editar-bovino';
   static const String perfil = '/perfil';
+  static const String registrarSintomas = '/registrar-sintomas';
+  static const String resultadoPrediccion = '/resultado-prediccion';
 }
 
 class AppRouter {
@@ -96,6 +103,28 @@ class AppRouter {
             ),
             child: const PerfilScreen(),
           );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.registrarSintomas,
+        builder: (context, state) {
+          final animal = state.extra as Animal;
+          final ds = GanaderoRemoteDataSourceImpl();
+          final repo = GanaderoRepositoryImpl(ds);
+          return ChangeNotifierProvider(
+            create: (_) => RegistrarSintomasViewModel(
+              animal: animal,
+              registrarSintomas: RegistrarSintomasUseCase(repo),
+            ),
+            child: const RegistrarSintomasScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.resultadoPrediccion,
+        builder: (context, state) {
+          final args = state.extra as ResultadoPrediccionArgs;
+          return ResultadoPrediccionScreen(args: args);
         },
       ),
     ],

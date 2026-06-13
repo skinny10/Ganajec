@@ -969,8 +969,13 @@ class _PrediccionCard extends StatelessWidget {
 
 class DetalleBottomCta extends StatelessWidget {
   final Animal animal;
+  final VoidCallback? onRegistrarSintomas;
 
-  const DetalleBottomCta({super.key, required this.animal});
+  const DetalleBottomCta({
+    super.key,
+    required this.animal,
+    this.onRegistrarSintomas,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -993,22 +998,12 @@ class DetalleBottomCta extends StatelessWidget {
             elevation: 4,
             shadowColor: Colors.black.withOpacity(0.18),
           ),
-          icon: const Icon(Icons.edit_outlined, size: 16),
+          icon: const Icon(Icons.medical_services_outlined, size: 16),
           label: const Text(
             'Registrar síntomas',
             style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
           ),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    'Registro de síntomas para ${animal.nombre} — próximamente'),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-            );
-          },
+          onPressed: onRegistrarSintomas,
         ),
       ),
     );
