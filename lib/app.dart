@@ -5,6 +5,7 @@ import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/auth_providers.dart';
 import 'core/providers/ganadero_providers.dart';
+import 'core/providers/dueno_providers.dart';
 
 class GanajecApp extends StatelessWidget {
   const GanajecApp({super.key});
@@ -15,6 +16,7 @@ class GanajecApp extends StatelessWidget {
       providers: [
         ...authProviders,
         ...ganaderoProviders,
+        ...duenoProviders,
       ],
       child: Builder(
         builder: (context) {

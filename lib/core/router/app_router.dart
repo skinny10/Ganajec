@@ -3,21 +3,21 @@ import 'package:ganajec/features/auth/presentation/screens/login/login_screen.da
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
+import 'package:ganajec/features/dueno/presentation/screens/dashboard/dashboard_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
-
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
   static const String registroBovino = '/registro-bovino';
+  static const String dashboardDueno = '/dashboard-dueno';
 }
 
 class AppRouter {
   AppRouter._();
-
   static final router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.dashboardDueno,
     routes: [
       GoRoute(
         path: AppRoutes.login,
@@ -34,6 +34,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.registroBovino,
         builder: (context, state) => const RegistroBovinoScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.dashboardDueno,
+        builder: (context, state) => const DashboardScreen(),
       ),
     ],
   );
