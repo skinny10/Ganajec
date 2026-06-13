@@ -3,16 +3,27 @@ import 'package:ganajec/features/dueno/domain/entities/dueno_dashboard.dart';
 
 class GanaderoListTile extends StatelessWidget {
   final GanaderoResumen ganadero;
+  final String? email;
+  final int moderadas;
 
-  const GanaderoListTile({super.key, required this.ganadero});
+  const GanaderoListTile({
+    super.key,
+    required this.ganadero,
+    this.email,
+    this.moderadas = 0,
+  });
 
   Color _colorAvatar() {
-    final colores = [
-      const Color(0xFF4CAF50),
-      const Color(0xFF7B5EA7),
-      const Color(0xFFBF6030),
-    ];
-    return colores[ganadero.id.hashCode % colores.length];
+    switch (ganadero.id) {
+      case '1':
+        return const Color(0xFF2E7D32);
+      case '2':
+        return const Color(0xFF00695C);
+      case '3':
+        return const Color(0xFF6D4C41);
+      default:
+        return const Color(0xFF4CAF50);
+    }
   }
 
   String _tiempoRelativo(DateTime? fecha) {
@@ -87,6 +98,16 @@ class GanaderoListTile extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (email != null) ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    email!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colors.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 2),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,10 +138,17 @@ class GanaderoListTile extends StatelessWidget {
                           const Color(0xFFE53935)),
                     if (ganadero.alertasAltas > 0)
                       const SizedBox(width: 6),
+                    if (moderadas > 0)
+                      _tag(
+                          '$moderadas moderada',
+                          const Color(0xFFFFF3E0),
+                          const Color(0xFFE65100)),
+                    if (moderadas > 0) const SizedBox(width: 6),
                     _tag(
-                        '${ganadero.animalesSanos} sanos',
-                        const Color(0xFFE8F5E9),
-                        const Color(0xFF43A047)),
+                      '${ganadero.animalesSanos} sanos',
+                      const Color(0xFFE8F5E9),
+                      const Color(0xFF43A047),
+                    ),
                   ],
                 ),
               ],
