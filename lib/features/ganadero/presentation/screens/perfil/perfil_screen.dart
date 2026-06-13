@@ -226,7 +226,7 @@ class PerfilScreen extends StatelessWidget {
                   name: 'Mi plan',
                   desc: '${vm.plan} · Activo',
                   trailingValue: 'Ver planes',
-                  onTap: () {},
+                  onTap: () => context.push(AppRoutes.miPlan),
                 ),
               ),
             ],

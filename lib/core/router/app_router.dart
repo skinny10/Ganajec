@@ -18,6 +18,15 @@ import 'package:ganajec/features/ganadero/presentation/viewmodels/alertas_viewmo
 import 'package:ganajec/features/ganadero/domain/usecase/get_alertas_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/marcar_alerta_leida_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/marcar_todas_alertas_leidas_usecase.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/mi_plan_screen.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/elegir_plan_screen.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/mi_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/elegir_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/get_suscripcion_usecase.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
+import 'package:ganajec/features/suscripcion/data/repositories/suscripcion_repo_impl.dart';
+import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -44,6 +53,8 @@ class AppRoutes {
   static const String registrarSintomas = '/registrar-sintomas';
   static const String resultadoPrediccion = '/resultado-prediccion';
   static const String alertas = '/alertas';
+  static const String miPlan = '/mi-plan';
+  static const String elegirPlan = '/elegir-plan';
 }
 
 class AppRouter {
@@ -145,6 +156,43 @@ class AppRouter {
               marcarTodas: MarcarTodasAlertasLeidasUseCase(repo),
             ),
             child: const AlertasScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.miPlan,
+        builder: (context, state) {
+          final ds = SuscripcionRemoteDataSourceImpl();
+          final repo = SuscripcionRepositoryImpl(ds);
+          return ChangeNotifierProvider(
+            create: (_) => MiPlanViewModel(
+              getSuscripcion: GetSuscripcionUseCase(repo),
+              getPlanes: GetPlanesUseCase(repo),
+            ),
+            child: const MiPlanScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.elegirPlan,
+        builder: (context, state) {
+          final planInicialStr = state.extra as String?;
+          final planInicial = planInicialStr != null
+              ? PlanTipo.values.firstWhere(
+                  (p) => p.name == planInicialStr,
+                  orElse: () => PlanTipo.basico,
+                )
+              : null;
+          final ds = SuscripcionRemoteDataSourceImpl();
+          final repo = SuscripcionRepositoryImpl(ds);
+          return ChangeNotifierProvider(
+            create: (_) => ElegirPlanViewModel(
+              getSuscripcion: GetSuscripcionUseCase(repo),
+              getPlanes: GetPlanesUseCase(repo),
+              suscribirse: SuscribirseUseCase(repo),
+              planInicial: planInicial,
+            ),
+            child: const ElegirPlanScreen(),
           );
         },
       ),
