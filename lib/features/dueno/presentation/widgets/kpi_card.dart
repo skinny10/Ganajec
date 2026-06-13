@@ -72,9 +72,10 @@ class KpiCard extends StatelessWidget {
           Text(
             etiqueta,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               color: colors.onSurface.withValues(alpha: 0.6),
             ),
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],

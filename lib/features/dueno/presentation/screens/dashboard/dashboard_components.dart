@@ -43,7 +43,7 @@ class DashboardHeader extends StatelessWidget {
             ),
             Row(
               children: [
-                Icon(Icons.agriculture, size: 14, color: colors.primary),
+                Icon(Icons.home, size: 14, color: colors.primary),
                 const SizedBox(width: 4),
                 Text(
                   nombreRancho,
@@ -91,7 +91,7 @@ class KpiGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.4,
+      childAspectRatio: 1.3,
       children: [
         KpiCard(
           valor: '${dashboard.totalAnimales}',
