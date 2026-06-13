@@ -1,5 +1,6 @@
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 
 abstract class GanaderoRepository {
@@ -8,4 +9,6 @@ abstract class GanaderoRepository {
   Future<List<Alerta>> getAlertas();
   Future<Map<String, int>> getResumenHato();
   Future<Animal> crearAnimal(Animal animal);
+  Future<List<HistorialProductivo>> getHistorialAnimal(String animalId);
+  Future<List<Prediccion>> getPrediccionesAnimal(String animalId);
 }

@@ -65,12 +65,14 @@ class HomeMiHato extends StatelessWidget {
   final List<Animal> animales;
   final List<Alerta> alertas;
   final VoidCallback onVerTodos;
+  final void Function(Animal)? onAnimalTap;
 
   const HomeMiHato({
     super.key,
     required this.animales,
     required this.alertas,
     required this.onVerTodos,
+    this.onAnimalTap,
   });
 
   String _estadoAnimal(String animalId, List<Alerta> alertas) {
@@ -104,6 +106,7 @@ class HomeMiHato extends StatelessWidget {
           (a) => AnimalListTile(
             animal: a,
             estado: _estadoAnimal(a.id, alertas),
+            onTap: onAnimalTap != null ? () => onAnimalTap!(a) : null,
           ),
         ),
       ],

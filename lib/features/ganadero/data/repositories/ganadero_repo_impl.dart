@@ -1,5 +1,6 @@
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/features/ganadero/domain/repositories/ganadero_repository.dart';
 import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
@@ -25,5 +26,13 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
 
   @override
   Future<Animal> crearAnimal(Animal animal) =>
-     remoteDataSource.crearAnimal(animal);
+      remoteDataSource.crearAnimal(animal);
+
+  @override
+  Future<List<HistorialProductivo>> getHistorialAnimal(String animalId) =>
+      remoteDataSource.getHistorialAnimal(animalId);
+
+  @override
+  Future<List<Prediccion>> getPrediccionesAnimal(String animalId) =>
+      remoteDataSource.getPrediccionesAnimal(animalId);
 }

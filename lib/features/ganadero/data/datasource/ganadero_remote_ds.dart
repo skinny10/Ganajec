@@ -1,6 +1,7 @@
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
 import 'package:ganajec/features/ganadero/data/models/alerta_model.dart';
+import 'package:ganajec/features/ganadero/data/models/historial_productivo_model.dart';
 import 'package:ganajec/features/ganadero/data/models/prediccion_model.dart';
 
 abstract class GanaderoRemoteDataSource {
@@ -9,6 +10,8 @@ abstract class GanaderoRemoteDataSource {
   Future<List<AlertaModel>> getAlertas();
   Future<Map<String, int>> getResumenHato();
   Future<AnimalModel> crearAnimal(Animal animal);
+  Future<List<HistorialProductivoModel>> getHistorialAnimal(String animalId);
+  Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId);
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
@@ -142,5 +145,105 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
           : animal.idExterno,
       creadoEn: DateTime.now(),
     );
+  }
+
+  @override
+  Future<List<HistorialProductivoModel>> getHistorialAnimal(
+      String animalId) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    final now = DateTime.now();
+
+    // Mock: Lupita (id=1) tiene caída anómala los últimos 3 días
+    if (animalId == '1') {
+      return [
+        HistorialProductivoModel(
+          id: 'h1', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 6)),
+          litrosLeche: 18.5, kgAlimento: 12.0, temperatura: 38.5,
+          anomaliaDetectada: false,
+        ),
+        HistorialProductivoModel(
+          id: 'h2', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 5)),
+          litrosLeche: 18.0, kgAlimento: 12.0, temperatura: 38.4,
+          anomaliaDetectada: false,
+        ),
+        HistorialProductivoModel(
+          id: 'h3', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 4)),
+          litrosLeche: 17.5, kgAlimento: 11.8, temperatura: 38.6,
+          anomaliaDetectada: false,
+        ),
+        HistorialProductivoModel(
+          id: 'h4', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 3)),
+          litrosLeche: 19.0, kgAlimento: 12.2, temperatura: 38.3,
+          anomaliaDetectada: false,
+        ),
+        HistorialProductivoModel(
+          id: 'h5', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 2)),
+          litrosLeche: 12.0, kgAlimento: 10.5, temperatura: 39.2,
+          anomaliaDetectada: true,
+        ),
+        HistorialProductivoModel(
+          id: 'h6', animalId: animalId,
+          fecha: now.subtract(const Duration(days: 1)),
+          litrosLeche: 8.0, kgAlimento: 9.0, temperatura: 39.5,
+          anomaliaDetectada: true,
+        ),
+        HistorialProductivoModel(
+          id: 'h7', animalId: animalId,
+          fecha: now,
+          litrosLeche: 5.0, kgAlimento: 8.5, temperatura: 39.8,
+          anomaliaDetectada: true,
+        ),
+      ];
+    }
+
+    // Mock genérico: animal saludable
+    return List.generate(7, (i) {
+      final liters = 14.0 + (i % 3) * 1.5;
+      return HistorialProductivoModel(
+        id: 'h_${animalId}_$i', animalId: animalId,
+        fecha: now.subtract(Duration(days: 6 - i)),
+        litrosLeche: liters, kgAlimento: 11.0, temperatura: 38.5,
+        anomaliaDetectada: false,
+      );
+    });
+  }
+
+  @override
+  Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    final now = DateTime.now();
+
+    if (animalId == '1') {
+      return [
+        PrediccionModel(
+          id: 'p1', animalId: animalId, animalNombre: 'Lupita',
+          enfermedad: 'Mastitis', confianza: 0.87,
+          fecha: now.subtract(const Duration(hours: 2)),
+        ),
+        PrediccionModel(
+          id: 'p2', animalId: animalId, animalNombre: 'Lupita',
+          enfermedad: 'Sin enfermedad', confianza: 0.91,
+          fecha: now.subtract(const Duration(days: 5)),
+        ),
+        PrediccionModel(
+          id: 'p3', animalId: animalId, animalNombre: 'Lupita',
+          enfermedad: 'Sin enfermedad', confianza: 0.88,
+          fecha: now.subtract(const Duration(days: 12)),
+        ),
+      ];
+    }
+
+    return [
+      PrediccionModel(
+        id: 'p_${animalId}_1', animalId: animalId, animalNombre: '',
+        enfermedad: 'Sin enfermedad', confianza: 0.92,
+        fecha: now.subtract(const Duration(hours: 6)),
+      ),
+    ];
   }
 }

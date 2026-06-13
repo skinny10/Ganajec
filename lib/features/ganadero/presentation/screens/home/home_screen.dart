@@ -118,6 +118,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             animales: vm.animales,
                             alertas: vm.alertas,
                             onVerTodos: () {},
+                            onAnimalTap: (animal) => context.push(
+                              AppRoutes.detalleBovino,
+                              extra: animal,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton.icon(
