@@ -11,4 +11,6 @@ abstract class GanaderoRepository {
   Future<Animal> crearAnimal(Animal animal);
   Future<List<HistorialProductivo>> getHistorialAnimal(String animalId);
   Future<List<Prediccion>> getPrediccionesAnimal(String animalId);
+  Future<Animal> actualizarAnimal(Animal animal);
+  Future<void> eliminarAnimal(String animalId);
 }

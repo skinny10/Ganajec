@@ -22,4 +22,30 @@ class Animal {
     required this.idExterno,
     required this.creadoEn,
   });
+
+  Animal copyWith({
+    String? id,
+    String? ranchoId,
+    String? ganaderoId,
+    String? nombre,
+    String? raza,
+    String? sexo,
+    DateTime? fechaNacimiento,
+    double? pesoKg,
+    String? idExterno,
+    DateTime? creadoEn,
+  }) {
+    return Animal(
+      id: id ?? this.id,
+      ranchoId: ranchoId ?? this.ranchoId,
+      ganaderoId: ganaderoId ?? this.ganaderoId,
+      nombre: nombre ?? this.nombre,
+      raza: raza ?? this.raza,
+      sexo: sexo ?? this.sexo,
+      fechaNacimiento: fechaNacimiento ?? this.fechaNacimiento,
+      pesoKg: pesoKg ?? this.pesoKg,
+      idExterno: idExterno ?? this.idExterno,
+      creadoEn: creadoEn ?? this.creadoEn,
+    );
+  }
 }

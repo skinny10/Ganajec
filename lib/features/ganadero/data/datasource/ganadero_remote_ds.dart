@@ -12,6 +12,8 @@ abstract class GanaderoRemoteDataSource {
   Future<AnimalModel> crearAnimal(Animal animal);
   Future<List<HistorialProductivoModel>> getHistorialAnimal(String animalId);
   Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId);
+  Future<AnimalModel> actualizarAnimal(Animal animal);
+  Future<void> eliminarAnimal(String animalId);
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
@@ -245,5 +247,29 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         fecha: now.subtract(const Duration(hours: 6)),
       ),
     ];
+  }
+
+  @override
+  Future<AnimalModel> actualizarAnimal(Animal animal) async {
+    await Future.delayed(const Duration(seconds: 1));
+    // Cuando tengas API: PUT /animales/:id
+    return AnimalModel(
+      id: animal.id,
+      ranchoId: animal.ranchoId,
+      ganaderoId: animal.ganaderoId,
+      nombre: animal.nombre,
+      raza: animal.raza,
+      sexo: animal.sexo,
+      fechaNacimiento: animal.fechaNacimiento,
+      pesoKg: animal.pesoKg,
+      idExterno: animal.idExterno,
+      creadoEn: animal.creadoEn,
+    );
+  }
+
+  @override
+  Future<void> eliminarAnimal(String animalId) async {
+    // Cuando tengas API: DELETE /animales/:id
+    await Future.delayed(const Duration(seconds: 1));
   }
 }

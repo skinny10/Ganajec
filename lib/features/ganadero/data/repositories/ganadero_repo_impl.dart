@@ -35,4 +35,12 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
   @override
   Future<List<Prediccion>> getPrediccionesAnimal(String animalId) =>
       remoteDataSource.getPrediccionesAnimal(animalId);
+
+  @override
+  Future<Animal> actualizarAnimal(Animal animal) =>
+      remoteDataSource.actualizarAnimal(animal);
+
+  @override
+  Future<void> eliminarAnimal(String animalId) =>
+      remoteDataSource.eliminarAnimal(animalId);
 }

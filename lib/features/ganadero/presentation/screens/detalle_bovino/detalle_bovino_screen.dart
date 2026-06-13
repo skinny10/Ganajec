@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
+import 'package:ganajec/core/router/app_router.dart';
 import 'detalle_bovino_components.dart';
 
 class DetalleBovinoScreen extends StatefulWidget {
@@ -58,16 +60,8 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
         centerTitle: true,
         actions: [
           GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Editar ${widget.animal.nombre} — próximamente'),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-              );
-            },
+            onTap: () =>
+                context.push(AppRoutes.editarBovino, extra: widget.animal),
             child: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
