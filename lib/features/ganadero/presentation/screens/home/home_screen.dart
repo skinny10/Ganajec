@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case HomeTab.inicio:
         break;
       case HomeTab.buscar:
-        // context.push('/buscar');
+        context.push(AppRoutes.alertas);
         break;
       case HomeTab.registrar:
         context.push(AppRoutes.registroBovino);
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () => context.push(AppRoutes.alertas),
                               icon: const Icon(Icons.notifications_outlined),
                             ),
                             const SizedBox(width: 8),
@@ -152,9 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
-            label: 'Buscar',
+            icon: Icon(Icons.notifications_outlined),
+            selectedIcon: Icon(Icons.notifications),
+            label: 'Alertas',
           ),
           NavigationDestination(
             icon: Icon(Icons.add_circle_outline),

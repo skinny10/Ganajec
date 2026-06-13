@@ -48,4 +48,12 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
   @override
   Future<Prediccion> registrarSintomas(RegistroSintomas registro) =>
       remoteDataSource.registrarSintomas(registro);
+
+  @override
+  Future<void> marcarAlertaLeida(String alertaId) =>
+      remoteDataSource.marcarAlertaLeida(alertaId);
+
+  @override
+  Future<void> marcarTodasAlertasLeidas() =>
+      remoteDataSource.marcarTodasAlertasLeidas();
 }

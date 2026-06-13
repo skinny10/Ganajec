@@ -1,3 +1,4 @@
+import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
@@ -16,6 +17,8 @@ abstract class GanaderoRemoteDataSource {
   Future<AnimalModel> actualizarAnimal(Animal animal);
   Future<void> eliminarAnimal(String animalId);
   Future<PrediccionModel> registrarSintomas(RegistroSintomas registro);
+  Future<void> marcarAlertaLeida(String alertaId);
+  Future<void> marcarTodasAlertasLeidas();
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
@@ -107,19 +110,106 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<List<AlertaModel>> getAlertas() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 700));
+    final now = DateTime.now();
     return [
+      // ── Hoy ──────────────────────────────────────────────────────────────
       AlertaModel(
         id: 'a1',
+        tipo: AlertaTipo.isolationForest,
+        severidad: AlertaSeveridad.alta,
+        titulo: 'Caída anómala detectada en Lupita',
+        descripcion: 'La producción bajó de 18 L a 5 L en 3 días — patrón estadísticamente anormal para este animal.',
         animalId: '1',
-        ganaderoId: 'g1',
-        tipo: 'productiva',
-        severidad: 'alta',
-        mensaje: 'Lupita bajó 40% de leche en 3 días — revisa su estado',
+        animalNombre: 'Lupita',
+        animalIdExterno: 'ID-0021',
+        fecha: DateTime(now.year, now.month, now.day, 8, 5),
         leida: false,
-        creadoEn: DateTime.now().subtract(const Duration(hours: 1)),
+        accion: AlertaAccion.verDetalle,
+      ),
+      AlertaModel(
+        id: 'a2',
+        tipo: AlertaTipo.prediccion,
+        severidad: AlertaSeveridad.alta,
+        titulo: 'Mastitis detectada — acción inmediata',
+        descripcion: 'El análisis de síntomas indica Mastitis con 87% de confianza. Revisa la ubre y contacta al veterinario.',
+        animalId: '1',
+        animalNombre: 'Lupita',
+        animalIdExterno: 'ID-0021',
+        fecha: DateTime(now.year, now.month, now.day, 8, 15),
+        leida: false,
+        accion: AlertaAccion.verResultado,
+      ),
+      // ── Ayer ─────────────────────────────────────────────────────────────
+      AlertaModel(
+        id: 'a3',
+        tipo: AlertaTipo.prediccion,
+        severidad: AlertaSeveridad.moderada,
+        titulo: 'Posible laminitis en Canela',
+        descripcion: 'Predicción con 72% de confianza. Observa si cojea o muestra dificultad para moverse.',
+        animalId: '2',
+        animalNombre: 'Canela',
+        animalIdExterno: 'ID-0014',
+        fecha: now.subtract(const Duration(days: 1, hours: 8, minutes: 19)),
+        leida: false,
+        accion: AlertaAccion.verResultado,
+      ),
+      AlertaModel(
+        id: 'a4',
+        tipo: AlertaTipo.nlp,
+        severidad: AlertaSeveridad.ninguna,
+        titulo: 'El NLP identificó decaimiento severo',
+        descripcion: 'Tu descripción de texto reveló señales de decaimiento que no seleccionaste en el formulario. Fueron agregadas al análisis.',
+        animalId: '2',
+        animalNombre: 'Canela',
+        animalIdExterno: 'ID-0014',
+        fecha: now.subtract(const Duration(days: 1, hours: 8, minutes: 20)),
+        leida: false,
+      ),
+      // ── Esta semana ───────────────────────────────────────────────────────
+      AlertaModel(
+        id: 'a5',
+        tipo: AlertaTipo.prediccion,
+        severidad: AlertaSeveridad.leve,
+        titulo: 'Estrella está saludable',
+        descripcion: 'Análisis completado con 94% de confianza. No se detectaron enfermedades ni anomalías.',
+        animalId: '3',
+        animalNombre: 'Estrella',
+        animalIdExterno: 'ID-0008',
+        fecha: now.subtract(const Duration(days: 1, hours: 16)),
+        leida: true,
+      ),
+      AlertaModel(
+        id: 'a6',
+        tipo: AlertaTipo.sistema,
+        severidad: AlertaSeveridad.ninguna,
+        titulo: 'Modelo actualizado a v1.2',
+        descripcion: 'El modelo de clasificación fue actualizado. La precisión mejoró del 82% al 87% en enfermedades respiratorias.',
+        fecha: now.subtract(const Duration(days: 3)),
+        leida: true,
+      ),
+      AlertaModel(
+        id: 'a7',
+        tipo: AlertaTipo.isolationForest,
+        severidad: AlertaSeveridad.moderada,
+        titulo: 'Resumen productivo de tu hato',
+        descripcion: 'Esta semana tu hato produjo en promedio 14.2 L por vaca/día. Lupita muestra tendencia a la baja desde el martes.',
+        fecha: now.subtract(const Duration(days: 4)),
+        leida: true,
       ),
     ];
+  }
+
+  @override
+  Future<void> marcarAlertaLeida(String alertaId) async {
+    // Cuando tengas API: PATCH /alertas/:id/leida
+    await Future.delayed(const Duration(milliseconds: 200));
+  }
+
+  @override
+  Future<void> marcarTodasAlertasLeidas() async {
+    // Cuando tengas API: POST /alertas/marcar-leidas
+    await Future.delayed(const Duration(milliseconds: 300));
   }
 
   @override

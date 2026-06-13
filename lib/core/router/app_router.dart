@@ -13,6 +13,11 @@ import 'package:ganajec/features/ganadero/presentation/viewmodels/registrar_sint
 import 'package:ganajec/features/ganadero/domain/usecase/registrar_sintomas_usecase.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/resultado_prediccion/resultado_prediccion_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/resultado_prediccion/resultado_prediccion_args.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/alertas/alertas_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/alertas_viewmodel.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/get_alertas_usecase.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/marcar_alerta_leida_usecase.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/marcar_todas_alertas_leidas_usecase.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -38,6 +43,7 @@ class AppRoutes {
   static const String perfil = '/perfil';
   static const String registrarSintomas = '/registrar-sintomas';
   static const String resultadoPrediccion = '/resultado-prediccion';
+  static const String alertas = '/alertas';
 }
 
 class AppRouter {
@@ -125,6 +131,21 @@ class AppRouter {
         builder: (context, state) {
           final args = state.extra as ResultadoPrediccionArgs;
           return ResultadoPrediccionScreen(args: args);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.alertas,
+        builder: (context, state) {
+          final ds = GanaderoRemoteDataSourceImpl();
+          final repo = GanaderoRepositoryImpl(ds);
+          return ChangeNotifierProvider(
+            create: (_) => AlertasViewModel(
+              getAlertas: GetAlertasUseCase(repo),
+              marcarLeida: MarcarAlertaLeidaUseCase(repo),
+              marcarTodas: MarcarTodasAlertasLeidasUseCase(repo),
+            ),
+            child: const AlertasScreen(),
+          );
         },
       ),
     ],

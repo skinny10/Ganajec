@@ -15,4 +15,6 @@ abstract class GanaderoRepository {
   Future<Animal> actualizarAnimal(Animal animal);
   Future<void> eliminarAnimal(String animalId);
   Future<Prediccion> registrarSintomas(RegistroSintomas registro);
+  Future<void> marcarAlertaLeida(String alertaId);
+  Future<void> marcarTodasAlertasLeidas();
 }
