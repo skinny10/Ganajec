@@ -7,14 +7,19 @@ import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.
 import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/editar_bovino/editar_bovino_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/perfil/perfil_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/get_historial_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/get_predicciones_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/actualizar_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/eliminar_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/data/repositories/ganadero_repo_impl.dart';
 import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
+import 'package:ganajec/features/auth/data/repositories/auth_repo_impl.dart';
+import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
+import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -25,6 +30,7 @@ class AppRoutes {
   static const String registroBovino = '/registro-bovino';
   static const String detalleBovino = '/detalle-bovino';
   static const String editarBovino = '/editar-bovino';
+  static const String perfil = '/perfil';
 }
 
 class AppRouter {
@@ -76,6 +82,19 @@ class AppRouter {
               eliminarAnimal: EliminarAnimalUseCase(repo),
             ),
             child: EditarBovinoScreen(animal: animal),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.perfil,
+        builder: (context, state) {
+          final authDs = AuthRemoteDataSourceImpl();
+          final authRepo = AuthRepositoryImpl(authDs);
+          return ChangeNotifierProvider(
+            create: (_) => PerfilViewModel(
+              logoutUseCase: LogoutUseCase(authRepo),
+            ),
+            child: const PerfilScreen(),
           );
         },
       ),

@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // context.push('/reportes');
         break;
       case HomeTab.perfil:
-        // context.push('/perfil');
+        context.push(AppRoutes.perfil);
         break;
     }
   }
