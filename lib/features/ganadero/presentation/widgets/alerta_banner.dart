@@ -11,6 +11,21 @@ class AlertaBanner extends StatelessWidget {
     this.onTap,
   });
 
+  String _titulo() {
+    switch (alerta.tipo) {
+      case AlertaTipo.isolationForest:
+        return 'Caída productiva detectada';
+      case AlertaTipo.prediccion:
+        return alerta.severidad == AlertaSeveridad.alta
+            ? 'Predicción · Severidad alta'
+            : 'Predicción detectada';
+      case AlertaTipo.nlp:
+        return 'NLP · Síntoma nuevo';
+      case AlertaTipo.sistema:
+        return 'Sistema';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -32,16 +47,14 @@ class AlertaBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    alerta.tipo == 'productiva'
-                        ? 'Caída productiva detectada'
-                        : alerta.tipo,
+                    _titulo(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: colors.onErrorContainer,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   Text(
-                    alerta.mensaje,
+                    alerta.descripcion,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colors.onErrorContainer,
                         ),
