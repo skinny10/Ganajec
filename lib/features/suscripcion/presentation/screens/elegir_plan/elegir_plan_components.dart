@@ -73,7 +73,7 @@ class ElegirPlanPromoHeader extends StatelessWidget {
                 'Alertas automáticas, historial extendido y reportes para tu hato.',
                 style: TextStyle(
                   fontSize: 12.5,
-                  color: Colors.white65,
+                  color: Color(0xA6FFFFFF), // ~65% white
                   fontWeight: FontWeight.w300,
                   height: 1.5,
                 ),
@@ -90,7 +90,7 @@ class ElegirPlanPromoHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white80,
+                    color: Color(0xCCFFFFFF), // ~80% white
                   ),
                 ),
               ),

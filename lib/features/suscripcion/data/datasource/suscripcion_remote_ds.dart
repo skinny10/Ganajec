@@ -11,9 +11,8 @@ class SuscripcionRemoteDataSourceImpl implements SuscripcionRemoteDataSource {
   @override
   Future<SuscripcionInfo> getSuscripcion() async {
     await Future.delayed(const Duration(milliseconds: 600));
-    const planGratuito = kPlanes[0]; // PlanTipo.gratuito
-    return const SuscripcionInfo(
-      planActual: planGratuito,
+    return SuscripcionInfo(
+      planActual: kPlanes[0], // PlanTipo.gratuito
       bovinosUsados: 3,
       analisisUsados: 12,
     );
