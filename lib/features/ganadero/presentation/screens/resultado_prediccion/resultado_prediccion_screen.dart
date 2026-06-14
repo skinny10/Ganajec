@@ -155,7 +155,7 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
             children: [
               // Ver historial
               GestureDetector(
-                onTap: () => context.go(AppRoutes.home),
+                onTap: () => context.push(AppRoutes.historial),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),

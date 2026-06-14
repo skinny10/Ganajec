@@ -8,21 +8,22 @@ class UserModel extends User {
     required super.role,
   });
 
+  /// La API devuelve `nombre` y `rol` (no `name`/`role`).
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: json['nombre'] as String,
       email: json['email'] as String,
-      role: json['role'] as String,
+      role: json['rol'] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'nombre': name,
       'email': email,
-      'role': role,
+      'rol': role,
     };
   }
 }

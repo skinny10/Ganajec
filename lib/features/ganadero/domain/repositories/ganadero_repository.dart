@@ -1,5 +1,6 @@
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/historial_item.dart';
 import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
@@ -17,4 +18,5 @@ abstract class GanaderoRepository {
   Future<Prediccion> registrarSintomas(RegistroSintomas registro);
   Future<void> marcarAlertaLeida(String alertaId);
   Future<void> marcarTodasAlertasLeidas();
+  Future<List<HistorialItem>> getHistorialGanadero();
 }

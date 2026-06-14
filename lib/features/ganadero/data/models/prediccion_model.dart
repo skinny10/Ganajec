@@ -10,14 +10,29 @@ class PrediccionModel extends Prediccion {
     required super.fecha,
   });
 
-  factory PrediccionModel.fromJson(Map<String, dynamic> json) {
+  /// Parsea un elemento de la lista `predicciones` de la API.
+  ///
+  /// Casos:
+  ///  - GET /ganadero/{id}/predicciones  → cada item trae `bovino: {id, nombre}`
+  ///  - GET /ganadero/bovinos/{id}/predicciones → no trae `bovino`; pasa [animalId]/[animalNombre]
+  ///  - POST /registros-sintomas → respuesta.prediccion; pasa [animalId]/[animalNombre]
+  factory PrediccionModel.fromJson(
+    Map<String, dynamic> json, {
+    String? animalId,
+    String? animalNombre,
+  }) {
+    final bovino = json['bovino'] as Map<String, dynamic>?;
     return PrediccionModel(
       id: json['id'] as String,
-      animalId: json['animal_id'] as String,
-      animalNombre: json['animal_nombre'] as String,
+      animalId: animalId ?? (bovino?['id'] as String? ?? ''),
+      animalNombre: animalNombre ?? (bovino?['nombre'] as String? ?? ''),
       enfermedad: json['enfermedad'] as String,
       confianza: (json['confianza'] as num).toDouble(),
-      fecha: DateTime.parse(json['fecha'] as String),
+      // La API usa `generado_en`; fallback por si algún endpoint usa otra clave.
+      fecha: DateTime.parse(
+        (json['generado_en'] ?? json['fecha'] ?? DateTime.now().toIso8601String())
+            as String,
+      ),
     );
   }
 
@@ -27,6 +42,6 @@ class PrediccionModel extends Prediccion {
         'animal_nombre': animalNombre,
         'enfermedad': enfermedad,
         'confianza': confianza,
-        'fecha': fecha.toIso8601String(),
+        'generado_en': fecha.toIso8601String(),
       };
 }

@@ -1,3 +1,7 @@
+import 'package:dio/dio.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/auth/data/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -8,26 +12,27 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String role,
   });
+  Future<void> logout();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  // Aquí irá Dio cuando conectes la API
-  // final Dio dio;
-  // AuthRemoteDataSourceImpl(this.dio);
+  final Dio _dio = ApiClient.instance;
 
   @override
   Future<UserModel> login({
     required String email,
     required String password,
   }) async {
-    // Mock — simula delay de red
-    await Future.delayed(const Duration(seconds: 1));
-    return UserModel(
-      id: '1',
-      name: 'Carlos Ramos',
-      email: email,
-      role: 'ganadero',
+    final response = await _dio.post(
+      ApiConstants.login,
+      data: {'email': email, 'password': password},
     );
+    final token = response.data['access_token'] as String;
+    final user = UserModel.fromJson(
+      response.data['usuario'] as Map<String, dynamic>,
+    );
+    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
+    return user;
   }
 
   @override
@@ -37,12 +42,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String role,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return UserModel(
-      id: '2',
-      name: name,
-      email: email,
-      role: role,
+    final response = await _dio.post(
+      ApiConstants.register,
+      data: {
+        'nombre': name,
+        'email': email,
+        'password': password,
+        'rol': role,
+      },
     );
+    final token = response.data['access_token'] as String;
+    final user = UserModel.fromJson(
+      response.data['usuario'] as Map<String, dynamic>,
+    );
+    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
+    return user;
   }
+
+  @override
+  Future<void> logout() => TokenStorage.clear();
 }

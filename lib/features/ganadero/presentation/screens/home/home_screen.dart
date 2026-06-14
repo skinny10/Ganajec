@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case HomeTab.registrar:
         context.push(AppRoutes.registroBovino);
       case HomeTab.reportes:
-        // context.push('/reportes');
+        context.push(AppRoutes.historial);
         break;
       case HomeTab.perfil:
         context.push(AppRoutes.perfil);
@@ -132,7 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 16),
                           HomePredicciones(
                             predicciones: vm.predicciones,
-                            onVerHistorial: () {},
+                            onVerHistorial: () =>
+                                context.push(AppRoutes.historial),
                           ),
                           const SizedBox(height: 24),
                         ]),

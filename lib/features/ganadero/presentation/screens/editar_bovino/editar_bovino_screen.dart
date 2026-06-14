@@ -176,6 +176,8 @@ class _EditarBovinoScreenState extends State<EditarBovinoScreen> {
       pesoKg: peso,
       raza: _raza,
       fechaNacimiento: _fechaNacimiento,
+      categoria: _categoria.name,
+      proposito: _proposito.name,
     );
 
     final ok = await vm.guardar(actualizado);

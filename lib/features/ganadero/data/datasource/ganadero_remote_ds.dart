@@ -1,8 +1,14 @@
+import 'package:dio/dio.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/historial_item.dart';
 import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
 import 'package:ganajec/features/ganadero/data/models/alerta_model.dart';
+import 'package:ganajec/features/ganadero/data/models/historial_item_model.dart';
 import 'package:ganajec/features/ganadero/data/models/historial_productivo_model.dart';
 import 'package:ganajec/features/ganadero/data/models/prediccion_model.dart';
 
@@ -19,107 +25,173 @@ abstract class GanaderoRemoteDataSource {
   Future<PrediccionModel> registrarSintomas(RegistroSintomas registro);
   Future<void> marcarAlertaLeida(String alertaId);
   Future<void> marcarTodasAlertasLeidas();
+  Future<List<HistorialItem>> getHistorialGanadero();
 }
 
 class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
+  final Dio _dio = ApiClient.instance;
+
+  /// ID del ganadero autenticado, guardado en TokenStorage tras el login.
+  String get _uid => TokenStorage.userId ?? '';
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // BOVINOS
+  // ────────────────────────────────────────────────────────────────────────────
+
   @override
   Future<List<AnimalModel>> getAnimales() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    return [
-      AnimalModel(
-        id: '1',
-        ranchoId: 'r1',
-        ganaderoId: 'g1',
-        nombre: 'Lupita',
-        raza: 'Holstein',
-        sexo: 'hembra',
-        fechaNacimiento: DateTime(2020, 3, 10),
-        pesoKg: 480,
-        idExterno: 'ID-0021',
-        creadoEn: DateTime.now(),
-      ),
-      AnimalModel(
-        id: '2',
-        ranchoId: 'r1',
-        ganaderoId: 'g1',
-        nombre: 'Canela',
-        raza: 'Suizo',
-        sexo: 'hembra',
-        fechaNacimiento: DateTime(2021, 6, 15),
-        pesoKg: 420,
-        idExterno: 'ID-0014',
-        creadoEn: DateTime.now(),
-      ),
-      AnimalModel(
-        id: '3',
-        ranchoId: 'r1',
-        ganaderoId: 'g1',
-        nombre: 'Estrella',
-        raza: 'Angus',
-        sexo: 'hembra',
-        fechaNacimiento: DateTime(2019, 1, 20),
-        pesoKg: 510,
-        idExterno: 'ID-0008',
-        creadoEn: DateTime.now(),
-      ),
-      AnimalModel(
-        id: '4',
-        ranchoId: 'r1',
-        ganaderoId: 'g1',
-        nombre: 'Rosita',
-        raza: 'Holstein',
-        sexo: 'hembra',
-        fechaNacimiento: DateTime(2022, 8, 5),
-        pesoKg: 390,
-        idExterno: 'ID-0033',
-        creadoEn: DateTime.now(),
-      ),
-    ];
+    final res = await _dio.get(ApiConstants.bovinosGanadero(_uid));
+    final list = res.data['bovinos'] as List;
+    final models = list
+        .map((e) => AnimalModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+    // Guarda el rancho_id del primer bovino para usarlo al crear nuevos bovinos.
+    if (models.isNotEmpty && TokenStorage.ranchoId == null) {
+      await TokenStorage.saveRanchoId(models.first.ranchoId);
+    }
+    return models;
   }
 
   @override
-  Future<List<PrediccionModel>> getUltimasPredicciones() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    return [
-      PrediccionModel(
-        id: 'p1',
-        animalId: '1',
-        animalNombre: 'Lupita',
-        enfermedad: 'Mastitis',
-        confianza: 0.87,
-        fecha: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      PrediccionModel(
-        id: 'p2',
-        animalId: '2',
-        animalNombre: 'Canela',
-        enfermedad: 'Laminitis leve',
-        confianza: 0.72,
-        fecha: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-      PrediccionModel(
-        id: 'p3',
-        animalId: '3',
-        animalNombre: 'Estrella',
-        enfermedad: 'Sin enfermedad',
-        confianza: 0.94,
-        fecha: DateTime.now().subtract(const Duration(hours: 8)),
-      ),
-    ];
+  Future<AnimalModel> crearAnimal(Animal animal) async {
+    final ranchoId = TokenStorage.ranchoId ?? '';
+    final body = <String, dynamic>{
+      'nombre': animal.nombre,
+      'raza': animal.raza,
+      'sexo': animal.sexo,
+      'categoria': animal.categoria.isNotEmpty ? animal.categoria : 'vaca',
+      'proposito': animal.proposito.isNotEmpty ? animal.proposito : 'leche',
+      'peso_kg': animal.pesoKg,
+      'fecha_nacimiento': _fmtDate(animal.fechaNacimiento),
+    };
+    if (ranchoId.isNotEmpty) body['rancho_id'] = ranchoId;
+    if (animal.idExterno.isNotEmpty) body['id_externo'] = animal.idExterno;
+
+    final res = await _dio.post(ApiConstants.crearBovino, data: body);
+    return AnimalModel.fromJson(res.data as Map<String, dynamic>);
   }
+
+  @override
+  Future<AnimalModel> actualizarAnimal(Animal animal) async {
+    final body = <String, dynamic>{
+      'nombre': animal.nombre,
+      'raza': animal.raza,
+      'sexo': animal.sexo,
+      'categoria': animal.categoria,
+      'proposito': animal.proposito,
+      'peso_kg': animal.pesoKg,
+      'fecha_nacimiento': _fmtDate(animal.fechaNacimiento),
+      if (animal.idExterno.isNotEmpty) 'id_externo': animal.idExterno,
+    };
+    final res =
+        await _dio.put(ApiConstants.bovino(animal.id), data: body);
+    return AnimalModel.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> eliminarAnimal(String animalId) async {
+    await _dio.delete(ApiConstants.bovino(animalId));
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // PREDICCIONES
+  // ────────────────────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<PrediccionModel>> getUltimasPredicciones() async {
+    final res =
+        await _dio.get(ApiConstants.prediccionesGanadero(_uid));
+    final list = res.data['predicciones'] as List;
+    return list
+        .map((e) => PrediccionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId) async {
+    final res =
+        await _dio.get(ApiConstants.prediccionesBovino(animalId));
+    final list = res.data['predicciones'] as List;
+    final nombre = res.data['nombre'] as String? ?? '';
+    return list
+        .map((e) => PrediccionModel.fromJson(
+              e as Map<String, dynamic>,
+              animalId: animalId,
+              animalNombre: nombre,
+            ))
+        .toList();
+  }
+
+  @override
+  Future<PrediccionModel> registrarSintomas(RegistroSintomas registro) async {
+    final texto = registro.descripcion.trim();
+    final body = <String, dynamic>{
+      'bovino_id': registro.animalId,
+      // texto_libre es obligatorio y debe tener ≥3 caracteres
+      'texto_libre': texto.length >= 3 ? texto : 'Sin descripción adicional',
+      'temperatura': registro.temperatura,
+      'produccion_leche': registro.litrosLeche,
+      'consumo_alimento_kg': registro.kgAlimento,
+      if (registro.sintomas.isNotEmpty)
+        'sintomas_seleccionados': registro.sintomas,
+    };
+    final res =
+        await _dio.post(ApiConstants.registroSintomas, data: body);
+    final pred = res.data['prediccion'] as Map<String, dynamic>;
+    return PrediccionModel.fromJson(
+      pred,
+      animalId: registro.animalId,
+      animalNombre: '',
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // HISTORIAL GLOBAL
+  // ────────────────────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<HistorialItem>> getHistorialGanadero() async {
+    final res =
+        await _dio.get(ApiConstants.prediccionesGanadero(_uid));
+    final list = res.data['predicciones'] as List;
+    return list
+        .map((e) =>
+            HistorialItemModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // RESUMEN HATO
+  // ────────────────────────────────────────────────────────────────────────────
+
+  @override
+  Future<Map<String, int>> getResumenHato() async {
+    final res = await _dio.get(ApiConstants.perfilGanadero(_uid));
+    final total = (res.data['total_bovinos'] as num? ?? 0).toInt();
+    // La API no devuelve el desglose; se deduce del total.
+    return {
+      'total': total,
+      'en_buen_estado': total,
+      'con_alertas': 0,
+    };
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // ALERTAS — MOCK (el usuario ajustará los campos tipo/mensaje al integrar)
+  // ────────────────────────────────────────────────────────────────────────────
 
   @override
   Future<List<AlertaModel>> getAlertas() async {
     await Future.delayed(const Duration(milliseconds: 700));
     final now = DateTime.now();
     return [
-      // ── Hoy ──────────────────────────────────────────────────────────────
       AlertaModel(
         id: 'a1',
         tipo: AlertaTipo.isolationForest,
         severidad: AlertaSeveridad.alta,
         titulo: 'Caída anómala detectada en Lupita',
-        descripcion: 'La producción bajó de 18 L a 5 L en 3 días — patrón estadísticamente anormal para este animal.',
+        descripcion:
+            'La producción bajó de 18 L a 5 L en 3 días — patrón estadísticamente anormal.',
         animalId: '1',
         animalNombre: 'Lupita',
         animalIdExterno: 'ID-0021',
@@ -132,7 +204,8 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         tipo: AlertaTipo.prediccion,
         severidad: AlertaSeveridad.alta,
         titulo: 'Mastitis detectada — acción inmediata',
-        descripcion: 'El análisis de síntomas indica Mastitis con 87% de confianza. Revisa la ubre y contacta al veterinario.',
+        descripcion:
+            'El análisis de síntomas indica Mastitis con 87% de confianza.',
         animalId: '1',
         animalNombre: 'Lupita',
         animalIdExterno: 'ID-0021',
@@ -140,13 +213,12 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         leida: false,
         accion: AlertaAccion.verResultado,
       ),
-      // ── Ayer ─────────────────────────────────────────────────────────────
       AlertaModel(
         id: 'a3',
         tipo: AlertaTipo.prediccion,
         severidad: AlertaSeveridad.moderada,
         titulo: 'Posible laminitis en Canela',
-        descripcion: 'Predicción con 72% de confianza. Observa si cojea o muestra dificultad para moverse.',
+        descripcion: 'Predicción con 72% de confianza.',
         animalId: '2',
         animalNombre: 'Canela',
         animalIdExterno: 'ID-0014',
@@ -159,20 +231,21 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         tipo: AlertaTipo.nlp,
         severidad: AlertaSeveridad.ninguna,
         titulo: 'El NLP identificó decaimiento severo',
-        descripcion: 'Tu descripción de texto reveló señales de decaimiento que no seleccionaste en el formulario. Fueron agregadas al análisis.',
+        descripcion:
+            'Tu descripción de texto reveló señales de decaimiento no seleccionadas en el formulario.',
         animalId: '2',
         animalNombre: 'Canela',
         animalIdExterno: 'ID-0014',
         fecha: now.subtract(const Duration(days: 1, hours: 8, minutes: 20)),
         leida: false,
       ),
-      // ── Esta semana ───────────────────────────────────────────────────────
       AlertaModel(
         id: 'a5',
         tipo: AlertaTipo.prediccion,
         severidad: AlertaSeveridad.leve,
         titulo: 'Estrella está saludable',
-        descripcion: 'Análisis completado con 94% de confianza. No se detectaron enfermedades ni anomalías.',
+        descripcion:
+            'Análisis completado con 94% de confianza. No se detectaron enfermedades.',
         animalId: '3',
         animalNombre: 'Estrella',
         animalIdExterno: 'ID-0008',
@@ -184,7 +257,8 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         tipo: AlertaTipo.sistema,
         severidad: AlertaSeveridad.ninguna,
         titulo: 'Modelo actualizado a v1.2',
-        descripcion: 'El modelo de clasificación fue actualizado. La precisión mejoró del 82% al 87% en enfermedades respiratorias.',
+        descripcion:
+            'La precisión mejoró del 82% al 87% en enfermedades respiratorias.',
         fecha: now.subtract(const Duration(days: 3)),
         leida: true,
       ),
@@ -193,7 +267,8 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
         tipo: AlertaTipo.isolationForest,
         severidad: AlertaSeveridad.moderada,
         titulo: 'Resumen productivo de tu hato',
-        descripcion: 'Esta semana tu hato produjo en promedio 14.2 L por vaca/día. Lupita muestra tendencia a la baja desde el martes.',
+        descripcion:
+            'Esta semana tu hato produjo en promedio 14.2 L por vaca/día.',
         fecha: now.subtract(const Duration(days: 4)),
         leida: true,
       ),
@@ -202,44 +277,20 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<void> marcarAlertaLeida(String alertaId) async {
-    // Cuando tengas API: PATCH /alertas/:id/leida
+    // Mock mientras las alertas no vengan de la API real.
+    // Cuando conectes alertas: await _dio.patch(ApiConstants.marcarAlerta(alertaId), data: {'leida': true});
     await Future.delayed(const Duration(milliseconds: 200));
   }
 
   @override
   Future<void> marcarTodasAlertasLeidas() async {
-    // Cuando tengas API: POST /alertas/marcar-leidas
+    // La API no tiene endpoint bulk; mock por ahora.
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
-  @override
-  Future<Map<String, int>> getResumenHato() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return {
-      'total': 12,
-      'en_buen_estado': 9,
-      'con_alertas': 3,
-    };
-  }
-
-  @override
-  Future<AnimalModel> crearAnimal(Animal animal) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return AnimalModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      ranchoId: 'r1',
-      ganaderoId: 'g1',
-      nombre: animal.nombre,
-      raza: animal.raza,
-      sexo: animal.sexo,
-      fechaNacimiento: animal.fechaNacimiento,
-      pesoKg: animal.pesoKg,
-      idExterno: animal.idExterno.isEmpty
-          ? 'ID-${DateTime.now().millisecondsSinceEpoch}'
-          : animal.idExterno,
-      creadoEn: DateTime.now(),
-    );
-  }
+  // ────────────────────────────────────────────────────────────────────────────
+  // HISTORIAL PRODUCTIVO — MOCK (no existe endpoint en la API)
+  // ────────────────────────────────────────────────────────────────────────────
 
   @override
   Future<List<HistorialProductivoModel>> getHistorialAnimal(
@@ -247,55 +298,18 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
     await Future.delayed(const Duration(milliseconds: 600));
     final now = DateTime.now();
 
-    // Mock: Lupita (id=1) tiene caída anómala los últimos 3 días
     if (animalId == '1') {
       return [
-        HistorialProductivoModel(
-          id: 'h1', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 6)),
-          litrosLeche: 18.5, kgAlimento: 12.0, temperatura: 38.5,
-          anomaliaDetectada: false,
-        ),
-        HistorialProductivoModel(
-          id: 'h2', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 5)),
-          litrosLeche: 18.0, kgAlimento: 12.0, temperatura: 38.4,
-          anomaliaDetectada: false,
-        ),
-        HistorialProductivoModel(
-          id: 'h3', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 4)),
-          litrosLeche: 17.5, kgAlimento: 11.8, temperatura: 38.6,
-          anomaliaDetectada: false,
-        ),
-        HistorialProductivoModel(
-          id: 'h4', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 3)),
-          litrosLeche: 19.0, kgAlimento: 12.2, temperatura: 38.3,
-          anomaliaDetectada: false,
-        ),
-        HistorialProductivoModel(
-          id: 'h5', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 2)),
-          litrosLeche: 12.0, kgAlimento: 10.5, temperatura: 39.2,
-          anomaliaDetectada: true,
-        ),
-        HistorialProductivoModel(
-          id: 'h6', animalId: animalId,
-          fecha: now.subtract(const Duration(days: 1)),
-          litrosLeche: 8.0, kgAlimento: 9.0, temperatura: 39.5,
-          anomaliaDetectada: true,
-        ),
-        HistorialProductivoModel(
-          id: 'h7', animalId: animalId,
-          fecha: now,
-          litrosLeche: 5.0, kgAlimento: 8.5, temperatura: 39.8,
-          anomaliaDetectada: true,
-        ),
+        HistorialProductivoModel(id: 'h1', animalId: animalId, fecha: now.subtract(const Duration(days: 6)), litrosLeche: 18.5, kgAlimento: 12.0, temperatura: 38.5, anomaliaDetectada: false),
+        HistorialProductivoModel(id: 'h2', animalId: animalId, fecha: now.subtract(const Duration(days: 5)), litrosLeche: 18.0, kgAlimento: 12.0, temperatura: 38.4, anomaliaDetectada: false),
+        HistorialProductivoModel(id: 'h3', animalId: animalId, fecha: now.subtract(const Duration(days: 4)), litrosLeche: 17.5, kgAlimento: 11.8, temperatura: 38.6, anomaliaDetectada: false),
+        HistorialProductivoModel(id: 'h4', animalId: animalId, fecha: now.subtract(const Duration(days: 3)), litrosLeche: 19.0, kgAlimento: 12.2, temperatura: 38.3, anomaliaDetectada: false),
+        HistorialProductivoModel(id: 'h5', animalId: animalId, fecha: now.subtract(const Duration(days: 2)), litrosLeche: 12.0, kgAlimento: 10.5, temperatura: 39.2, anomaliaDetectada: true),
+        HistorialProductivoModel(id: 'h6', animalId: animalId, fecha: now.subtract(const Duration(days: 1)), litrosLeche: 8.0, kgAlimento: 9.0, temperatura: 39.5, anomaliaDetectada: true),
+        HistorialProductivoModel(id: 'h7', animalId: animalId, fecha: now, litrosLeche: 5.0, kgAlimento: 8.5, temperatura: 39.8, anomaliaDetectada: true),
       ];
     }
 
-    // Mock genérico: animal saludable
     return List.generate(7, (i) {
       final liters = 14.0 + (i % 3) * 1.5;
       return HistorialProductivoModel(
@@ -307,102 +321,12 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
     });
   }
 
-  @override
-  Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    final now = DateTime.now();
+  // ────────────────────────────────────────────────────────────────────────────
+  // Helpers
+  // ────────────────────────────────────────────────────────────────────────────
 
-    if (animalId == '1') {
-      return [
-        PrediccionModel(
-          id: 'p1', animalId: animalId, animalNombre: 'Lupita',
-          enfermedad: 'Mastitis', confianza: 0.87,
-          fecha: now.subtract(const Duration(hours: 2)),
-        ),
-        PrediccionModel(
-          id: 'p2', animalId: animalId, animalNombre: 'Lupita',
-          enfermedad: 'Sin enfermedad', confianza: 0.91,
-          fecha: now.subtract(const Duration(days: 5)),
-        ),
-        PrediccionModel(
-          id: 'p3', animalId: animalId, animalNombre: 'Lupita',
-          enfermedad: 'Sin enfermedad', confianza: 0.88,
-          fecha: now.subtract(const Duration(days: 12)),
-        ),
-      ];
-    }
-
-    return [
-      PrediccionModel(
-        id: 'p_${animalId}_1', animalId: animalId, animalNombre: '',
-        enfermedad: 'Sin enfermedad', confianza: 0.92,
-        fecha: now.subtract(const Duration(hours: 6)),
-      ),
-    ];
-  }
-
-  @override
-  Future<AnimalModel> actualizarAnimal(Animal animal) async {
-    await Future.delayed(const Duration(seconds: 1));
-    // Cuando tengas API: PUT /animales/:id
-    return AnimalModel(
-      id: animal.id,
-      ranchoId: animal.ranchoId,
-      ganaderoId: animal.ganaderoId,
-      nombre: animal.nombre,
-      raza: animal.raza,
-      sexo: animal.sexo,
-      fechaNacimiento: animal.fechaNacimiento,
-      pesoKg: animal.pesoKg,
-      idExterno: animal.idExterno,
-      creadoEn: animal.creadoEn,
-    );
-  }
-
-  @override
-  Future<void> eliminarAnimal(String animalId) async {
-    // Cuando tengas API: DELETE /animales/:id
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  @override
-  Future<PrediccionModel> registrarSintomas(RegistroSintomas registro) async {
-    // Cuando tengas API: POST /sintomas con NLP + Isolation Forest
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Mock: derivar diagnóstico a partir de severidad calculada localmente
-    final sinCount = registro.sintomas.length;
-    final temp = registro.temperatura;
-    final leche = registro.litrosLeche;
-    final textoLen = registro.descripcion.length;
-
-    int score = 0;
-    score += sinCount >= 4 ? 3 : sinCount >= 2 ? 2 : sinCount >= 1 ? 1 : 0;
-    score += temp > 40 ? 3 : temp > 39 ? 1 : 0;
-    score += leche <= 5 ? 2 : leche <= 10 ? 1 : 0;
-    score += textoLen > 20 ? 1 : 0;
-
-    final String enfermedad;
-    final double confianza;
-
-    if (score >= 6) {
-      enfermedad = 'Mastitis';
-      confianza = 0.87;
-    } else if (score >= 3) {
-      enfermedad = 'Laminitis leve';
-      confianza = 0.72;
-    } else {
-      enfermedad = 'Sin enfermedad detectada';
-      confianza = 0.91;
-    }
-
-    return PrediccionModel(
-      id: 'pred_${DateTime.now().millisecondsSinceEpoch}',
-      animalId: registro.animalId,
-      animalNombre: '',
-      enfermedad: enfermedad,
-      confianza: confianza,
-      fecha: DateTime.now(),
-    );
-  }
+  static String _fmtDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
 }

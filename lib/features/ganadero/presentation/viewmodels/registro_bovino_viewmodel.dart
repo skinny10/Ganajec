@@ -30,11 +30,13 @@ class RegistroBovinoViewModel extends ChangeNotifier {
     try {
       final animal = Animal(
         id: '',
-        ranchoId: 'r1',
-        ganaderoId: 'g1',
+        ranchoId: '',  // se resuelve en el datasource desde TokenStorage
+        ganaderoId: '',
         nombre: nombre,
         raza: raza,
         sexo: _sexoPorCategoria(categoria),
+        categoria: categoria,
+        proposito: proposito,
         fechaNacimiento: DateTime(DateTime.now().year - edad),
         pesoKg: pesoKg,
         idExterno: idExterno,

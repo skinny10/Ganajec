@@ -28,7 +28,5 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() async {
-    // cuando tengas API: limpiar token de SharedPreferences
-  }
+  Future<void> logout() => remoteDataSource.logout();
 }

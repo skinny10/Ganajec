@@ -18,6 +18,9 @@ import 'package:ganajec/features/ganadero/presentation/viewmodels/alertas_viewmo
 import 'package:ganajec/features/ganadero/domain/usecase/get_alertas_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/marcar_alerta_leida_usecase.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/marcar_todas_alertas_leidas_usecase.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/historial/historial_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/historial_viewmodel.dart';
+import 'package:ganajec/features/ganadero/domain/usecase/get_historial_ganadero_usecase.dart';
 import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/mi_plan_screen.dart';
 import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/elegir_plan_screen.dart';
 import 'package:ganajec/features/suscripcion/presentation/viewmodels/mi_plan_viewmodel.dart';
@@ -39,6 +42,7 @@ import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dar
 import 'package:ganajec/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
 import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
+import 'package:ganajec/share/domain/entities/plan.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -53,6 +57,7 @@ class AppRoutes {
   static const String registrarSintomas = '/registrar-sintomas';
   static const String resultadoPrediccion = '/resultado-prediccion';
   static const String alertas = '/alertas';
+  static const String historial = '/historial';
   static const String miPlan = '/mi-plan';
   static const String elegirPlan = '/elegir-plan';
 }
@@ -156,6 +161,19 @@ class AppRouter {
               marcarTodas: MarcarTodasAlertasLeidasUseCase(repo),
             ),
             child: const AlertasScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.historial,
+        builder: (context, state) {
+          final ds = GanaderoRemoteDataSourceImpl();
+          final repo = GanaderoRepositoryImpl(ds);
+          return ChangeNotifierProvider(
+            create: (_) => HistorialViewModel(
+              getHistorial: GetHistorialGanaderoUseCase(repo),
+            ),
+            child: const HistorialScreen(),
           );
         },
       ),

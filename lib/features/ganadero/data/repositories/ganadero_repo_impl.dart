@@ -1,5 +1,6 @@
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/share/domain/entities/historial_item.dart';
 import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
@@ -56,4 +57,8 @@ class GanaderoRepositoryImpl implements GanaderoRepository {
   @override
   Future<void> marcarTodasAlertasLeidas() =>
       remoteDataSource.marcarTodasAlertasLeidas();
+
+  @override
+  Future<List<HistorialItem>> getHistorialGanadero() =>
+      remoteDataSource.getHistorialGanadero();
 }
