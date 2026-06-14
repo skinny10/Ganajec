@@ -9,6 +9,20 @@ class DuenoRemoteDataSource {
     final usuarioRes = await dio.get('/dueno/$duenoId');
     final nombreDueno = usuarioRes.data['nombre'] as String;
     final ranchos = usuarioRes.data['ranchos'] as List;
+    if (ranchos.isEmpty) {
+      return DuenoDashboardModel(
+        totalAnimales: 0,
+        animalesConAlerta: 0,
+        animalesSanos: 0,
+        ganadoresEnCampo: 0,
+        produccionLecheHoy: 0,
+        produccionLecheAyer: 0,
+        casosCriticos: [],
+        ganaderos: [],
+        nombreDueno: usuarioRes.data['nombre'] ?? '',
+        nombreRancho: 'Sin rancho asignado',
+      );
+    }
     final ranchoId = ranchos[0]['id'] as String;
     final nombreRancho = ranchos[0]['nombre'] as String;
     await TokenStorage.saveRanchoId(ranchoId);

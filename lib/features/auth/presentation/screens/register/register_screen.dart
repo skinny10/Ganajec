@@ -43,7 +43,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       role: _selectedRole,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go(AppRoutes.home);
+      final role = vm.user?.role ?? "";
+      if (role == "dueno") {
+        context.go(AppRoutes.dashboardDueno);
+      } else if (role == "admin") {
+        context.go(AppRoutes.panelUsuarios);
+      } else {
+        context.go(AppRoutes.home);
+      }
     }
   }
 

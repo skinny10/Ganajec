@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ganajec/core/network/api_client.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/usecases/get_usuarios_usecase.dart';
 
@@ -39,18 +40,35 @@ class PanelUsuariosViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _usuarios = [
-        const Usuario(id: '1', nombre: 'Juan Perez', email: 'juanperez@gmail.com', rol: RolUsuario.ganadero, estado: EstadoUsuario.activo),
-        const Usuario(id: '2', nombre: 'Maria Lopez', email: 'Mariaperez@gmail.com', rol: RolUsuario.ganadero, estado: EstadoUsuario.activo),
-        const Usuario(id: '3', nombre: 'Samuel', email: 'Samuelperez@gmail.com', rol: RolUsuario.ganadero, estado: EstadoUsuario.inactivo),
-        const Usuario(id: '4', nombre: 'Carlos Mendoza', email: 'carlos@gmail.com', rol: RolUsuario.dueno, estado: EstadoUsuario.activo),
-        const Usuario(id: '5', nombre: 'Ana Martinez', email: 'ana@gmail.com', rol: RolUsuario.veterinario, estado: EstadoUsuario.activo),
-      ];
-      _stats = const UsuarioStats(
-        totalUsuarios: 25,
-        totalGanaderos: 14,
-        totalDuenos: 14,
-        totalVeterinarios: 14,
+      final dio = ApiClient.instance;
+      final res = await dio.get('/admin/usuarios');
+      final lista = res.data['usuarios'] as List;
+
+      _usuarios = lista.map((json) {
+        final rolStr = json['rol'] as String? ?? '';
+        final rol = RolUsuario.values.firstWhere(
+          (r) => r.name == rolStr,
+          orElse: () => RolUsuario.ganadero,
+        );
+        final activo = json['activo'] as bool? ?? false;
+        final estado = activo ? EstadoUsuario.activo : EstadoUsuario.inactivo;
+
+        return Usuario(
+          id: json['id'] as String,
+          nombre: json['nombre'] as String,
+          email: json['email'] as String? ?? '',
+          rol: rol,
+          estado: estado,
+        );
+      }).toList();
+
+      _stats = UsuarioStats(
+        totalUsuarios: _usuarios.length,
+        totalGanaderos:
+            _usuarios.where((u) => u.rol == RolUsuario.ganadero).length,
+        totalDuenos: _usuarios.where((u) => u.rol == RolUsuario.dueno).length,
+        totalVeterinarios:
+            _usuarios.where((u) => u.rol == RolUsuario.veterinario).length,
       );
       _state = PanelUsuariosState.loaded;
     } catch (e) {
