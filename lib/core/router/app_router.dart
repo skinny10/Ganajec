@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
+import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
+import 'package:ganajec/features/auth/data/repositories/auth_repo_impl.dart';
+import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_screen.dart';
@@ -21,15 +24,6 @@ import 'package:ganajec/features/ganadero/domain/usecase/marcar_todas_alertas_le
 import 'package:ganajec/features/ganadero/presentation/screens/historial/historial_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/historial_viewmodel.dart';
 import 'package:ganajec/features/ganadero/domain/usecase/get_historial_ganadero_usecase.dart';
-import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/mi_plan_screen.dart';
-import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/elegir_plan_screen.dart';
-import 'package:ganajec/features/suscripcion/presentation/viewmodels/mi_plan_viewmodel.dart';
-import 'package:ganajec/features/suscripcion/presentation/viewmodels/elegir_plan_viewmodel.dart';
-import 'package:ganajec/features/suscripcion/domain/usecase/get_suscripcion_usecase.dart';
-import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.dart';
-import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
-import 'package:ganajec/features/suscripcion/data/repositories/suscripcion_repo_impl.dart';
-import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -39,14 +33,23 @@ import 'package:ganajec/features/ganadero/domain/usecase/actualizar_animal_useca
 import 'package:ganajec/features/ganadero/domain/usecase/eliminar_animal_usecase.dart';
 import 'package:ganajec/features/ganadero/data/repositories/ganadero_repo_impl.dart';
 import 'package:ganajec/features/ganadero/data/datasource/ganadero_remote_ds.dart';
-import 'package:ganajec/features/auth/data/repositories/auth_repo_impl.dart';
-import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
-import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/mi_plan_screen.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/elegir_plan_screen.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/mi_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/elegir_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/get_suscripcion_usecase.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.dart';
+import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
+import 'package:ganajec/features/suscripcion/data/repositories/suscripcion_repo_impl.dart';
+import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
 import 'package:ganajec/share/domain/entities/plan.dart';
+import 'package:ganajec/features/dueno/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:ganajec/features/dueno/presentation/screens/mis_ganaderos/mis_ganaderos_screen.dart';
+import 'package:ganajec/features/admin/presentation/screens/panel_usuarios/panel_usuarios_screen.dart';
+import 'package:ganajec/features/admin/presentation/screens/auditoria/auditoria_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
-
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -60,11 +63,14 @@ class AppRoutes {
   static const String historial = '/historial';
   static const String miPlan = '/mi-plan';
   static const String elegirPlan = '/elegir-plan';
+  static const String dashboardDueno = '/dashboard-dueno';
+  static const String misGanaderos = '/mis-ganaderos';
+  static const String panelUsuarios = '/panel-usuarios';
+  static const String auditoria = '/auditoria';
 }
 
 class AppRouter {
   AppRouter._();
-
   static final router = GoRouter(
     initialLocation: AppRoutes.login,
     routes: [
@@ -213,6 +219,22 @@ class AppRouter {
             child: const ElegirPlanScreen(),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.dashboardDueno,
+        builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.misGanaderos,
+        builder: (context, state) => const MisGanaderosScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.panelUsuarios,
+        builder: (context, state) => const PanelUsuariosScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.auditoria,
+        builder: (context, state) => const AuditoriaScreen(),
       ),
     ],
   );
