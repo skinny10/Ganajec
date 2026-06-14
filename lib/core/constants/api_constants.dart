@@ -1,9 +1,9 @@
 /// Centraliza la URL base y todos los paths de la API GANAJEC AI.
-/// Base URL: http://44.193.46.236:8000/api
+/// Base URL: http://localhost:8000/api
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://44.193.46.236:8000/api';
+  static const String baseUrl = 'http://localhost:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';

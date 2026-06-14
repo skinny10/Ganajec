@@ -34,7 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go(AppRoutes.home);
+      final role = vm.user?.role ?? '';
+      if (role == 'dueno') {
+        context.go(AppRoutes.dashboardDueno);
+      } else if (role == 'admin') {
+        context.go(AppRoutes.panelUsuarios);
+      } else {
+        context.go(AppRoutes.home);
+      }
     }
   }
 

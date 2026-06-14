@@ -7,6 +7,8 @@ class DuenoDashboard {
   final double produccionLecheAyer;
   final List<CasoCritico> casosCriticos;
   final List<GanaderoResumen> ganaderos;
+  final String nombreDueno;
+  final String nombreRancho;
 
   const DuenoDashboard({
     required this.totalAnimales,
@@ -17,6 +19,8 @@ class DuenoDashboard {
     required this.produccionLecheAyer,
     required this.casosCriticos,
     required this.ganaderos,
+    this.nombreDueno = '',
+    this.nombreRancho = '',
   });
 
   double get porcentajeCambioLeche {

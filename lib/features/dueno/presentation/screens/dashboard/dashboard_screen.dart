@@ -19,7 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DashboardViewModel>().cargarDashboard('dueno-001');
+      context.read<DashboardViewModel>().cargarDashboard();
     });
   }
 
@@ -54,10 +54,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DashboardHeader(
-            nombreDueno: 'Carlos Mendoza',
-            nombreRancho: 'Rancho La Esmeralda',
-            iniciales: 'CM',
+          DashboardHeader(
+            nombreDueno: dashboard.nombreDueno,
+            nombreRancho: dashboard.nombreRancho,
+            iniciales: dashboard.nombreDueno.isNotEmpty
+                ? dashboard.nombreDueno.split(' ').map((w) => w[0]).take(2).join().toUpperCase()
+                : '??',
           ),
           const SizedBox(height: 16),
           if (criticos.isNotEmpty)

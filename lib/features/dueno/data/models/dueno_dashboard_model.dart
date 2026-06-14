@@ -39,17 +39,19 @@ class GanaderoResumenModel extends GanaderoResumen {
   });
 
   factory GanaderoResumenModel.fromJson(Map<String, dynamic> json) {
+    final nombre = json['nombre'] as String;
+    final partes = nombre.split(' ');
+    final iniciales = partes.length >= 2
+        ? '${partes[0][0]}${partes[1][0]}'.toUpperCase()
+        : nombre.substring(0, 2).toUpperCase();
     return GanaderoResumenModel(
       id: json['id'],
-      nombre: json['nombre'],
-      iniciales: json['iniciales'],
-      totalBovinos: json['total_bovinos'],
-      alertasAltas: json['alertas_altas'],
-      animalesSanos: json['animales_sanos'],
-      activoHoy: json['activo_hoy'],
-      ultimaActividad: json['ultima_actividad'] != null
-          ? DateTime.parse(json['ultima_actividad'])
-          : null,
+      nombre: nombre,
+      iniciales: iniciales,
+      totalBovinos: json['total_bovinos'] ?? 0,
+      alertasAltas: 0,
+      animalesSanos: 0,
+      activoHoy: true,
     );
   }
 }
@@ -64,6 +66,8 @@ class DuenoDashboardModel extends DuenoDashboard {
     required super.produccionLecheAyer,
     required super.casosCriticos,
     required super.ganaderos,
+    super.nombreDueno,
+    super.nombreRancho,
   });
 
   factory DuenoDashboardModel.fromJson(Map<String, dynamic> json) {
@@ -80,6 +84,8 @@ class DuenoDashboardModel extends DuenoDashboard {
       ganaderos: (json['ganaderos'] as List)
           .map((e) => GanaderoResumenModel.fromJson(e))
           .toList(),
+      nombreDueno: json['nombre_dueno'] ?? '',
+      nombreRancho: json['nombre_rancho'] ?? '',
     );
   }
 }
