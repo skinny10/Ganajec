@@ -1,4 +1,5 @@
 import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import '../models/dueno_dashboard_model.dart';
 
 class DuenoRemoteDataSource {
@@ -10,6 +11,7 @@ class DuenoRemoteDataSource {
     final ranchos = usuarioRes.data['ranchos'] as List;
     final ranchoId = ranchos[0]['id'] as String;
     final nombreRancho = ranchos[0]['nombre'] as String;
+    await TokenStorage.saveRanchoId(ranchoId);
 
     final ranchoRes = await dio.get('/dueno/ranchos/$ranchoId');
     final resumen = ranchoRes.data['resumen'] as Map;

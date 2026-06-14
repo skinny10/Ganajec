@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/dueno/domain/entities/dueno_dashboard.dart';
 import '../../widgets/ganadero_list_tile.dart';
 import 'mis_ganaderos_components.dart';
@@ -13,6 +15,15 @@ class MisGanaderosScreen extends StatefulWidget {
 class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
+  List<_GanaderoItem> _ganaderos = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarGanaderos();
+  }
 
   @override
   void dispose() {
@@ -20,59 +31,64 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
     super.dispose();
   }
 
-  List<_GanaderoMock> _ganaderos = [
-    _GanaderoMock(
-      resumen: GanaderoResumen(
-        id: '1',
-        nombre: 'Juan Perez',
-        iniciales: 'JP',
-        totalBovinos: 8,
-        alertasAltas: 1,
-        animalesSanos: 7,
-        activoHoy: true,
-        ultimaActividad: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      email: 'juanperez@rancho.com',
-      moderadas: 0,
-    ),
-    _GanaderoMock(
-      resumen: GanaderoResumen(
-        id: '2',
-        nombre: 'Maria Lopez',
-        iniciales: 'ML',
-        totalBovinos: 7,
-        alertasAltas: 1,
-        animalesSanos: 6,
-        activoHoy: true,
-        ultimaActividad: DateTime.now().subtract(const Duration(hours: 3)),
-      ),
-      email: 'marialopez@rancho.com',
-      moderadas: 0,
-    ),
-    _GanaderoMock(
-      resumen: GanaderoResumen(
-        id: '3',
-        nombre: 'Pedro Ruiz',
-        iniciales: 'PR',
-        totalBovinos: 9,
-        alertasAltas: 0,
-        animalesSanos: 8,
-        activoHoy: true,
-        ultimaActividad: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      email: 'pedroruiz@rancho.com',
-      moderadas: 1,
-    ),
-  ];
+  Future<void> _cargarGanaderos() async {
+    final ranchoId = TokenStorage.ranchoId;
+    if (ranchoId == null || ranchoId.isEmpty) {
+      setState(() {
+        _error = 'Rancho no identificado. Inicia sesi\u00f3n nuevamente.';
+        _isLoading = false;
+      });
+      return;
+    }
 
-  List<_GanaderoMock> get _filtrados => _ganaderos
+    setState(() => _isLoading = true);
+
+    try {
+      final dio = ApiClient.instance;
+      final res = await dio.get('/dueno/ranchos/$ranchoId/ganaderos');
+      final ganaderosList = res.data['ganaderos'] as List;
+
+      setState(() {
+        _ganaderos = ganaderosList.map((g) {
+          final nombre = g['nombre'] as String;
+          final partes = nombre.split(' ');
+          final iniciales = partes.length >= 2
+              ? '${partes[0][0]}${partes[1][0]}'.toUpperCase()
+              : nombre.substring(0, 2).toUpperCase();
+
+          return _GanaderoItem(
+            resumen: GanaderoResumen(
+              id: g['id'] as String,
+              nombre: nombre,
+              iniciales: iniciales,
+              totalBovinos: 0,
+              alertasAltas: 0,
+              animalesSanos: 0,
+              activoHoy: true,
+            ),
+            email: g['email'] as String? ?? '',
+            moderadas: 0,
+          );
+        }).toList();
+        _isLoading = false;
+        _error = null;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al cargar ganaderos: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<_GanaderoItem> get _filtrados => _ganaderos
       .where(
           (g) => g.resumen.nombre.toLowerCase().contains(_query.toLowerCase()))
       .toList();
 
   void _showAddGanaderoSheet() {
     final disponibles = [
-      _GanaderoMock(
+      _GanaderoItem(
         resumen: GanaderoResumen(
           id: '4',
           nombre: 'Carlos Hernandez',
@@ -85,7 +101,7 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
         email: 'carloshernandez@rancho.com',
         moderadas: 0,
       ),
-      _GanaderoMock(
+      _GanaderoItem(
         resumen: GanaderoResumen(
           id: '5',
           nombre: 'Ana Martinez',
@@ -98,7 +114,7 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
         email: 'anamartinez@rancho.com',
         moderadas: 0,
       ),
-      _GanaderoMock(
+      _GanaderoItem(
         resumen: GanaderoResumen(
           id: '6',
           nombre: 'Luis Garcia',
@@ -122,9 +138,9 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
       builder: (sheetContext) {
         return _AddGanaderoSheet(
           disponibles: disponibles,
-          onAgregar: (mock) {
+          onAgregar: (item) {
             setState(() {
-              _ganaderos.add(mock);
+              _ganaderos.add(item);
             });
             Navigator.pop(sheetContext);
           },
@@ -166,30 +182,7 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          GanaderoSearchBar(
-            controller: _searchController,
-            onChanged: (v) => setState(() => _query = v),
-          ),
-          Expanded(
-            child: ListView.separated(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _filtrados.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final g = _filtrados[index];
-                return GanaderoListTile(
-                  ganadero: g.resumen,
-                  email: g.email,
-                  moderadas: g.moderadas,
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      body: _buildBody(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 2,
         type: BottomNavigationBarType.fixed,
@@ -211,11 +204,68 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
       ),
     );
   }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _cargarGanaderos,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        GanaderoSearchBar(
+          controller: _searchController,
+          onChanged: (v) => setState(() => _query = v),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: _filtrados.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final g = _filtrados[index];
+              return GanaderoListTile(
+                ganadero: g.resumen,
+                email: g.email,
+                moderadas: g.moderadas,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _AddGanaderoSheet extends StatefulWidget {
-  final List<_GanaderoMock> disponibles;
-  final void Function(_GanaderoMock) onAgregar;
+  final List<_GanaderoItem> disponibles;
+  final void Function(_GanaderoItem) onAgregar;
 
   const _AddGanaderoSheet({
     required this.disponibles,
@@ -357,12 +407,12 @@ class _AddGanaderoSheetState extends State<_AddGanaderoSheet> {
   }
 }
 
-class _GanaderoMock {
+class _GanaderoItem {
   final GanaderoResumen resumen;
   final String email;
   final int moderadas;
 
-  const _GanaderoMock({
+  const _GanaderoItem({
     required this.resumen,
     required this.email,
     required this.moderadas,

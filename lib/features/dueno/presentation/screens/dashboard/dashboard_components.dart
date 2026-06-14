@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/router/app_router.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../widgets/kpi_card.dart';
 import '../../widgets/caso_critico_tile.dart';
@@ -179,7 +181,7 @@ class SeccionGanaderos extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () => context.go(AppRoutes.misGanaderos),
               child: const Text('Ver todos'),
             ),
           ],
