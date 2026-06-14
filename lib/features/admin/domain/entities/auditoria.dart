@@ -5,6 +5,7 @@ class RegistroAuditoria {
   final String hora;
   final String nombreUsuario;
   final String accion;
+  final String? detalle;
   final TipoAcceso tipo;
   final String? avatarUrl;
 
@@ -14,6 +15,7 @@ class RegistroAuditoria {
     required this.nombreUsuario,
     required this.accion,
     required this.tipo,
+    this.detalle,
     this.avatarUrl,
   });
 

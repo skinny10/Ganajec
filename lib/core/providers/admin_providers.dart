@@ -4,6 +4,7 @@ import 'package:ganajec/features/admin/data/datasources/admin_remote_ds.dart';
 import 'package:ganajec/features/admin/data/repositories/admin_repo_impl.dart';
 import 'package:ganajec/features/admin/domain/usecases/get_usuarios_usecase.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/panel_usuarios_viewmodel.dart';
+import 'package:ganajec/features/admin/presentation/viewmodels/auditoria_viewmodel.dart';
 
 List<ChangeNotifierProvider> adminProviders = [
   ChangeNotifierProvider<PanelUsuariosViewModel>(
@@ -19,5 +20,8 @@ List<ChangeNotifierProvider> adminProviders = [
         ),
       ),
     ),
+  ),
+  ChangeNotifierProvider<AuditoriaViewModel>(
+    create: (_) => AuditoriaViewModel(),
   ),
 ];
