@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/plan.dart';
 
 // ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kBg = Color(0xFFFAFAF7);
 const _kSurface = Color(0xFFFFFFFF);
 const _kBorder = Color(0xFFE8E5DC);
 const _kCream = Color(0xFFF5F3EE);
@@ -10,10 +9,7 @@ const _kTextPrimary = Color(0xFF1A1A1A);
 const _kTextSecondary = Color(0xFF888880);
 const _kTextMuted = Color(0xFFAEADA6);
 const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kYellowBorder = Color(0xFFF7DC6F);
 const _kCow = Color(0xFF8B4A2B);
-const _kCowLight = Color(0xFFF5EBE0);
 
 // ─── Promo header ─────────────────────────────────────────────────────────────
 
@@ -41,7 +37,7 @@ class ElegirPlanPromoHeader extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -82,7 +78,7 @@ class ElegirPlanPromoHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -241,7 +237,7 @@ class ElegirPlanCard extends StatelessWidget {
             width: isSelected && !isActual ? 1.5 : 1,
           ),
           boxShadow: isSelected && !isActual
-              ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))]
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))]
               : [],
         ),
         child: Stack(
@@ -465,12 +461,12 @@ class ElegirPlanGPlayInfo extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _kBorder),
       ),
-      child: Row(
+      child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('▶️', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 10),
-          const Expanded(
+          Text('▶️', style: TextStyle(fontSize: 20)),
+          SizedBox(width: 10),
+          Expanded(
             child: Text.rich(
               TextSpan(
                 style: TextStyle(

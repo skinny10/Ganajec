@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../widgets/alerta_critica_banner.dart';
 import '../../widgets/produccion_leche_card.dart';
@@ -14,6 +16,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  bool _hasShownCreateDialog = false;
 
   @override
   void initState() {
@@ -46,6 +49,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final dashboard = vm.dashboard!;
+
+    if (dashboard.nombreRancho == 'Sin rancho asignado' && !_hasShownCreateDialog) {
+      _hasShownCreateDialog = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _mostrarDialogoCrearRancho());
+    }
+
     final criticos =
         dashboard.casosCriticos.where((c) => c.severidad == 'alta').toList();
 
@@ -83,6 +92,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 20),
           const SeccionGanaderos(),
           const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _mostrarDialogoCrearRancho() {
+    final nombreCtrl = TextEditingController();
+    final municipioCtrl = TextEditingController();
+    final estadoCtrl = TextEditingController();
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Crea tu rancho'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Para comenzar, ingresa los datos de tu rancho'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: nombreCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Nombre del rancho',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: municipioCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Municipio',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: estadoCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Estado',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final nombre = nombreCtrl.text.trim();
+              final municipio = municipioCtrl.text.trim();
+              final estado = estadoCtrl.text.trim();
+              if (nombre.isEmpty || municipio.isEmpty || estado.isEmpty) return;
+
+              try {
+                final dio = ApiClient.instance;
+                final res = await dio.post('/dueno/ranchos', data: {
+                  'nombre': nombre,
+                  'municipio': municipio,
+                  'estado': estado,
+                });
+                final ranchoId = res.data['id'] as String;
+                await TokenStorage.saveRanchoId(ranchoId);
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                context.read<DashboardViewModel>().cargarDashboard();
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text('Error al crear rancho: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Crear'),
+          ),
         ],
       ),
     );

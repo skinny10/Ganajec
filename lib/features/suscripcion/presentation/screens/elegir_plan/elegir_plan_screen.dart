@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
-import 'package:ganajec/share/domain/entities/plan.dart';
 import '../../viewmodels/elegir_plan_viewmodel.dart';
 import 'elegir_plan_components.dart';
 
@@ -22,7 +21,8 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ElegirPlanViewModel>().cargar());
+    final vm = context.read<ElegirPlanViewModel>();
+    Future.microtask(() => vm.cargar());
   }
 
   Future<void> _abrirGPlaySheet() async {
@@ -43,8 +43,9 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
             isLoading: vm.isSubscribing,
             onConfirm: () async {
               final ok = await vm.confirmarSuscripcion();
-              if (!context.mounted) return;
-              Navigator.of(ctx).pop(); // cierra sheet
+              if (!ctx.mounted) return;
+              Navigator.of(ctx).pop();
+              if (!mounted) return;
               if (ok) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -54,7 +55,8 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                   ),
                 );
                 await Future.delayed(const Duration(milliseconds: 800));
-                if (context.mounted) context.go(AppRoutes.perfil);
+                if (!mounted) return;
+                context.go(AppRoutes.perfil);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -182,12 +184,12 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kTextPrimary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: _kTextPrimary.withOpacity(0.4),
+                  disabledBackgroundColor: _kTextPrimary.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
                   elevation: 4,
-                  shadowColor: Colors.black.withOpacity(0.18),
+                  shadowColor: Colors.black.withValues(alpha: 0.18),
                 ),
                 onPressed: disabled ? null : _abrirGPlaySheet,
                 child: vm.isSubscribing
@@ -215,8 +217,8 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            Text.rich(
-              const TextSpan(
+            const Text.rich(
+              TextSpan(
                 style: TextStyle(
                   fontSize: 10.5,
                   color: _kTextMuted,

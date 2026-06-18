@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
-import 'package:ganajec/share/domain/entities/plan.dart';
 import '../../viewmodels/mi_plan_viewmodel.dart';
 import 'mi_plan_components.dart';
 
@@ -21,7 +20,8 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<MiPlanViewModel>().cargar());
+    final vm = context.read<MiPlanViewModel>();
+    Future.microtask(() => vm.cargar());
   }
 
   @override

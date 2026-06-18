@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/core/network/token_storage.dart';
+import 'package:ganajec/core/router/app_router.dart';
 import 'package:ganajec/features/dueno/domain/entities/dueno_dashboard.dart';
 import '../../widgets/ganadero_list_tile.dart';
 import 'mis_ganaderos_components.dart';
@@ -18,17 +21,36 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
   List<_GanaderoItem> _ganaderos = [];
   bool _isLoading = true;
   String? _error;
+  String _codigoInvitacion = '';
 
   @override
   void initState() {
     super.initState();
     _cargarGanaderos();
+    _cargarCodigoInvitacion();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cargarCodigoInvitacion() async {
+    final duenoId = TokenStorage.userId;
+    if (duenoId == null || duenoId.isEmpty) return;
+
+    try {
+      final dio = ApiClient.instance;
+      final res = await dio.get('/dueno/$duenoId');
+      final ranchos = res.data['ranchos'] as List?;
+      if (ranchos != null && ranchos.isNotEmpty) {
+        final codigo = ranchos[0]['codigo_invitacion'] as String?;
+        if (codigo != null && codigo.isNotEmpty) {
+          setState(() => _codigoInvitacion = codigo);
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> _cargarGanaderos() async {
@@ -158,28 +180,63 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAFAF7),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, size: 18),
-          onPressed: () => Navigator.pop(context),
-        ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 18),
+            onPressed: () => context.go(AppRoutes.dashboardDueno),
+          ),
         title: const Text(
           'Mis ganaderos',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
         ),
         centerTitle: true,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.black,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add, color: Colors.white, size: 18),
-                onPressed: _showAddGanaderoSheet,
+          if (_codigoInvitacion.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                    Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6B4423),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _codigoInvitacion,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: _codigoInvitacion));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Código copiado'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: const Icon(
+                            Icons.copy_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
         ],
       ),
       body: _buildBody(),
