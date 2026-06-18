@@ -31,7 +31,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final user = UserModel.fromJson(
       response.data['usuario'] as Map<String, dynamic>,
     );
-    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
+    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role, nombre: user.name);
     return user;
   }
 
@@ -55,7 +55,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final user = UserModel.fromJson(
       response.data['usuario'] as Map<String, dynamic>,
     );
-    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
+    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role, nombre: user.name);
     return user;
   }
 

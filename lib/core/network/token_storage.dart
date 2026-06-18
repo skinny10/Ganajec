@@ -9,6 +9,7 @@ class TokenStorage {
 
   static const _kToken = 'access_token';
   static const _kUserId = 'user_id';
+  static const _kNombre = 'user_nombre';
   static const _kRanchoId = 'rancho_id';
   static const _kRole = 'user_role';
 
@@ -20,6 +21,7 @@ class TokenStorage {
   // ── Getters ───────────────────────────────────────────────────────────────────
   static String? get token => _prefs?.getString(_kToken);
   static String? get userId => _prefs?.getString(_kUserId);
+  static String? get nombre => _prefs?.getString(_kNombre);
   static String? get ranchoId => _prefs?.getString(_kRanchoId);
   static String? get role => _prefs?.getString(_kRole);
 
@@ -33,11 +35,13 @@ class TokenStorage {
     required String token,
     required String userId,
     required String role,
+    String? nombre,
   }) async {
     await Future.wait([
       _prefs!.setString(_kToken, token),
       _prefs!.setString(_kUserId, userId),
       _prefs!.setString(_kRole, role),
+      if (nombre != null) _prefs!.setString(_kNombre, nombre),
     ]);
   }
 
@@ -50,6 +54,7 @@ class TokenStorage {
     await Future.wait([
       _prefs!.remove(_kToken),
       _prefs!.remove(_kUserId),
+      _prefs!.remove(_kNombre),
       _prefs!.remove(_kRanchoId),
       _prefs!.remove(_kRole),
     ]);
