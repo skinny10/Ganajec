@@ -47,11 +47,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _verificarUnirseRancho() {
-    final ranchoId = TokenStorage.ranchoId;
-    if ((ranchoId != null && ranchoId.isNotEmpty) || _hasShownUnirseDialog) return;
-
+  Future<void> _verificarUnirseRancho() async {
+    if (_hasShownUnirseDialog) return;
     _hasShownUnirseDialog = true;
+
+    try {
+      final userId = TokenStorage.userId;
+      if (userId == null || userId.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _mostrarDialogoUnirse());
+        return;
+      }
+      final dio = ApiClient.instance;
+      final res = await dio.get('/ganadero/$userId');
+      final ranchoId = res.data['rancho_id'] as String?;
+      if (ranchoId != null && ranchoId.isNotEmpty) {
+        await TokenStorage.saveRanchoId(ranchoId);
+        return;
+      }
+    } catch (_) {}
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _mostrarDialogoUnirse());
   }
 
