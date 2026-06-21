@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/constants/app_strings.dart';
+import 'package:ganajec/core/router/app_router.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/registro_bovino_viewmodel.dart';
 import 'registro_bovino_components.dart';
 
@@ -45,13 +46,22 @@ class _RegistroBovinoScreenState extends State<RegistroBovinoScreen> {
       nombre: _nombreController.text.trim(),
       idExterno: _idAreteController.text.trim(),
       categoria: _categoriaSelected!,
-      proposito: _propositosSelected.join(','),
+      // La API acepta un solo valor enum: leche|carne|doble|cria
+      proposito: _propositosSelected.isNotEmpty
+          ? _propositosSelected.first
+          : 'leche',
       raza: _razaSelected ?? '',
       edad: int.tryParse(_edadController.text) ?? 0,
       pesoKg: double.tryParse(_pesoController.text) ?? 0,
     );
     if (mounted && vm.status == RegistroStatus.success) {
-      context.pop();
+      final nuevo = vm.createdAnimal;
+      if (nuevo != null) {
+        // Reemplaza la pantalla de registro con el detalle del nuevo bovino
+        context.pushReplacement(AppRoutes.detalleBovino, extra: nuevo);
+      } else {
+        context.pop();
+      }
     }
   }
 

@@ -31,7 +31,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final user = UserModel.fromJson(
       response.data['usuario'] as Map<String, dynamic>,
     );
-    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
+    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role, name: user.name, email: user.email);
     return user;
   }
 
@@ -42,7 +42,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String role,
   }) async {
-    final response = await _dio.post(
+    // v2: POST /register ya no devuelve access_token, solo { message, usuario }
+    await _dio.post(
       ApiConstants.register,
       data: {
         'nombre': name,
@@ -51,12 +52,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'rol': role,
       },
     );
-    final token = response.data['access_token'] as String;
-    final user = UserModel.fromJson(
-      response.data['usuario'] as Map<String, dynamic>,
-    );
-    await TokenStorage.saveSession(token: token, userId: user.id, role: user.role);
-    return user;
+    // Obtenemos el token haciendo login inmediatamente después
+    return login(email: email, password: password);
   }
 
   @override

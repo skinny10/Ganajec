@@ -11,6 +11,8 @@ class TokenStorage {
   static const _kUserId = 'user_id';
   static const _kRanchoId = 'rancho_id';
   static const _kRole = 'user_role';
+  static const _kName = 'user_name';
+  static const _kEmail = 'user_email';
 
   // ── Inicialización ────────────────────────────────────────────────────────────
   static Future<void> init() async {
@@ -22,6 +24,8 @@ class TokenStorage {
   static String? get userId => _prefs?.getString(_kUserId);
   static String? get ranchoId => _prefs?.getString(_kRanchoId);
   static String? get role => _prefs?.getString(_kRole);
+  static String? get userName => _prefs?.getString(_kName);
+  static String? get email => _prefs?.getString(_kEmail);
 
   static bool get isLoggedIn {
     final t = token;
@@ -33,11 +37,15 @@ class TokenStorage {
     required String token,
     required String userId,
     required String role,
+    String? name,
+    String? email,
   }) async {
     await Future.wait([
       _prefs!.setString(_kToken, token),
       _prefs!.setString(_kUserId, userId),
       _prefs!.setString(_kRole, role),
+      if (name != null) _prefs!.setString(_kName, name),
+      if (email != null) _prefs!.setString(_kEmail, email),
     ]);
   }
 
@@ -52,6 +60,8 @@ class TokenStorage {
       _prefs!.remove(_kUserId),
       _prefs!.remove(_kRanchoId),
       _prefs!.remove(_kRole),
+      _prefs!.remove(_kName),
+      _prefs!.remove(_kEmail),
     ]);
   }
 }

@@ -23,6 +23,10 @@ class AlertaBanner extends StatelessWidget {
         return 'NLP · Síntoma nuevo';
       case AlertaTipo.sistema:
         return 'Sistema';
+      case AlertaTipo.clinica:
+        return alerta.severidad == AlertaSeveridad.alta
+            ? 'Clínica · Severidad alta'
+            : 'Alerta clínica';
     }
   }
 

@@ -89,6 +89,29 @@ _TipoConfig _configFor(AlertaTipo tipo, AlertaSeveridad sev) {
         emoji: '⚙️',
         etiqueta: 'Sistema · Actualización',
       );
+    case AlertaTipo.clinica:
+      if (sev == AlertaSeveridad.alta) {
+        return const _TipoConfig(
+          iconBg: _kRedLight,
+          labelColor: _kRed,
+          emoji: '🩺',
+          etiqueta: 'Clínica · Severidad alta',
+        );
+      }
+      if (sev == AlertaSeveridad.moderada) {
+        return const _TipoConfig(
+          iconBg: _kYellowLight,
+          labelColor: _kYellow,
+          emoji: '🩺',
+          etiqueta: 'Clínica · Severidad moderada',
+        );
+      }
+      return const _TipoConfig(
+        iconBg: _kGreenLight,
+        labelColor: _kGreen,
+        emoji: '🩺',
+        etiqueta: 'Clínica · Sin anomalía',
+      );
   }
 }
 

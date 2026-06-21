@@ -26,10 +26,14 @@ class AnimalModel extends Animal {
       sexo: json['sexo'] as String? ?? '',
       categoria: json['categoria'] as String? ?? '',
       proposito: json['proposito'] as String? ?? '',
-      fechaNacimiento: DateTime.parse(json['fecha_nacimiento'] as String),
-      pesoKg: (json['peso_kg'] as num).toDouble(),
+      fechaNacimiento: json['fecha_nacimiento'] != null
+          ? DateTime.parse(json['fecha_nacimiento'] as String)
+          : DateTime(2020),
+      pesoKg: (json['peso_kg'] as num? ?? 0).toDouble(),
       idExterno: json['id_externo'] as String? ?? '',
-      creadoEn: DateTime.parse(json['creado_en'] as String),
+      creadoEn: json['creado_en'] != null
+          ? DateTime.parse(json['creado_en'] as String)
+          : DateTime.now(),
     );
   }
 

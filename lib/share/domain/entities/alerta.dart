@@ -1,4 +1,4 @@
-enum AlertaTipo { prediccion, isolationForest, nlp, sistema }
+enum AlertaTipo { prediccion, isolationForest, nlp, sistema, clinica }
 
 enum AlertaSeveridad { alta, moderada, leve, ninguna }
 

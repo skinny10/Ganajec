@@ -12,10 +12,12 @@ class RegistroBovinoViewModel extends ChangeNotifier {
 
   RegistroStatus _status = RegistroStatus.idle;
   String? _errorMessage;
+  Animal? _createdAnimal;
 
   RegistroStatus get status => _status;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _status == RegistroStatus.loading;
+  Animal? get createdAnimal => _createdAnimal;
 
   Future<void> registrar({
     required String nombre,
@@ -42,10 +44,12 @@ class RegistroBovinoViewModel extends ChangeNotifier {
         idExterno: idExterno,
         creadoEn: DateTime.now(),
       );
-      await _crearAnimal(animal);
+      _createdAnimal = await _crearAnimal(animal);
       _setStatus(RegistroStatus.success);
     } catch (e) {
-      _errorMessage = e.toString();
+      // Mostrar solo el mensaje, no el stack trace completo
+      final raw = e.toString();
+      _errorMessage = raw.startsWith('Exception: ') ? raw.substring(11) : raw;
       _setStatus(RegistroStatus.error);
     }
   }
@@ -63,6 +67,7 @@ class RegistroBovinoViewModel extends ChangeNotifier {
 
   void resetStatus() {
     _errorMessage = null;
+    _createdAnimal = null;
     _setStatus(RegistroStatus.idle);
   }
 

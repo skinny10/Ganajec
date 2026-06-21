@@ -30,6 +30,18 @@ import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.d
 import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
 import 'package:ganajec/features/suscripcion/data/repositories/suscripcion_repo_impl.dart';
 import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/editar_perfil/editar_perfil_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_perfil_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/mis_ganaderos/mis_ganaderos_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/mis_ganaderos_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/rancho_dashboard/rancho_dashboard_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/rancho_dashboard_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/editar_rancho/editar_rancho_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_rancho_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/registrar_ganadero/registrar_ganadero_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/registrar_ganadero_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/cambiar_contrasena/cambiar_contrasena_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/cambiar_contrasena_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -60,6 +72,12 @@ class AppRoutes {
   static const String historial = '/historial';
   static const String miPlan = '/mi-plan';
   static const String elegirPlan = '/elegir-plan';
+  static const String editarPerfil = '/editar-perfil';
+  static const String misGanaderos = '/mis-ganaderos';
+  static const String ranchoDashboard = '/rancho-dashboard';
+  static const String editarRancho = '/editar-rancho';
+  static const String registrarGanadero = '/registrar-ganadero';
+  static const String cambiarContrasena = '/cambiar-contrasena';
 }
 
 class AppRouter {
@@ -190,6 +208,56 @@ class AppRouter {
             child: const MiPlanScreen(),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.editarPerfil,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => EditarPerfilViewModel(),
+          child: const EditarPerfilScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.misGanaderos,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => MisGanaderosViewModel(),
+          child: const MisGanaderosScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.ranchoDashboard,
+        builder: (context, state) {
+          final ranchoId = state.extra as String;
+          return ChangeNotifierProvider(
+            create: (_) =>
+                RanchoDashboardViewModel(ranchoId: ranchoId),
+            child: const RanchoDashboardScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.editarRancho,
+        builder: (context, state) {
+          final rancho = state.extra as RanchoInfo;
+          return ChangeNotifierProvider(
+            create: (_) =>
+                EditarRanchoViewModel(ranchoActual: rancho),
+            child: const EditarRanchoScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.registrarGanadero,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => RegistrarGanaderoViewModel(),
+          child: const RegistrarGanaderoScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.cambiarContrasena,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => CambiarContrasenaViewModel(),
+          child: const CambiarContrasenaScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.elegirPlan,

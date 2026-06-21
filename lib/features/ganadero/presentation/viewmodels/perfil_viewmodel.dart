@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/auth/domain/entities/user.dart';
 import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:ganajec/share/domain/entities/rancho.dart';
 
-// Configuración de notificaciones (en producción iría a SharedPreferences/API)
 class NotificacionesConfig {
   final bool alertasPrediccion;
   final bool anomaliasProductivas;
@@ -19,19 +22,19 @@ class NotificacionesConfig {
     bool? alertasPrediccion,
     bool? anomaliasProductivas,
     bool? resumenSemanal,
-  }) {
-    return NotificacionesConfig(
-      alertasPrediccion: alertasPrediccion ?? this.alertasPrediccion,
-      anomaliasProductivas: anomaliasProductivas ?? this.anomaliasProductivas,
-      resumenSemanal: resumenSemanal ?? this.resumenSemanal,
-    );
-  }
+  }) =>
+      NotificacionesConfig(
+        alertasPrediccion: alertasPrediccion ?? this.alertasPrediccion,
+        anomaliasProductivas: anomaliasProductivas ?? this.anomaliasProductivas,
+        resumenSemanal: resumenSemanal ?? this.resumenSemanal,
+      );
 }
 
-enum PerfilStatus { idle, loggingOut, loggedOut, error }
+enum PerfilStatus { idle, loading, success, loggingOut, loggedOut, error }
 
 class PerfilViewModel extends ChangeNotifier {
   final LogoutUseCase _logoutUseCase;
+  final Dio _dio = ApiClient.instance;
 
   PerfilViewModel({required LogoutUseCase logoutUseCase})
       : _logoutUseCase = logoutUseCase;
@@ -41,42 +44,129 @@ class PerfilViewModel extends ChangeNotifier {
   String? _error;
   NotificacionesConfig _notificaciones = const NotificacionesConfig();
 
-  // Mock de usuario actual — cuando tengas sesión real, pasa el User desde login
-  User get usuario => const User(
-        id: 'g1',
-        name: 'Juan Pérez',
-        email: 'juan@ejemplo.com',
-        role: 'ganadero',
+  // ── Datos cargados desde TokenStorage + API ───────────────────────────────
+  String _nombre = '';
+  String _email = '';
+  String _ranchoNombre = '—';
+  String _ranchoMunicipio = '—';
+  String _ranchoEstado = '—';
+  String _ranchoId = '';
+  String _duenoNombre = '';
+  String _duenoId = '';
+  int _totalBovinos = 0;
+
+  // ── Getters con la misma API que antes (la screen no cambia) ──────────────
+  User get usuario => User(
+        id: TokenStorage.userId ?? '',
+        name: _nombre.isNotEmpty ? _nombre : (TokenStorage.userName ?? 'Usuario'),
+        email: _email.isNotEmpty ? _email : (TokenStorage.email ?? '—'),
+        role: TokenStorage.role ?? 'ganadero',
       );
 
-  // Mock de rancho — cuando tengas API, carga con GetRanchoUseCase
   Rancho get rancho => Rancho(
-        id: 'r1',
-        nombre: 'Rancho La Esmeralda',
-        municipio: 'Tuxtla Gutiérrez',
-        estado: 'Chiapas',
-        duenoId: 'g1',
-        creadoEn: DateTime(2023, 1, 15),
+        id: _ranchoId,
+        nombre: _ranchoNombre,
+        municipio: _ranchoMunicipio,
+        estado: _ranchoEstado,
+        duenoId: _duenoId,
+        duenoNombre: _duenoNombre,
+        creadoEn: DateTime.now(),
       );
 
-  int get totalBovinos => 12;
+  int get totalBovinos => _totalBovinos;
   String get plan => 'Plan Gratuito';
+
+  /// true si el ganadero ya pertenece a un rancho
+  bool get tieneRancho => _ranchoId.isNotEmpty || TokenStorage.ranchoId != null;
 
   PerfilStatus get status => _status;
   String? get error => _error;
+  bool get isLoading => _status == PerfilStatus.loading;
   bool get isLoggingOut => _status == PerfilStatus.loggingOut;
   NotificacionesConfig get notificaciones => _notificaciones;
 
   // ── Iniciales del avatar ──────────────────────────────────────────────────
   String get iniciales {
-    final partes = usuario.name.trim().split(' ');
-    if (partes.length >= 2) {
-      return '${partes[0][0]}${partes[1][0]}'.toUpperCase();
-    }
-    return usuario.name.substring(0, partes[0].length >= 2 ? 2 : 1).toUpperCase();
+    final name = usuario.name;
+    final partes = name.trim().split(RegExp(r'\s+'));
+    if (partes.length >= 2) return '${partes[0][0]}${partes[1][0]}'.toUpperCase();
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
   }
 
-  // ── Toggles ───────────────────────────────────────────────────────────────
+  // ── Cargar perfil desde la API ────────────────────────────────────────────
+  Future<void> cargarPerfil() async {
+    _status = PerfilStatus.loading;
+    _error = null;
+    notifyListeners();
+
+    // Datos del usuario desde TokenStorage (ya disponibles desde el login)
+    _nombre = TokenStorage.userName ?? '';
+    _email = TokenStorage.email ?? '';
+
+    try {
+      final uid = TokenStorage.userId ?? '';
+      final role = TokenStorage.role ?? 'ganadero';
+      final endpoint = role == 'dueno'
+          ? ApiConstants.perfilDueno(uid)
+          : ApiConstants.perfilGanadero(uid);
+      final res = await _dio.get(endpoint);
+      final data = res.data as Map<String, dynamic>;
+
+      // Si la API devuelve nombre/email más actualizado, los usamos
+      final apiNombre = data['nombre'] as String?;
+      final apiEmail = data['email'] as String?;
+      if (apiNombre != null && apiNombre.isNotEmpty) _nombre = apiNombre;
+      if (apiEmail != null && apiEmail.isNotEmpty) _email = apiEmail;
+
+      // Ranchos: v2 devuelve { ..., ranchos: [{id, nombre, municipio, estado, dueno_id, dueno_nombre?, total_bovinos}] }
+      final ranchos = data['ranchos'] as List?;
+      if (ranchos != null && ranchos.isNotEmpty) {
+        final r = ranchos.first as Map<String, dynamic>;
+        _ranchoId     = r['id']        as String? ?? '';
+        _ranchoNombre = r['nombre']    as String? ?? '—';
+        _ranchoMunicipio = r['municipio'] as String? ?? '—';
+        _ranchoEstado = r['estado']    as String? ?? '—';
+        _duenoId      = r['dueno_id']  as String? ?? '';
+
+        // El API puede o no devolver el nombre del dueño
+        _duenoNombre  = r['dueno_nombre']  as String?
+                      ?? r['nombre_dueno'] as String?
+                      ?? '';
+
+        // Guarda el rancho_id para uso en otras pantallas
+        if (TokenStorage.ranchoId == null && _ranchoId.isNotEmpty) {
+          await TokenStorage.saveRanchoId(_ranchoId);
+        }
+
+        // Si no vino el nombre del dueño, intentar fetch extra
+        if (_duenoNombre.isEmpty && _duenoId.isNotEmpty) {
+          try {
+            final duenoRes = await _dio.get(ApiConstants.perfilDueno(_duenoId));
+            final dNombre = duenoRes.data['nombre'] as String?;
+            if (dNombre != null && dNombre.isNotEmpty) _duenoNombre = dNombre;
+          } catch (_) {} // silencioso — no es crítico
+        }
+
+        // Total bovinos: suma de todos los ranchos del ganadero
+        _totalBovinos = ranchos.fold<int>(
+          0,
+          (sum, r) => sum + ((r['total_bovinos'] as num?)?.toInt() ?? 0),
+        );
+      } else {
+        // Fallback v1: total_bovinos en la raíz
+        _totalBovinos = (data['total_bovinos'] as num?)?.toInt() ?? 0;
+      }
+
+      _status = PerfilStatus.success;
+    } catch (e) {
+      // Si la API falla, al menos mostramos datos de TokenStorage
+      _error = e.toString();
+      _status = PerfilStatus.error;
+    }
+    notifyListeners();
+  }
+
+  // ── Toggles de notificaciones ─────────────────────────────────────────────
   void toggleAlertasPrediccion() {
     _notificaciones = _notificaciones.copyWith(
       alertasPrediccion: !_notificaciones.alertasPrediccion,

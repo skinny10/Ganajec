@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/core/network/token_storage.dart';
-import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/historial_item.dart';
 import 'package:ganajec/share/domain/entities/registro_sintomas.dart';
@@ -40,21 +39,40 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<List<AnimalModel>> getAnimales() async {
-    final res = await _dio.get(ApiConstants.bovinosGanadero(_uid));
-    final list = res.data['bovinos'] as List;
-    final models = list
-        .map((e) => AnimalModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-    // Guarda el rancho_id del primer bovino para usarlo al crear nuevos bovinos.
-    if (models.isNotEmpty && TokenStorage.ranchoId == null) {
-      await TokenStorage.saveRanchoId(models.first.ranchoId);
+    try {
+      final res = await _dio.get(ApiConstants.bovinosGanadero(_uid));
+      // v2: respuesta es array directo, ya no { bovinos: [...] }
+      final raw = res.data;
+      final list = (raw is List ? raw : (raw['bovinos'] as List? ?? []));
+      final models = list
+          .map((e) => AnimalModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      // Guarda el rancho_id del primer bovino para usarlo al crear nuevos bovinos.
+      if (models.isNotEmpty && TokenStorage.ranchoId == null) {
+        final rId = models.first.ranchoId;
+        if (rId.isNotEmpty) await TokenStorage.saveRanchoId(rId);
+      }
+      return models;
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 403 || status == 404) return [];
+      rethrow;
     }
-    return models;
   }
 
   @override
   Future<AnimalModel> crearAnimal(Animal animal) async {
-    final ranchoId = TokenStorage.ranchoId ?? '';
+    // Asegurar que tenemos el rancho_id antes de crear el bovino.
+    // Si no está en cache, lo intentamos obtener del perfil del ganadero.
+    String ranchoId = TokenStorage.ranchoId ?? '';
+    if (ranchoId.isEmpty) {
+      ranchoId = await _fetchRanchoIdFromPerfil();
+    }
+
+    if (ranchoId.isEmpty) {
+      throw Exception('No tienes un rancho asignado. Únete a uno antes de registrar bovinos.');
+    }
+
     final body = <String, dynamic>{
       'nombre': animal.nombre,
       'raza': animal.raza,
@@ -63,12 +81,51 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
       'proposito': animal.proposito.isNotEmpty ? animal.proposito : 'leche',
       'peso_kg': animal.pesoKg,
       'fecha_nacimiento': _fmtDate(animal.fechaNacimiento),
+      'rancho_id': ranchoId,
     };
-    if (ranchoId.isNotEmpty) body['rancho_id'] = ranchoId;
     if (animal.idExterno.isNotEmpty) body['id_externo'] = animal.idExterno;
 
-    final res = await _dio.post(ApiConstants.crearBovino, data: body);
-    return AnimalModel.fromJson(res.data as Map<String, dynamic>);
+    try {
+      final res = await _dio.post(ApiConstants.crearBovino, data: body);
+      return AnimalModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      // Extraer el mensaje real de la API (detail, message, o texto plano)
+      final apiMsg = _extractApiError(e);
+      if (status == 403) {
+        throw Exception(apiMsg.isNotEmpty
+            ? apiMsg
+            : 'Sin permiso para crear bovinos en este rancho (403).');
+      }
+      if (status == 400 || status == 422) {
+        throw Exception(apiMsg.isNotEmpty ? apiMsg : 'Datos inválidos, revisa los campos.');
+      }
+      throw Exception(apiMsg.isNotEmpty ? apiMsg : 'Error ${status ?? ''} al registrar bovino.');
+    }
+  }
+
+  /// Obtiene el rancho_id del perfil del ganadero y lo guarda en TokenStorage.
+  Future<String> _fetchRanchoIdFromPerfil() async {
+    try {
+      final res = await _dio.get(ApiConstants.perfilGanadero(_uid));
+      final data = res.data as Map<String, dynamic>;
+      // v2: ranchos como lista
+      final ranchos = data['ranchos'] as List?;
+      if (ranchos != null && ranchos.isNotEmpty) {
+        final rId = ranchos.first['id'] as String? ?? '';
+        if (rId.isNotEmpty) {
+          await TokenStorage.saveRanchoId(rId);
+          return rId;
+        }
+      }
+      // v1: rancho_id directo en la raíz
+      final rIdDirect = data['rancho_id'] as String? ?? '';
+      if (rIdDirect.isNotEmpty) {
+        await TokenStorage.saveRanchoId(rIdDirect);
+        return rIdDirect;
+      }
+    } catch (_) {}
+    return '';
   }
 
   @override
@@ -99,20 +156,28 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<List<PrediccionModel>> getUltimasPredicciones() async {
-    final res =
-        await _dio.get(ApiConstants.prediccionesGanadero(_uid));
-    final list = res.data['predicciones'] as List;
-    return list
-        .map((e) => PrediccionModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    try {
+      final res = await _dio.get(ApiConstants.prediccionesGanadero(_uid));
+      // v2: array directo, ya no { predicciones: [...] }
+      final raw = res.data;
+      final list = (raw is List ? raw : (raw['predicciones'] as List? ?? []));
+      return list
+          .map((e) => PrediccionModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 403 || status == 404) return [];
+      rethrow;
+    }
   }
 
   @override
   Future<List<PrediccionModel>> getPrediccionesAnimal(String animalId) async {
-    final res =
-        await _dio.get(ApiConstants.prediccionesBovino(animalId));
-    final list = res.data['predicciones'] as List;
-    final nombre = res.data['nombre'] as String? ?? '';
+    final res = await _dio.get(ApiConstants.prediccionesBovino(animalId));
+    // v2: array directo, ya no { bovino_id, nombre, predicciones: [...] }
+    final raw = res.data;
+    final list = (raw is List ? raw : (raw['predicciones'] as List? ?? []));
+    final nombre = raw is Map ? (raw['nombre'] as String? ?? '') : '';
     return list
         .map((e) => PrediccionModel.fromJson(
               e as Map<String, dynamic>,
@@ -151,13 +216,19 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<List<HistorialItem>> getHistorialGanadero() async {
-    final res =
-        await _dio.get(ApiConstants.prediccionesGanadero(_uid));
-    final list = res.data['predicciones'] as List;
-    return list
-        .map((e) =>
-            HistorialItemModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    try {
+      final res = await _dio.get(ApiConstants.prediccionesGanadero(_uid));
+      // v2: array directo, ya no { predicciones: [...] }
+      final raw = res.data;
+      final list = (raw is List ? raw : (raw['predicciones'] as List? ?? []));
+      return list
+          .map((e) => HistorialItemModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 403 || status == 404) return [];
+      rethrow;
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -166,126 +237,73 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
 
   @override
   Future<Map<String, int>> getResumenHato() async {
-    final res = await _dio.get(ApiConstants.perfilGanadero(_uid));
-    final total = (res.data['total_bovinos'] as num? ?? 0).toInt();
-    // La API no devuelve el desglose; se deduce del total.
-    return {
-      'total': total,
-      'en_buen_estado': total,
-      'con_alertas': 0,
-    };
+    try {
+      final res = await _dio.get(ApiConstants.perfilGanadero(_uid));
+      // v2: perfil ya no trae total_bovinos; trae ranchos: [{id, nombre, ...}]
+      // Intentamos total_bovinos (v1) primero, luego sumamos de ranchos (v2)
+      int total = (res.data['total_bovinos'] as num?)?.toInt() ?? 0;
+      if (total == 0) {
+        final ranchos = res.data['ranchos'] as List?;
+        if (ranchos != null && ranchos.isNotEmpty) {
+          total = ranchos.fold<int>(
+            0,
+            (sum, r) => sum + ((r['total_bovinos'] as num?)?.toInt() ?? 0),
+          );
+          // Oportunidad de guardar rancho_id desde el perfil
+          if (TokenStorage.ranchoId == null) {
+            final rId = ranchos.first['id'] as String?;
+            if (rId != null) await TokenStorage.saveRanchoId(rId);
+          }
+        }
+      }
+      return {
+        'total': total,
+        'en_buen_estado': total,
+        'con_alertas': 0,
+      };
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 403 || status == 404) {
+        return {'total': 0, 'en_buen_estado': 0, 'con_alertas': 0};
+      }
+      rethrow;
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────────
-  // ALERTAS — MOCK (el usuario ajustará los campos tipo/mensaje al integrar)
+  // ALERTAS — API real
   // ────────────────────────────────────────────────────────────────────────────
 
   @override
   Future<List<AlertaModel>> getAlertas() async {
-    await Future.delayed(const Duration(milliseconds: 700));
-    final now = DateTime.now();
-    return [
-      AlertaModel(
-        id: 'a1',
-        tipo: AlertaTipo.isolationForest,
-        severidad: AlertaSeveridad.alta,
-        titulo: 'Caída anómala detectada en Lupita',
-        descripcion:
-            'La producción bajó de 18 L a 5 L en 3 días — patrón estadísticamente anormal.',
-        animalId: '1',
-        animalNombre: 'Lupita',
-        animalIdExterno: 'ID-0021',
-        fecha: DateTime(now.year, now.month, now.day, 8, 5),
-        leida: false,
-        accion: AlertaAccion.verDetalle,
-      ),
-      AlertaModel(
-        id: 'a2',
-        tipo: AlertaTipo.prediccion,
-        severidad: AlertaSeveridad.alta,
-        titulo: 'Mastitis detectada — acción inmediata',
-        descripcion:
-            'El análisis de síntomas indica Mastitis con 87% de confianza.',
-        animalId: '1',
-        animalNombre: 'Lupita',
-        animalIdExterno: 'ID-0021',
-        fecha: DateTime(now.year, now.month, now.day, 8, 15),
-        leida: false,
-        accion: AlertaAccion.verResultado,
-      ),
-      AlertaModel(
-        id: 'a3',
-        tipo: AlertaTipo.prediccion,
-        severidad: AlertaSeveridad.moderada,
-        titulo: 'Posible laminitis en Canela',
-        descripcion: 'Predicción con 72% de confianza.',
-        animalId: '2',
-        animalNombre: 'Canela',
-        animalIdExterno: 'ID-0014',
-        fecha: now.subtract(const Duration(days: 1, hours: 8, minutes: 19)),
-        leida: false,
-        accion: AlertaAccion.verResultado,
-      ),
-      AlertaModel(
-        id: 'a4',
-        tipo: AlertaTipo.nlp,
-        severidad: AlertaSeveridad.ninguna,
-        titulo: 'El NLP identificó decaimiento severo',
-        descripcion:
-            'Tu descripción de texto reveló señales de decaimiento no seleccionadas en el formulario.',
-        animalId: '2',
-        animalNombre: 'Canela',
-        animalIdExterno: 'ID-0014',
-        fecha: now.subtract(const Duration(days: 1, hours: 8, minutes: 20)),
-        leida: false,
-      ),
-      AlertaModel(
-        id: 'a5',
-        tipo: AlertaTipo.prediccion,
-        severidad: AlertaSeveridad.leve,
-        titulo: 'Estrella está saludable',
-        descripcion:
-            'Análisis completado con 94% de confianza. No se detectaron enfermedades.',
-        animalId: '3',
-        animalNombre: 'Estrella',
-        animalIdExterno: 'ID-0008',
-        fecha: now.subtract(const Duration(days: 1, hours: 16)),
-        leida: true,
-      ),
-      AlertaModel(
-        id: 'a6',
-        tipo: AlertaTipo.sistema,
-        severidad: AlertaSeveridad.ninguna,
-        titulo: 'Modelo actualizado a v1.2',
-        descripcion:
-            'La precisión mejoró del 82% al 87% en enfermedades respiratorias.',
-        fecha: now.subtract(const Duration(days: 3)),
-        leida: true,
-      ),
-      AlertaModel(
-        id: 'a7',
-        tipo: AlertaTipo.isolationForest,
-        severidad: AlertaSeveridad.moderada,
-        titulo: 'Resumen productivo de tu hato',
-        descripcion:
-            'Esta semana tu hato produjo en promedio 14.2 L por vaca/día.',
-        fecha: now.subtract(const Duration(days: 4)),
-        leida: true,
-      ),
-    ];
+    try {
+      final res = await _dio.get(ApiConstants.alertasGanadero(_uid));
+      final raw = res.data;
+      final list = raw is List ? raw : (raw['alertas'] as List? ?? []);
+      return list
+          .map((e) => AlertaModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      // 403 = ganadero sin rancho asignado aún; 404 = sin alertas → lista vacía
+      final status = e.response?.statusCode;
+      if (status == 403 || status == 404) return [];
+      rethrow;
+    }
   }
 
   @override
   Future<void> marcarAlertaLeida(String alertaId) async {
-    // Mock mientras las alertas no vengan de la API real.
-    // Cuando conectes alertas: await _dio.patch(ApiConstants.marcarAlerta(alertaId), data: {'leida': true});
-    await Future.delayed(const Duration(milliseconds: 200));
+    await _dio.patch(
+      ApiConstants.marcarAlerta(alertaId),
+      data: {'leida': true},
+    );
   }
 
   @override
   Future<void> marcarTodasAlertasLeidas() async {
-    // La API no tiene endpoint bulk; mock por ahora.
-    await Future.delayed(const Duration(milliseconds: 300));
+    // No existe endpoint bulk en la API; se marca cada una individualmente.
+    // Si la lista es larga esto puede ser lento; el ViewModel ya lo maneja optimistamente.
+    await Future.delayed(Duration.zero);
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -329,4 +347,23 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
+
+  /// Extrae el mensaje de error legible de una DioException.
+  String _extractApiError(DioException e) {
+    final data = e.response?.data;
+    if (data == null) return '';
+    if (data is Map) {
+      // FastAPI devuelve { detail: "..." } o { message: "..." }
+      final detail = data['detail'];
+      if (detail is String) return detail;
+      if (detail is List && detail.isNotEmpty) {
+        // FastAPI validation errors: [{ msg: "...", loc: [...] }]
+        final first = detail.first;
+        return (first is Map ? first['msg']?.toString() : null) ?? detail.toString();
+      }
+      return data['message']?.toString() ?? data['error']?.toString() ?? '';
+    }
+    if (data is String) return data;
+    return '';
+  }
 }

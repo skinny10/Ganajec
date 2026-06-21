@@ -23,16 +23,18 @@ class PrediccionModel extends Prediccion {
   }) {
     final bovino = json['bovino'] as Map<String, dynamic>?;
     return PrediccionModel(
-      id: json['id'] as String,
+      // v2: POST /registros-sintomas ya no devuelve id en la prediccion
+      id: json['id'] as String? ?? '',
       animalId: animalId ?? (bovino?['id'] as String? ?? ''),
       animalNombre: animalNombre ?? (bovino?['nombre'] as String? ?? ''),
-      enfermedad: json['enfermedad'] as String,
-      confianza: (json['confianza'] as num).toDouble(),
-      // La API usa `generado_en`; fallback por si algún endpoint usa otra clave.
-      fecha: DateTime.parse(
-        (json['generado_en'] ?? json['fecha'] ?? DateTime.now().toIso8601String())
-            as String,
-      ),
+      enfermedad: json['enfermedad'] as String? ?? 'Sin diagnóstico',
+      confianza: (json['confianza'] as num? ?? 0).toDouble(),
+      // v2: POST /registros-sintomas tampoco devuelve generado_en
+      fecha: json['generado_en'] != null
+          ? DateTime.parse(json['generado_en'] as String)
+          : json['fecha'] != null
+              ? DateTime.parse(json['fecha'] as String)
+              : DateTime.now(),
     );
   }
 

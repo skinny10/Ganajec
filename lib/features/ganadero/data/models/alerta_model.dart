@@ -16,27 +16,55 @@ class AlertaModel extends Alerta {
   });
 
   factory AlertaModel.fromJson(Map<String, dynamic> json) {
+    // Normaliza el tipo: la API puede devolver snake_case o camelCase
+    // e.g. "isolation_forest" → isolationForest, "prediccion" → prediccion
+    final tipoRaw = (json['tipo'] as String? ?? 'sistema')
+        .toLowerCase()
+        .replaceAll('_', '');
+    final tipo = AlertaTipo.values.firstWhere(
+      (e) => e.name.toLowerCase() == tipoRaw,
+      orElse: () => AlertaTipo.sistema,
+    );
+
+    final sevRaw = (json['severidad'] as String? ?? 'ninguna').toLowerCase();
+    final severidad = AlertaSeveridad.values.firstWhere(
+      (e) => e.name.toLowerCase() == sevRaw,
+      orElse: () => AlertaSeveridad.ninguna,
+    );
+
+    // accion: "ver_detalle" → verDetalle, "ver_resultado" → verResultado
+    final accionRaw = (json['accion'] as String? ?? 'ninguna')
+        .toLowerCase()
+        .replaceAll('_', '');
+    final accion = AlertaAccion.values.firstWhere(
+      (e) => e.name.toLowerCase() == accionRaw,
+      orElse: () => AlertaAccion.ninguna,
+    );
+
+    // fecha: puede venir como "fecha", "created_at", "generado_en"
+    final fechaStr = json['fecha'] as String? ??
+        json['created_at'] as String? ??
+        json['generado_en'] as String? ??
+        DateTime.now().toIso8601String();
+
     return AlertaModel(
-      id: json['id'] as String,
-      tipo: AlertaTipo.values.firstWhere(
-        (e) => e.name == json['tipo'],
-        orElse: () => AlertaTipo.sistema,
-      ),
-      severidad: AlertaSeveridad.values.firstWhere(
-        (e) => e.name == json['severidad'],
-        orElse: () => AlertaSeveridad.ninguna,
-      ),
-      titulo: json['titulo'] as String,
-      descripcion: json['descripcion'] as String,
-      animalId: json['animal_id'] as String?,
-      animalNombre: json['animal_nombre'] as String?,
+      id: json['id'] as String? ?? '',
+      tipo: tipo,
+      severidad: severidad,
+      titulo: json['titulo'] as String? ??
+          json['message'] as String? ??
+          json['mensaje'] as String? ??
+          'Sin título',
+      descripcion: json['descripcion'] as String? ??
+          json['mensaje'] as String? ??
+          '',
+      animalId: json['animal_id'] as String? ?? json['bovino_id'] as String?,
+      animalNombre: json['animal_nombre'] as String? ??
+          json['nombre_bovino'] as String?,
       animalIdExterno: json['animal_id_externo'] as String?,
-      fecha: DateTime.parse(json['fecha'] as String),
-      leida: json['leida'] as bool,
-      accion: AlertaAccion.values.firstWhere(
-        (e) => e.name == (json['accion'] ?? 'ninguna'),
-        orElse: () => AlertaAccion.ninguna,
-      ),
+      fecha: DateTime.parse(fechaStr),
+      leida: json['leida'] as bool? ?? false,
+      accion: accion,
     );
   }
 

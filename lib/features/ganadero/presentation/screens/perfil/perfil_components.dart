@@ -152,15 +152,25 @@ class PerfilRanchoCard extends StatelessWidget {
   final String nombre;
   final String municipio;
   final String estado;
+  final String duenoNombre;
   final int totalBovinos;
+  final VoidCallback? onUnirseRancho;   // si no tiene rancho
+  final VoidCallback? onMisGanaderos;   // si tiene rancho
+  final String ganaderosBtnLabel;       // "Ver ganaderos" o "Ver mis ganaderos"
 
   const PerfilRanchoCard({
     super.key,
     required this.nombre,
     required this.municipio,
     required this.estado,
+    this.duenoNombre = '',
     required this.totalBovinos,
+    this.onUnirseRancho,
+    this.onMisGanaderos,
+    this.ganaderosBtnLabel = 'Ver ganaderos',
   });
+
+  bool get _tieneRancho => nombre.isNotEmpty && nombre != '—';
 
   @override
   Widget build(BuildContext context) {
@@ -172,36 +182,128 @@ class PerfilRanchoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE8D5C4)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🏡', style: TextStyle(fontSize: 24)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    color: _kCow,
-                  ),
+          Row(
+            children: [
+              const Text('🏡', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _tieneRancho ? nombre : 'Sin rancho asignado',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                        color: _kCow,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _tieneRancho
+                          ? '$municipio, $estado'
+                          : 'Únete o crea un rancho para comenzar',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: _kCow.withOpacity(0.7),
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '$municipio · $estado · $totalBovinos bovinos',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: _kCow.withOpacity(0.7),
-                    fontWeight: FontWeight.w300,
-                  ),
+              ),
+            ],
+          ),
+
+          // Dueño y bovinos — solo cuando tiene rancho
+          if (_tieneRancho) ...[
+            const SizedBox(height: 10),
+            const Divider(color: Color(0xFFE8D5C4), height: 1),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _InfoChip(
+                  icon: Icons.person_outline,
+                  label: duenoNombre.isNotEmpty ? duenoNombre : 'Dueño del rancho',
+                ),
+                const SizedBox(width: 12),
+                _InfoChip(
+                  icon: Icons.pets_outlined,
+                  label: '$totalBovinos bovinos',
                 ),
               ],
             ),
-          ),
+          ],
+
+          // Botón de acción
+          if (onUnirseRancho != null || onMisGanaderos != null) ...[
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: onUnirseRancho ?? onMisGanaderos,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: _kCow.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _kCow.withOpacity(0.25)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      onUnirseRancho != null
+                          ? Icons.add_home_outlined
+                          : Icons.people_outlined,
+                      color: _kCow,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      onUnirseRancho != null
+                          ? 'Unirse o crear rancho'
+                          : ganaderosBtnLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: _kCow,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _InfoChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: const Color(0xFF8B6914)),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF8B6914),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
     );
   }
 }

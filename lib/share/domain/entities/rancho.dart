@@ -4,6 +4,7 @@ class Rancho {
   final String municipio;
   final String estado;
   final String duenoId;
+  final String duenoNombre;
   final DateTime creadoEn;
 
   const Rancho({
@@ -12,6 +13,7 @@ class Rancho {
     required this.municipio,
     required this.estado,
     required this.duenoId,
+    this.duenoNombre = '',
     required this.creadoEn,
   });
 }
