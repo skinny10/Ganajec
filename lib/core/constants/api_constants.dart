@@ -1,12 +1,12 @@
 /// Centraliza la URL base y todos los paths de la API GANAJEC AI.
 ///
 /// Dev local  → http://192.168.1.17:8000/api  (tu IP LAN, para emulador/físico)
-/// Emulador   → http://10.0.2.2:8000/api      (alias de localhost en AVD)
+/// Emulador   → http://localhost:8000/api      (alias de localhost en AVD)
 /// Producción → http://44.193.46.236:8000/api
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.1.102:8000/api';
+  static const String baseUrl = 'http://localhost:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
@@ -105,4 +105,9 @@ class ApiConstants {
 
   /// POST /dueno/suscripcion   { plan, es_anual }
   static const String suscribirse = '/dueno/suscripcion';
+
+  // ── Dueño — estadísticas ─────────────────────────────────────────────────────
+  /// GET /dueno/ranchos/{rancho_id}/estadisticas
+  static String estadisticasRancho(String ranchoId) =>
+      '/dueno/ranchos/$ranchoId/estadisticas';
 }

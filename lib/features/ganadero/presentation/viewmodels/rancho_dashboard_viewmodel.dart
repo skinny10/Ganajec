@@ -2,30 +2,65 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
+import 'package:ganajec/features/dueno/data/models/estadisticas_model.dart';
 import 'package:ganajec/features/ganadero/data/models/animal_model.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/mis_ganaderos_viewmodel.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 
-enum RanchoDashboardStatus { idle, loading, success, error }
+enum RanchoDashboardStatus { idle, loading, success, error, unassigned }
 
 class RanchoDashboardViewModel extends ChangeNotifier {
   final Dio _dio = ApiClient.instance;
-  final String ranchoId;
 
-  RanchoDashboardViewModel({required this.ranchoId});
+  RanchoDashboardViewModel();
 
   RanchoDashboardStatus _status = RanchoDashboardStatus.idle;
   String? _error;
   RanchoInfo? _rancho;
   List<Animal> _bovinos = [];
+  EstadisticasModel? _estadisticas;
 
   RanchoDashboardStatus get status => _status;
   String? get error => _error;
   bool get isLoading => _status == RanchoDashboardStatus.loading;
+  bool get isUnassigned => _status == RanchoDashboardStatus.unassigned;
   RanchoInfo? get rancho => _rancho;
   List<Animal> get bovinos => _bovinos;
+  EstadisticasModel? get estadisticas => _estadisticas;
 
   Future<void> cargar() async {
+    String? ranchoId = TokenStorage.ranchoId;
+
+    if (ranchoId == null || ranchoId.isEmpty) {
+      final userId = TokenStorage.userId;
+      if (userId != null && userId.isNotEmpty) {
+        try {
+          final res = await _dio.get(ApiConstants.perfilDueno(userId));
+          final ranchos = res.data['ranchos'] as List? ?? [];
+          if (ranchos.isNotEmpty) {
+            final first = ranchos.first as Map<String, dynamic>;
+            ranchoId = first['id'] as String?;
+            if (ranchoId != null && ranchoId.isNotEmpty) {
+              await TokenStorage.saveRanchoId(ranchoId);
+            }
+          }
+        } catch (_) {
+          // fall through to unassigned
+        }
+      }
+    }
+
+    if (ranchoId == null || ranchoId.isEmpty) {
+      _status = RanchoDashboardStatus.unassigned;
+      _rancho = null;
+      _bovinos = [];
+      _estadisticas = null;
+      _error = null;
+      notifyListeners();
+      return;
+    }
+
     _status = RanchoDashboardStatus.loading;
     _error = null;
     notifyListeners();
@@ -47,6 +82,16 @@ class RanchoDashboardViewModel extends ChangeNotifier {
             .toList();
       } catch (_) {
         _bovinos = [];
+      }
+
+      // 3. Estadísticas del rancho
+      try {
+        final eRes =
+            await _dio.get(ApiConstants.estadisticasRancho(ranchoId));
+        _estadisticas = EstadisticasModel.fromJson(
+            eRes.data as Map<String, dynamic>);
+      } catch (_) {
+        _estadisticas = null;
       }
 
       _status = RanchoDashboardStatus.success;

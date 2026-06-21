@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'login_components.dart';
 import 'package:ganajec/core/router/app_router.dart';
@@ -34,7 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go(AppRoutes.home);
+      final role = TokenStorage.role;
+      if (role == 'dueno') {
+        context.go(AppRoutes.ranchoDashboard);
+      } else if (role == 'admin') {
+        context.go(AppRoutes.home);
+      } else {
+        context.go(AppRoutes.home);
+      }
     }
   }
 

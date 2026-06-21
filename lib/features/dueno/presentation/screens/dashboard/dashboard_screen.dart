@@ -1,42 +1,40 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:ganajec/core/router/app_router.dart';
 import 'package:ganajec/features/dueno/data/models/estadisticas_model.dart';
-import 'package:ganajec/features/ganadero/presentation/viewmodels/rancho_dashboard_viewmodel.dart';
-import 'package:ganajec/features/ganadero/presentation/viewmodels/mis_ganaderos_viewmodel.dart';
-import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/features/dueno/presentation/viewmodels/dashboard_viewmodel.dart';
 
-class RanchoDashboardScreen extends StatefulWidget {
-  const RanchoDashboardScreen({super.key});
+class DuenoDashboardScreen extends StatefulWidget {
+  const DuenoDashboardScreen({super.key});
 
   @override
-  State<RanchoDashboardScreen> createState() =>
-      _RanchoDashboardScreenState();
+  State<DuenoDashboardScreen> createState() => _DuenoDashboardScreenState();
 }
 
-class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
+class _DuenoDashboardScreenState extends State<DuenoDashboardScreen> {
   static const _kBg = Color(0xFFFAFAF7);
   static const _kSurface = Color(0xFFFFFFFF);
   static const _kBorder = Color(0xFFE8E5DC);
   static const _kTextPrimary = Color(0xFF1A1A1A);
   static const _kTextSecondary = Color(0xFF888880);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
+
+  static const _kNovillo = Color(0xFF1D7A55);
+  static const _kVaca = Color(0xFF4A90D9);
+  static const _kToro = Color(0xFFD4893B);
+
+  static const _kAlta = Color(0xFFE53935);
+  static const _kMedia = Color(0xFFFFC107);
+  static const _kBaja = Color(0xFF4CAF50);
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-        () => context.read<RanchoDashboardViewModel>().cargar());
+    Future.microtask(() => context.read<DashboardViewModel>().cargar());
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RanchoDashboardViewModel>();
+    final vm = context.watch<DashboardViewModel>();
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -44,23 +42,10 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
         backgroundColor: _kBg,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => context.pop(),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: _kSurface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
-            ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
-          ),
-        ),
         centerTitle: true,
-        title: Text(
-          vm.rancho?.nombre ?? 'Mi rancho',
-          style: const TextStyle(
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: _kTextPrimary,
@@ -68,32 +53,8 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
           ),
         ),
         actions: [
-          if (vm.rancho != null)
-            GestureDetector(
-              onTap: () async {
-                await context.push(
-                  AppRoutes.editarRancho,
-                  extra: vm.rancho,
-                );
-                if (context.mounted) {
-                  context.read<RanchoDashboardViewModel>().cargar();
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _kSurface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: _kBorder),
-                ),
-                child: const Icon(Icons.edit_outlined,
-                    color: _kTextPrimary, size: 16),
-              ),
-            ),
           IconButton(
-            onPressed: () =>
-                context.read<RanchoDashboardViewModel>().cargar(),
+            onPressed: () => context.read<DashboardViewModel>().cargar(),
             icon: const Icon(Icons.refresh_outlined,
                 color: _kTextSecondary, size: 20),
           ),
@@ -105,306 +66,79 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : vm.isUnassigned
-              ? const _NoRanchoView()
-              : vm.status == RanchoDashboardStatus.error
-                  ? _ErrorView(
-                      message: vm.error ?? 'Error al cargar el rancho',
-                      onRetry: () =>
-                          context.read<RanchoDashboardViewModel>().cargar(),
-                    )
+          : vm.status == DashboardStatus.error
+              ? _ErrorView(
+                  message: vm.error ?? 'Error al cargar estadísticas',
+                  onRetry: () =>
+                      context.read<DashboardViewModel>().cargar(),
+                )
+              : vm.status == DashboardStatus.idle
+                  ? _NoRanchoView()
                   : _buildContent(context, vm),
     );
   }
 
-  Widget _buildContent(
-      BuildContext context, RanchoDashboardViewModel vm) {
+  Widget _buildContent(BuildContext context, DashboardViewModel vm) {
+    final est = vm.estadisticas;
+    if (est == null) return _NoRanchoView();
     return RefreshIndicator(
-      onRefresh: () =>
-          context.read<RanchoDashboardViewModel>().cargar(),
+      onRefresh: () => context.read<DashboardViewModel>().cargar(),
       child: ListView(
         padding: const EdgeInsets.only(top: 16, bottom: 40),
         children: [
-          // Card info del rancho
-          if (vm.rancho != null) _RanchoInfoCard(rancho: vm.rancho!),
-
-          const SizedBox(height: 16),
-
-          // Sección bovinos
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Bovinos (${vm.bovinos.length})',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: _kTextSecondary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          if (vm.bovinos.isEmpty)
-            const _EmptyBovinos()
-          else
-            ...vm.bovinos.map((b) => _BovinoTile(animal: b)),
-
-          if (vm.estadisticas != null) ...[
-            const SizedBox(height: 24),
-            _DonutChartSection(estadisticas: vm.estadisticas!),
-            const SizedBox(height: 20),
-            _BarChartSection(estadisticas: vm.estadisticas!),
-            const SizedBox(height: 20),
-            _PrediccionesSection(estadisticas: vm.estadisticas!),
-          ],
+          _KpiRow(estadisticas: est),
+          const SizedBox(height: 20),
+          _DonutChartSection(estadisticas: est),
+          const SizedBox(height: 20),
+          _BarChartSection(estadisticas: est),
+          const SizedBox(height: 20),
+          _PrediccionesSection(estadisticas: est),
         ],
       ),
     );
   }
 }
 
-// ── Rancho info card ──────────────────────────────────────────────────────────
+// ── KPI Row ──────────────────────────────────────────────────────────────────
 
-class _RanchoInfoCard extends StatelessWidget {
-  final RanchoInfo rancho;
+class _KpiRow extends StatelessWidget {
+  final EstadisticasModel estadisticas;
 
-  static const _kBorder = Color(0xFFE8E5DC);
   static const _kSurface = Color(0xFFFFFFFF);
+  static const _kBorder = Color(0xFFE8E5DC);
   static const _kTextPrimary = Color(0xFF1A1A1A);
   static const _kTextSecondary = Color(0xFF888880);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
 
-  const _RanchoInfoCard({required this.rancho});
+  const _KpiRow({required this.estadisticas});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: _kSurface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _kBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: _kGreenLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text('🏡', style: TextStyle(fontSize: 22)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        rancho.nombre,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: _kTextPrimary,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                      Text(
-                        '${rancho.municipio}, ${rancho.estado}',
-                        style: const TextStyle(
-                            fontSize: 12, color: _kTextSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(height: 0, thickness: 0.5, color: _kBorder),
-            const SizedBox(height: 14),
-            // Código
-            const Text(
-              'CÓDIGO DE INVITACIÓN',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: _kTextSecondary,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                Clipboard.setData(
-                    ClipboardData(text: rancho.codigoInvitacion));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Código copiado'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: _kGreenLight,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: _kGreen.withOpacity(0.25)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      rancho.codigoInvitacion,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 3,
-                        color: _kGreen,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.copy_outlined,
-                        color: _kGreen, size: 16),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Bovino tile ───────────────────────────────────────────────────────────────
-
-class _BovinoTile extends StatelessWidget {
-  final Animal animal;
-
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
-  const _BovinoTile({required this.animal});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(
-          color: _kSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F3EE),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
-                child: Text('🐄', style: TextStyle(fontSize: 18)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    animal.nombre,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: _kTextPrimary,
-                    ),
-                  ),
-                  Text(
-                    '${animal.raza} · ${animal.idExterno}',
-                    style: const TextStyle(
-                        fontSize: 11.5, color: _kTextSecondary),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${animal.pesoKg.toStringAsFixed(0)} kg',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
-                  ),
-                ),
-                Text(
-                  animal.sexo,
-                  style: const TextStyle(
-                      fontSize: 11, color: _kTextMuted),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Empty state ───────────────────────────────────────────────────────────────
-
-class _EmptyBovinos extends StatelessWidget {
-  const _EmptyBovinos();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(40),
-      child: Column(
+      child: Row(
         children: [
-          Text('🐄', style: TextStyle(fontSize: 40)),
-          SizedBox(height: 12),
-          Text(
-            'Sin bovinos registrados en este rancho',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+          Expanded(
+            child: _KpiCard(
+              icon: '🐄',
+              label: 'Bovinos',
+              value: '${estadisticas.totalBovinos}',
             ),
           ),
-          SizedBox(height: 6),
-          Text(
-            'Los ganaderos que se unan al rancho podrán registrar su hato.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Color(0xFF888880)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _KpiCard(
+              icon: '🔔',
+              label: 'Alertas',
+              value: '${estadisticas.totalAlertas}',
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _KpiCard(
+              icon: '📊',
+              label: 'Predicciones',
+              value: '${estadisticas.prediccionesMes.length}',
+            ),
           ),
         ],
       ),
@@ -412,7 +146,59 @@ class _EmptyBovinos extends StatelessWidget {
   }
 }
 
-// ── Donut chart — Bovinos por categoría ─────────────────────────────────────
+class _KpiCard extends StatelessWidget {
+  final String icon;
+  final String label;
+  final String value;
+
+  static const _kSurface = Color(0xFFFFFFFF);
+  static const _kBorder = Color(0xFFE8E5DC);
+  static const _kTextPrimary = Color(0xFF1A1A1A);
+  static const _kTextSecondary = Color(0xFF888880);
+
+  const _KpiCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Column(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 22)),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: _kTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: _kTextSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Donut chart ──────────────────────────────────────────────────────────────
 
 class _DonutChartSection extends StatelessWidget {
   final EstadisticasModel estadisticas;
@@ -582,7 +368,7 @@ class _DonutPainter extends CustomPainter {
   bool shouldRepaint(covariant _DonutPainter oldDelegate) => true;
 }
 
-// ── Bar chart — Alertas por severidad ───────────────────────────────────────
+// ── Bar chart ────────────────────────────────────────────────────────────────
 
 class _BarChartSection extends StatelessWidget {
   final EstadisticasModel estadisticas;
@@ -687,7 +473,7 @@ class _BarChartSection extends StatelessWidget {
   }
 }
 
-// ── Predicciones del mes ────────────────────────────────────────────────────
+// ── Predicciones section ─────────────────────────────────────────────────────
 
 class _PrediccionesSection extends StatelessWidget {
   final EstadisticasModel estadisticas;
@@ -853,11 +639,9 @@ class _PrediccionTile extends StatelessWidget {
   }
 }
 
-// ── No rancho view ─────────────────────────────────────────────────────────────
+// ── Empty / Error states ─────────────────────────────────────────────────────
 
 class _NoRanchoView extends StatelessWidget {
-  const _NoRanchoView();
-
   @override
   Widget build(BuildContext context) {
     return const Center(
@@ -870,7 +654,7 @@ class _NoRanchoView extends StatelessWidget {
                 color: Color(0xFFAEADA6), size: 48),
             SizedBox(height: 12),
             Text(
-              'Sin rancho asignado',
+              'No hay un rancho seleccionado',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -880,7 +664,7 @@ class _NoRanchoView extends StatelessWidget {
             ),
             SizedBox(height: 6),
             Text(
-              'No tienes un rancho asignado. Contacta al administrador.',
+              'Selecciona o crea un rancho para ver sus estadísticas.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: Color(0xFF888880)),
             ),
@@ -890,8 +674,6 @@ class _NoRanchoView extends StatelessWidget {
     );
   }
 }
-
-// ── Error view ────────────────────────────────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
   final String message;
@@ -915,8 +697,7 @@ class _ErrorView extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFF888880))),
             const SizedBox(height: 16),
             ElevatedButton(
-                onPressed: onRetry,
-                child: const Text('Reintentar')),
+                onPressed: onRetry, child: const Text('Reintentar')),
           ],
         ),
       ),

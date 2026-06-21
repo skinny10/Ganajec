@@ -225,14 +225,10 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.ranchoDashboard,
-        builder: (context, state) {
-          final ranchoId = state.extra as String;
-          return ChangeNotifierProvider(
-            create: (_) =>
-                RanchoDashboardViewModel(ranchoId: ranchoId),
-            child: const RanchoDashboardScreen(),
-          );
-        },
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => RanchoDashboardViewModel(),
+          child: const RanchoDashboardScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.editarRancho,
