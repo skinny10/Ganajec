@@ -9,7 +9,9 @@ class PrediccionTile extends StatelessWidget {
   Color _confianzaColor(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     if (prediccion.enfermedad == 'Sin enfermedad') return colors.tertiary;
-    if (prediccion.confianza >= 0.8) return colors.error;
+    if (prediccion.severidad == 'alta' || prediccion.confianza >= 0.8) {
+      return colors.error;
+    }
     return colors.secondary;
   }
 
@@ -26,14 +28,15 @@ class PrediccionTile extends StatelessWidget {
 
   String _formatHora(DateTime fecha) {
     final hora = fecha.hour.toString().padLeft(2, '0');
-    final min = fecha.minute.toString().padLeft(2, '0');
-    return '$hora:$min am';
+    final min  = fecha.minute.toString().padLeft(2, '0');
+    return '$hora:$min';
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final color = _confianzaColor(context);
+    final color  = _confianzaColor(context);
+    final tieneContexto = prediccion.ganaderoNombre.isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -70,10 +73,16 @@ class PrediccionTile extends StatelessWidget {
                       ?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '${prediccion.animalNombre} · ${prediccion.animalId}',
+                  tieneContexto
+                      ? '${prediccion.animalNombre} · ${prediccion.ganaderoNombre} · ${prediccion.ranchoNombre}'
+                      : prediccion.animalIdExterno.isNotEmpty
+                          ? '${prediccion.animalNombre} · ${prediccion.animalIdExterno}'
+                          : prediccion.animalNombre,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -82,7 +91,7 @@ class PrediccionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${(prediccion.confianza * 100).toStringAsFixed(0)}% conf.',
+                '${(prediccion.confianza * 100).toStringAsFixed(0)}%',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,

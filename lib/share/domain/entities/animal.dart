@@ -19,6 +19,10 @@ class Animal {
   final String idExterno;
   final DateTime creadoEn;
 
+  /// Campos de contexto — solo presentes en la vista del dueño
+  final String ranchoNombre;
+  final String ganaderoNombre;
+
   const Animal({
     required this.id,
     required this.ranchoId,
@@ -32,6 +36,8 @@ class Animal {
     required this.pesoKg,
     required this.idExterno,
     required this.creadoEn,
+    this.ranchoNombre = '',
+    this.ganaderoNombre = '',
   });
 
   Animal copyWith({
@@ -47,6 +53,8 @@ class Animal {
     double? pesoKg,
     String? idExterno,
     DateTime? creadoEn,
+    String? ranchoNombre,
+    String? ganaderoNombre,
   }) {
     return Animal(
       id: id ?? this.id,
@@ -61,6 +69,8 @@ class Animal {
       pesoKg: pesoKg ?? this.pesoKg,
       idExterno: idExterno ?? this.idExterno,
       creadoEn: creadoEn ?? this.creadoEn,
+      ranchoNombre: ranchoNombre ?? this.ranchoNombre,
+      ganaderoNombre: ganaderoNombre ?? this.ganaderoNombre,
     );
   }
 }

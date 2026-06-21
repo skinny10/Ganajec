@@ -8,6 +8,7 @@ class PrediccionModel extends Prediccion {
     required super.enfermedad,
     required super.confianza,
     required super.fecha,
+    super.animalIdExterno,
   });
 
   /// Parsea un elemento de la lista `predicciones` de la API.
@@ -27,6 +28,7 @@ class PrediccionModel extends Prediccion {
       id: json['id'] as String? ?? '',
       animalId: animalId ?? (bovino?['id'] as String? ?? ''),
       animalNombre: animalNombre ?? (bovino?['nombre'] as String? ?? ''),
+      animalIdExterno: bovino?['id_externo'] as String? ?? '',
       enfermedad: json['enfermedad'] as String? ?? 'Sin diagnóstico',
       confianza: (json['confianza'] as num? ?? 0).toDouble(),
       // v2: POST /registros-sintomas tampoco devuelve generado_en

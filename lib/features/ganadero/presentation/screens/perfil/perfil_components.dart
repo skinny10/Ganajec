@@ -155,8 +155,9 @@ class PerfilRanchoCard extends StatelessWidget {
   final String duenoNombre;
   final int totalBovinos;
   final VoidCallback? onUnirseRancho;   // si no tiene rancho
-  final VoidCallback? onMisGanaderos;   // si tiene rancho
-  final String ganaderosBtnLabel;       // "Ver ganaderos" o "Ver mis ganaderos"
+  final VoidCallback? onMisGanaderos;   // dueño: ver ganaderos
+  final VoidCallback? onVerColegas;     // ganadero: ver colegas del rancho
+  final String ganaderosBtnLabel;       // "Ver ganaderos del rancho"
 
   const PerfilRanchoCard({
     super.key,
@@ -167,7 +168,8 @@ class PerfilRanchoCard extends StatelessWidget {
     required this.totalBovinos,
     this.onUnirseRancho,
     this.onMisGanaderos,
-    this.ganaderosBtnLabel = 'Ver ganaderos',
+    this.onVerColegas,
+    this.ganaderosBtnLabel = 'Ver ganaderos del rancho',
   });
 
   bool get _tieneRancho => nombre.isNotEmpty && nombre != '—';
@@ -227,7 +229,9 @@ class PerfilRanchoCard extends StatelessWidget {
               children: [
                 _InfoChip(
                   icon: Icons.person_outline,
-                  label: duenoNombre.isNotEmpty ? duenoNombre : 'Dueño del rancho',
+                  label: duenoNombre.isNotEmpty
+                      ? 'Dueño del rancho: $duenoNombre'
+                      : 'Dueño del rancho',
                 ),
                 const SizedBox(width: 12),
                 _InfoChip(
@@ -239,10 +243,12 @@ class PerfilRanchoCard extends StatelessWidget {
           ],
 
           // Botón de acción
-          if (onUnirseRancho != null || onMisGanaderos != null) ...[
+          if (onUnirseRancho != null ||
+              onMisGanaderos != null ||
+              onVerColegas != null) ...[
             const SizedBox(height: 10),
             GestureDetector(
-              onTap: onUnirseRancho ?? onMisGanaderos,
+              onTap: onUnirseRancho ?? onMisGanaderos ?? onVerColegas,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 7),
@@ -265,7 +271,9 @@ class PerfilRanchoCard extends StatelessWidget {
                     Text(
                       onUnirseRancho != null
                           ? 'Unirse o crear rancho'
-                          : ganaderosBtnLabel,
+                          : onVerColegas != null
+                              ? 'Ver colegas del rancho'
+                              : ganaderosBtnLabel,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,

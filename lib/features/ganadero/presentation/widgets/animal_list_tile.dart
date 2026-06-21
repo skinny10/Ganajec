@@ -25,21 +25,12 @@ class AnimalListTile extends StatelessWidget {
     }
   }
 
-  IconData _animalIcon(String raza) {
-    switch (raza.toLowerCase()) {
-      case 'holstein':
-        return Icons.pets;
-      case 'angus':
-        return Icons.cruelty_free;
-      default:
-        return Icons.pets;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final color = _estadoColor(context, estado);
+    final tieneContexto = animal.ganaderoNombre.isNotEmpty;
+    final edad = DateTime.now().year - animal.fechaNacimiento.year;
 
     return GestureDetector(
       onTap: onTap,
@@ -61,7 +52,7 @@ class AnimalListTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                _animalIcon(animal.raza),
+                Icons.pets,
                 color: colors.onSurfaceVariant,
                 size: 22,
               ),
@@ -78,12 +69,21 @@ class AnimalListTile extends StatelessWidget {
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  Text(
-                    '${animal.raza} · ${DateTime.now().year - animal.fechaNacimiento.year} años · ${animal.idExterno}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                  ),
+                  if (tieneContexto) ...[
+                    Text(
+                      '${animal.ganaderoNombre} · ${animal.raza}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                    ),
+                  ] else ...[
+                    Text(
+                      '${animal.raza} · $edad año${edad == 1 ? '' : 's'} · ${animal.idExterno}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ],
               ),
             ),

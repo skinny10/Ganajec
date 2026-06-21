@@ -41,13 +41,24 @@ class RanchoModalViewModel extends ChangeNotifier {
         ApiConstants.unirseRancho,
         data: {'codigo_invitacion': codigo},
       );
-      // La API devuelve { rancho_id, nombre, ... } o similar
+      // La API devuelve { rancho_id, nombre, municipio, estado, ... }
+      // o { rancho: { id, nombre, municipio, estado } }
       final data = res.data as Map<String, dynamic>? ?? {};
+      final rancho = data['rancho'] as Map<String, dynamic>? ?? data;
       final rId = data['rancho_id'] as String? ??
-          data['id'] as String? ??
-          data['rancho']?['id'] as String? ??
+          rancho['id'] as String? ??
           '';
-      if (rId.isNotEmpty) await TokenStorage.saveRanchoId(rId);
+      final rNombre    = rancho['nombre']    as String?;
+      final rMunicipio = rancho['municipio'] as String?;
+      final rEstado    = rancho['estado']    as String?;
+      if (rId.isNotEmpty) {
+        await TokenStorage.saveRanchoInfo(
+          id: rId,
+          nombre: rNombre,
+          municipio: rMunicipio,
+          estado: rEstado,
+        );
+      }
       _status = RanchoModalStatus.success;
       notifyListeners();
     } on DioException catch (e) {

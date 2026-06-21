@@ -57,7 +57,7 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
         ),
         centerTitle: true,
         title: Text(
-          vm.rancho?.nombre ?? 'Mi rancho',
+          vm.rancho.nombre,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -66,8 +66,7 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
           ),
         ),
         actions: [
-          if (vm.rancho != null)
-            GestureDetector(
+          GestureDetector(
               onTap: () async {
                 await context.push(
                   AppRoutes.editarRancho,
@@ -122,7 +121,7 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
         padding: const EdgeInsets.only(top: 16, bottom: 40),
         children: [
           // Card info del rancho
-          if (vm.rancho != null) _RanchoInfoCard(rancho: vm.rancho!),
+          _RanchoInfoCard(rancho: vm.rancho),
 
           const SizedBox(height: 16),
 

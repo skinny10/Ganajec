@@ -16,23 +16,58 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _awayFromHome = false;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      await context.read<HomeViewModel>().cargarDatos();
-      if (mounted && context.read<HomeViewModel>().hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.read<HomeViewModel>().errorMessage ?? 'Error al cargar datos',
-            ),
-            backgroundColor: Colors.red[700],
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Escucha cambios de ruta para recargar al volver a home
+      GoRouter.of(context).routerDelegate.addListener(_onRouteChanged);
+      _cargarDatos();
     });
+  }
+
+  @override
+  void dispose() {
+    // Intenta remover el listener (puede no estar montado si se llama tarde)
+    try {
+      GoRouter.of(context).routerDelegate.removeListener(_onRouteChanged);
+    } catch (_) {}
+    super.dispose();
+  }
+
+  void _onRouteChanged() {
+    if (!mounted) return;
+    final location = GoRouter.of(context)
+        .routerDelegate
+        .currentConfiguration
+        .uri
+        .path;
+    if (location == AppRoutes.home) {
+      if (_awayFromHome) {
+        _awayFromHome = false;
+        _cargarDatos();
+      }
+    } else {
+      _awayFromHome = true;
+    }
+  }
+
+  Future<void> _cargarDatos() async {
+    await context.read<HomeViewModel>().cargarDatos();
+    if (mounted && context.read<HomeViewModel>().hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.read<HomeViewModel>().errorMessage ?? 'Error al cargar datos',
+          ),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   bool get _esDueno => TokenStorage.role == 'dueno';
@@ -54,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
         context.push(AppRoutes.registroBovino);
         break;
       case HomeTab.reportes:
-        context.push(AppRoutes.historial);
+        context.push(
+          _esDueno ? AppRoutes.historialDueno : AppRoutes.historial,
+        );
         break;
       case HomeTab.perfil:
         context.push(AppRoutes.perfil);
@@ -72,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: vm.isLoading
             ? const Center(child: CircularProgressIndicator())
             : RefreshIndicator(
-                onRefresh: () => context.read<HomeViewModel>().cargarDatos(),
+                onRefresh: _cargarDatos,
                 child: CustomScrollView(
                   slivers: [
                     SliverToBoxAdapter(
@@ -93,14 +130,47 @@ class _HomeScreenState extends State<HomeScreen> {
                                           color: colors.onSurfaceVariant,
                                         ),
                                   ),
-                                  Text(
-                                    vm.userName,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          vm.userName,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: _esDueno
+                                              ? const Color(0xFFFEF9E7)
+                                              : const Color(0xFFE8F5EF),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: _esDueno
+                                                ? const Color(0xFFD4AC0D)
+                                                : const Color(0xFF2E7D32),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _esDueno ? 'Dueño' : 'Ganadero',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: _esDueno
+                                                ? const Color(0xFF9A7D0A)
+                                                : const Color(0xFF2E7D32),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -137,13 +207,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           HomeMiHato(
                             animales: vm.animales,
                             alertas: vm.alertas,
+                            esDueno: _esDueno,
                             onVerTodos: () {},
-                            onAnimalTap: (animal) => context.push(
-                              AppRoutes.detalleBovino,
-                              extra: animal,
-                            ),
+                            onAnimalTap: _esDueno
+                                ? null
+                                : (animal) => context.push(
+                                      AppRoutes.detalleBovino,
+                                      extra: animal,
+                                    ),
                           ),
-                          if (TokenStorage.role != 'dueno') ...[
+                          if (!_esDueno) ...[
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
                               onPressed: () => context.push(AppRoutes.registroBovino),
@@ -154,8 +227,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 16),
                           HomePredicciones(
                             predicciones: vm.predicciones,
-                            onVerHistorial: () =>
-                                context.push(AppRoutes.historial),
+                            onVerHistorial: () => context.push(
+                              _esDueno
+                                  ? AppRoutes.historialDueno
+                                  : AppRoutes.historial,
+                            ),
                           ),
                           const SizedBox(height: 24),
                         ]),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
 import '../../viewmodels/mis_ganaderos_viewmodel.dart';
+import '../../widgets/rancho_modal.dart';
 
 class MisGanaderosScreen extends StatefulWidget {
   const MisGanaderosScreen({super.key});
@@ -63,6 +64,43 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           ),
         ),
         actions: [
+          // Crear rancho adicional
+          GestureDetector(
+            onTap: () async {
+              final creado = await mostrarRanchoModal(
+                context,
+                initialTab: 1, // tab "Crear"
+              );
+              if (creado && context.mounted) {
+                context.read<MisGanaderosViewModel>().cargar();
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 4, top: 8, bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: _kGreenLight,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: _kGreen.withOpacity(0.35)),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: _kGreen, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Crear rancho',
+                    style: TextStyle(
+                      color: _kGreen,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           IconButton(
             onPressed: () => context.read<MisGanaderosViewModel>().cargar(),
             icon: const Icon(Icons.refresh_outlined,
@@ -264,7 +302,7 @@ class _RanchoHeaderCard extends StatelessWidget {
             GestureDetector(
               onTap: () => context.push(
                 AppRoutes.ranchoDashboard,
-                extra: rancho.id,
+                extra: rancho, // pasamos el objeto completo, no solo el ID
               ),
               child: Container(
                 padding: const EdgeInsets.symmetric(

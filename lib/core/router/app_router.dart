@@ -42,6 +42,10 @@ import 'package:ganajec/features/ganadero/presentation/screens/registrar_ganader
 import 'package:ganajec/features/ganadero/presentation/viewmodels/registrar_ganadero_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/cambiar_contrasena/cambiar_contrasena_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/cambiar_contrasena_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/colegas/colegas_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/colegas_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/historial_dueno/historial_dueno_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/historial_dueno_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -78,6 +82,8 @@ class AppRoutes {
   static const String editarRancho = '/editar-rancho';
   static const String registrarGanadero = '/registrar-ganadero';
   static const String cambiarContrasena = '/cambiar-contrasena';
+  static const String colegas = '/colegas';
+  static const String historialDueno = '/historial-dueno';
 }
 
 class AppRouter {
@@ -226,10 +232,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.ranchoDashboard,
         builder: (context, state) {
-          final ranchoId = state.extra as String;
+          final rancho = state.extra as RanchoInfo;
           return ChangeNotifierProvider(
             create: (_) =>
-                RanchoDashboardViewModel(ranchoId: ranchoId),
+                RanchoDashboardViewModel(initialRancho: rancho),
             child: const RanchoDashboardScreen(),
           );
         },
@@ -257,6 +263,20 @@ class AppRouter {
         builder: (context, state) => ChangeNotifierProvider(
           create: (_) => CambiarContrasenaViewModel(),
           child: const CambiarContrasenaScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.colegas,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => ColegasViewModel(),
+          child: const ColegasScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.historialDueno,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => HistorialDuenoViewModel(),
+          child: const HistorialDuenoScreen(),
         ),
       ),
       GoRoute(

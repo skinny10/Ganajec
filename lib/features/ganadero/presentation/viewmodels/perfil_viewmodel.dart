@@ -118,43 +118,85 @@ class PerfilViewModel extends ChangeNotifier {
       if (apiNombre != null && apiNombre.isNotEmpty) _nombre = apiNombre;
       if (apiEmail != null && apiEmail.isNotEmpty) _email = apiEmail;
 
-      // Ranchos: v2 devuelve { ..., ranchos: [{id, nombre, municipio, estado, dueno_id, dueno_nombre?, total_bovinos}] }
+      // ── Rancho ──────────────────────────────────────────────────────────────
+      // El endpoint del ganadero puede devolver el rancho de varias formas:
+      //   v2: { ranchos: [{id, nombre, municipio, estado, dueno_id, ...}] }
+      //   v1: { rancho_id: "...", rancho: {nombre, municipio, estado} }
+      //   v0: solo { rancho_id: "..." } en la raíz
+      // Como último recurso, usamos TokenStorage (persistido al unirse).
+
       final ranchos = data['ranchos'] as List?;
       if (ranchos != null && ranchos.isNotEmpty) {
+        // ── Formato v2 (array) ───────────────────────────────────────────────
         final r = ranchos.first as Map<String, dynamic>;
-        _ranchoId     = r['id']        as String? ?? '';
-        _ranchoNombre = r['nombre']    as String? ?? '—';
-        _ranchoMunicipio = r['municipio'] as String? ?? '—';
-        _ranchoEstado = r['estado']    as String? ?? '—';
-        _duenoId      = r['dueno_id']  as String? ?? '';
+        _ranchoId        = r['id']         as String? ?? '';
+        _ranchoNombre    = r['nombre']     as String? ?? '—';
+        _ranchoMunicipio = r['municipio']  as String? ?? '—';
+        _ranchoEstado    = r['estado']     as String? ?? '—';
+        _duenoId         = r['dueno_id']   as String? ?? '';
+        _duenoNombre     = r['dueno_nombre']  as String?
+                         ?? r['nombre_dueno'] as String?
+                         ?? '';
 
-        // El API puede o no devolver el nombre del dueño
-        _duenoNombre  = r['dueno_nombre']  as String?
-                      ?? r['nombre_dueno'] as String?
-                      ?? '';
+        // Persistir para futuras sesiones
+        await TokenStorage.saveRanchoInfo(
+          id: _ranchoId,
+          nombre: _ranchoNombre == '—' ? null : _ranchoNombre,
+          municipio: _ranchoMunicipio == '—' ? null : _ranchoMunicipio,
+          estado: _ranchoEstado == '—' ? null : _ranchoEstado,
+        );
 
-        // Guarda el rancho_id para uso en otras pantallas
-        if (TokenStorage.ranchoId == null && _ranchoId.isNotEmpty) {
-          await TokenStorage.saveRanchoId(_ranchoId);
-        }
-
-        // Si no vino el nombre del dueño, intentar fetch extra
-        if (_duenoNombre.isEmpty && _duenoId.isNotEmpty) {
-          try {
-            final duenoRes = await _dio.get(ApiConstants.perfilDueno(_duenoId));
-            final dNombre = duenoRes.data['nombre'] as String?;
-            if (dNombre != null && dNombre.isNotEmpty) _duenoNombre = dNombre;
-          } catch (_) {} // silencioso — no es crítico
-        }
-
-        // Total bovinos: suma de todos los ranchos del ganadero
         _totalBovinos = ranchos.fold<int>(
           0,
           (sum, r) => sum + ((r['total_bovinos'] as num?)?.toInt() ?? 0),
         );
       } else {
-        // Fallback v1: total_bovinos en la raíz
+        // ── Formatos v0/v1: rancho_id en raíz o objeto rancho ───────────────
+        final inlineRancho = data['rancho'] as Map<String, dynamic>?;
+        final rIdFromRoot  = data['rancho_id'] as String?
+                           ?? inlineRancho?['id'] as String?
+                           ?? '';
+
+        if (rIdFromRoot.isNotEmpty || inlineRancho != null) {
+          _ranchoId        = rIdFromRoot.isNotEmpty ? rIdFromRoot
+                           : inlineRancho?['id'] as String?
+                           ?? TokenStorage.ranchoId ?? '';
+          _ranchoNombre    = inlineRancho?['nombre']    as String?
+                           ?? TokenStorage.ranchoNombre ?? '—';
+          _ranchoMunicipio = inlineRancho?['municipio'] as String?
+                           ?? TokenStorage.ranchoMunicipio ?? '—';
+          _ranchoEstado    = inlineRancho?['estado']    as String?
+                           ?? TokenStorage.ranchoEstado ?? '—';
+          _duenoId         = inlineRancho?['dueno_id']  as String? ?? '';
+          _duenoNombre     = inlineRancho?['dueno_nombre'] as String?
+                           ?? inlineRancho?['nombre_dueno'] as String?
+                           ?? '';
+          // Persistir detalles para próximas sesiones
+          await TokenStorage.saveRanchoInfo(
+            id: _ranchoId,
+            nombre: _ranchoNombre == '—' ? null : _ranchoNombre,
+            municipio: _ranchoMunicipio == '—' ? null : _ranchoMunicipio,
+            estado: _ranchoEstado == '—' ? null : _ranchoEstado,
+          );
+        } else if (TokenStorage.ranchoId != null) {
+          // ── v0 sin datos inline: usar lo que guardamos al unirse ──────────
+          _ranchoId        = TokenStorage.ranchoId!;
+          _ranchoNombre    = TokenStorage.ranchoNombre    ?? '—';
+          _ranchoMunicipio = TokenStorage.ranchoMunicipio ?? '—';
+          _ranchoEstado    = TokenStorage.ranchoEstado    ?? '—';
+        }
+
+        // Total bovinos en raíz (v1)
         _totalBovinos = (data['total_bovinos'] as num?)?.toInt() ?? 0;
+      }
+
+      // Si no vino nombre del dueño, intentar fetch silencioso
+      if (_duenoNombre.isEmpty && _duenoId.isNotEmpty) {
+        try {
+          final duenoRes = await _dio.get(ApiConstants.perfilDueno(_duenoId));
+          final dNombre = duenoRes.data['nombre'] as String?;
+          if (dNombre != null && dNombre.isNotEmpty) _duenoNombre = dNombre;
+        } catch (_) {}
       }
 
       _status = PerfilStatus.success;

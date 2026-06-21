@@ -12,7 +12,6 @@ class EditarPerfilViewModel extends ChangeNotifier {
   EditarPerfilStatus _status = EditarPerfilStatus.idle;
   String? _error;
 
-  // Controladores de texto
   final nombreCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
 
@@ -22,7 +21,6 @@ class EditarPerfilViewModel extends ChangeNotifier {
   bool get isSuccess => _status == EditarPerfilStatus.success;
 
   EditarPerfilViewModel() {
-    // Pre-fill con datos actuales
     nombreCtrl.text = TokenStorage.userName ?? '';
     emailCtrl.text = TokenStorage.email ?? '';
   }
@@ -44,11 +42,11 @@ class EditarPerfilViewModel extends ChangeNotifier {
 
     try {
       final uid = TokenStorage.userId ?? '';
-      await _dio.patch(
-        ApiConstants.actualizarPerfilGanadero(uid),
+      await _dio.put(
+        ApiConstants.actualizarPerfilGanaderoV2(uid),
         data: {'nombre': nombre, 'email': email},
       );
-      // Actualizar TokenStorage local
+      // Actualizar caché local
       await TokenStorage.saveSession(
         token: TokenStorage.token ?? '',
         userId: uid,
@@ -60,10 +58,10 @@ class EditarPerfilViewModel extends ChangeNotifier {
     } on DioException catch (e) {
       _error = e.response?.data?['detail']?.toString() ??
           e.message ??
-          'Error al guardar';
+          'Error al guardar perfil';
       _status = EditarPerfilStatus.error;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Error inesperado';
       _status = EditarPerfilStatus.error;
     }
     notifyListeners();

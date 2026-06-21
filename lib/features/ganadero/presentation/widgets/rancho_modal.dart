@@ -4,28 +4,31 @@ import 'package:provider/provider.dart';
 import 'package:ganajec/core/network/token_storage.dart';
 import '../viewmodels/rancho_modal_viewmodel.dart';
 
-Future<bool> mostrarRanchoModal(BuildContext context) async {
+/// [initialTab] 0 = Unirse, 1 = Crear
+Future<bool> mostrarRanchoModal(BuildContext context,
+    {int initialTab = 0}) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => ChangeNotifierProvider(
       create: (_) => RanchoModalViewModel(),
-      child: const _RanchoModalSheet(),
+      child: _RanchoModalSheet(initialTab: initialTab),
     ),
   );
   return result == true;
 }
 
 class _RanchoModalSheet extends StatefulWidget {
-  const _RanchoModalSheet();
+  final int initialTab;
+  const _RanchoModalSheet({this.initialTab = 0});
   @override
   State<_RanchoModalSheet> createState() => _RanchoModalSheetState();
 }
 
 class _RanchoModalSheetState extends State<_RanchoModalSheet> {
   // 0 = Unirse, 1 = Crear
-  int _tab = 0;
+  late int _tab = widget.initialTab;
 
   static const _kBg = Color(0xFFFAFAF7);
   static const _kBorder = Color(0xFFE8E5DC);

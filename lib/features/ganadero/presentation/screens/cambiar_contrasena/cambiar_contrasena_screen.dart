@@ -21,7 +21,6 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
   static const _kRed = Color(0xFFC0392B);
   static const _kRedLight = Color(0xFFFDEDEC);
 
-  bool _verActual = false;
   bool _verNueva = false;
   bool _verConfirmar = false;
 
@@ -126,7 +125,7 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
           const SizedBox(height: 4),
           const Center(
             child: Text(
-              'Ingresa tu contraseña actual y define una nueva.',
+              'Define tu nueva contraseña de acceso.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: _kTextSecondary),
             ),
@@ -157,17 +156,6 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
             ),
             const SizedBox(height: 16),
           ],
-
-          // Campo: contraseña actual
-          _label('Contraseña actual'),
-          const SizedBox(height: 6),
-          _passwordField(
-            controller: vm.actualCtrl,
-            hint: '••••••••',
-            visible: _verActual,
-            onToggle: () => setState(() => _verActual = !_verActual),
-          ),
-          const SizedBox(height: 16),
 
           // Campo: nueva contraseña
           _label('Nueva contraseña'),
@@ -258,7 +246,9 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
             suffixIcon: GestureDetector(
               onTap: onToggle,
               child: Icon(
-                visible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                visible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
                 color: _kTextSecondary,
                 size: 18,
               ),

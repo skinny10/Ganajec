@@ -25,6 +25,9 @@ dependencies:
   # Fuentes
   google_fonts: ^6.2.1
 
+  # Gráficas
+  fl_chart: ^0.69.0
+
   # Dev tools
   device_preview: ^1.1.0
 

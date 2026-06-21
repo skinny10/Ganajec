@@ -121,13 +121,16 @@ class MisGanaderosViewModel extends ChangeNotifier {
       }
 
       // 3. Ganaderos del rancho actual → GET /dueno/ranchos/{id}/ganaderos
+      //    El endpoint NO devuelve total_bovinos, así que también pedimos
+      //    los bovinos y contamos por ganadero_id.
       final actualRanchoId = _rancho?.id ?? ranchoId;
       if (actualRanchoId.isNotEmpty) {
+        // El endpoint ya incluye total_bovinos por ganadero (GROUP BY en el server).
         final ganaderosRes =
             await _dio.get(ApiConstants.ganaderosDeRancho(actualRanchoId));
-        final raw = ganaderosRes.data;
-        final list = raw is List ? raw : (raw['ganaderos'] as List? ?? []);
-        _ganaderos = list
+        final rawG = ganaderosRes.data;
+        final listG = rawG is List ? rawG : (rawG['ganaderos'] as List? ?? []);
+        _ganaderos = listG
             .map((e) => GanaderoItem.fromJson(e as Map<String, dynamic>))
             .toList();
       }

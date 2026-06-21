@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/historial_productivo.dart';
@@ -349,6 +350,11 @@ class DetalleTabBar extends StatelessWidget {
               label: 'Predicciones',
               isActive: selectedIndex == 1,
               onTap: () => onTabChanged(1),
+            ),
+            _TabButton(
+              label: 'Gráficas',
+              isActive: selectedIndex == 2,
+              onTap: () => onTabChanged(2),
             ),
           ],
         ),
@@ -959,6 +965,336 @@ class _PrediccionCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Tab Gráficas ─────────────────────────────────────────────────────────────
+
+/// Metadatos por clave de métrica
+class _MetricaMeta {
+  final String label;
+  final String unidad;
+  final Color color;
+  const _MetricaMeta(this.label, this.unidad, this.color);
+}
+
+const _metricasMeta = <String, _MetricaMeta>{
+  'temperatura_corporal':    _MetricaMeta('Temperatura corporal',   '°C',  Color(0xFFE74C3C)),
+  'produccion_leche_litros': _MetricaMeta('Producción de leche',    'L',   Color(0xFF2980B9)),
+  'consumo_alimento_kg':     _MetricaMeta('Consumo de alimento',    'kg',  Color(0xFF27AE60)),
+  'consumo_agua_litros':     _MetricaMeta('Consumo de agua',        'L',   Color(0xFF1ABC9C)),
+  'frecuencia_cardiaca':     _MetricaMeta('Frecuencia cardíaca',    'bpm', Color(0xFFE67E22)),
+  'frecuencia_respiratoria': _MetricaMeta('Frec. respiratoria',     'rpm', Color(0xFF9B59B6)),
+  'condicion_corporal':      _MetricaMeta('Condición corporal',     '',    Color(0xFF8B4A2B)),
+};
+
+class DetalleGraficasTab extends StatelessWidget {
+  final Map<String, List<GraficaPunto>> graficas;
+
+  const DetalleGraficasTab({super.key, required this.graficas});
+
+  @override
+  Widget build(BuildContext context) {
+    if (graficas.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('📊', style: TextStyle(fontSize: 36)),
+              SizedBox(height: 12),
+              Text(
+                'Aún no hay gráficas disponibles',
+                style: TextStyle(
+                  color: _kTextSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Registra más síntomas para ver la evolución.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: _kTextMuted, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Orden preferido de métricas
+    final orden = [
+      'temperatura_corporal',
+      'produccion_leche_litros',
+      'consumo_alimento_kg',
+      'consumo_agua_litros',
+      'frecuencia_cardiaca',
+      'frecuencia_respiratoria',
+      'condicion_corporal',
+    ];
+
+    final keys = [
+      ...orden.where(graficas.containsKey),
+      ...graficas.keys.where((k) => !orden.contains(k)),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: Column(
+        children: keys
+            .map((key) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _GraficaCard(
+                    metricaKey: key,
+                    puntos: graficas[key]!,
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _GraficaCard extends StatelessWidget {
+  final String metricaKey;
+  final List<GraficaPunto> puntos;
+
+  const _GraficaCard({required this.metricaKey, required this.puntos});
+
+  String _formatFecha(DateTime d) =>
+      '${d.day}/${d.month}';
+
+  String _formatValor(double v, String unidad) =>
+      unidad.isEmpty ? v.toStringAsFixed(1) : '${v.toStringAsFixed(1)} $unidad';
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = _metricasMeta[metricaKey] ??
+        _MetricaMeta(metricaKey, '', const Color(0xFF2E7D32));
+    final color = meta.color;
+    final ultimo = puntos.last;
+    final anterior = puntos.length > 1 ? puntos[puntos.length - 2] : null;
+    final tendencia = anterior == null
+        ? 0
+        : ultimo.valor.compareTo(anterior.valor);
+
+    // Rango Y con margen
+    final minVal = puntos.map((p) => p.valor).reduce(math.min);
+    final maxVal = puntos.map((p) => p.valor).reduce(math.max);
+    final rango = (maxVal - minVal).abs();
+    final margen = rango < 1 ? 1.0 : rango * 0.2;
+    final yMin = (minVal - margen);
+    final yMax = (maxVal + margen);
+
+    // Spots de fl_chart
+    final spots = puntos
+        .asMap()
+        .entries
+        .map((e) => FlSpot(e.key.toDouble(), e.value.valor))
+        .toList();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meta.label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _kTextPrimary,
+                      ),
+                    ),
+                    if (meta.unidad.isNotEmpty)
+                      Text(
+                        meta.unidad,
+                        style: const TextStyle(
+                            fontSize: 11, color: _kTextMuted),
+                      ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    _formatValor(ultimo.valor, meta.unidad),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  if (tendencia != 0)
+                    Icon(
+                      tendencia > 0
+                          ? Icons.trending_up_rounded
+                          : Icons.trending_down_rounded,
+                      color: tendencia > 0
+                          ? const Color(0xFFE74C3C)
+                          : const Color(0xFF27AE60),
+                      size: 16,
+                    ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Gráfica
+          SizedBox(
+            height: 120,
+            child: puntos.length == 1
+                // Un solo punto: solo mostramos el valor centrado
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, color: color, size: 10),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatFecha(ultimo.fecha),
+                          style: const TextStyle(
+                              fontSize: 10, color: _kTextMuted),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Solo un registro',
+                          style: const TextStyle(
+                              fontSize: 11, color: _kTextSecondary),
+                        ),
+                      ],
+                    ),
+                  )
+                : LineChart(
+                    LineChartData(
+                      minY: yMin,
+                      maxY: yMax,
+                      clipData: const FlClipData.all(),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        horizontalInterval: rango < 1 ? 0.5 : rango / 3,
+                        getDrawingHorizontalLine: (_) => FlLine(
+                          color: _kBorder,
+                          strokeWidth: 1,
+                          dashArray: [4, 4],
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 22,
+                            interval: 1,
+                            getTitlesWidget: (value, meta) {
+                              final idx = value.toInt();
+                              if (idx < 0 || idx >= puntos.length) {
+                                return const SizedBox.shrink();
+                              }
+                              // Solo primero y último (para no saturar)
+                              if (idx != 0 && idx != puntos.length - 1) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  _formatFecha(puntos[idx].fecha),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    color: _kTextMuted,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: spots,
+                          isCurved: true,
+                          curveSmoothness: 0.3,
+                          color: color,
+                          barWidth: 2,
+                          dotData: FlDotData(
+                            show: true,
+                            getDotPainter: (spot, pct, bar, idx) =>
+                                FlDotCirclePainter(
+                              radius: idx == spots.length - 1 ? 4 : 2.5,
+                              color: color,
+                              strokeWidth: 1.5,
+                              strokeColor: Colors.white,
+                            ),
+                          ),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            gradient: LinearGradient(
+                              colors: [
+                                color.withOpacity(0.18),
+                                color.withOpacity(0.02),
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+          // Fechas mínima y máxima bajo el chart si hay más de 2 puntos
+          if (puntos.length > 2) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _formatFecha(puntos.first.fecha),
+                  style:
+                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                ),
+                Text(
+                  '${puntos.length} registros',
+                  style:
+                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                ),
+                Text(
+                  _formatFecha(puntos.last.fecha),
+                  style:
+                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

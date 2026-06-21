@@ -2,9 +2,15 @@ class Prediccion {
   final String id;
   final String animalId;
   final String animalNombre;
+  final String animalIdExterno; // ID de arete / registro
   final String enfermedad;
   final double confianza;
   final DateTime fecha;
+
+  /// Campos de contexto — solo presentes en la vista del dueño
+  final String ranchoNombre;
+  final String ganaderoNombre;
+  final String severidad; // baja · media · alta
 
   const Prediccion({
     required this.id,
@@ -13,5 +19,9 @@ class Prediccion {
     required this.enfermedad,
     required this.confianza,
     required this.fecha,
+    this.animalIdExterno = '',
+    this.ranchoNombre = '',
+    this.ganaderoNombre = '',
+    this.severidad = '',
   });
 }

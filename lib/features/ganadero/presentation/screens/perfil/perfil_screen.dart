@@ -158,10 +158,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   estado: vm.rancho.estado,
                   duenoNombre: vm.rancho.duenoNombre,
                   totalBovinos: vm.totalBovinos,
-                  // Ganadero: "Ver ganaderos" / Dueño: "Ver mis ganaderos"
-                  ganaderosBtnLabel: vm.usuario.role == 'dueno'
-                      ? 'Ver mis ganaderos'
-                      : 'Ver ganaderos',
+                  ganaderosBtnLabel: 'Ver ganaderos del rancho',
                   onUnirseRancho: !vm.tieneRancho
                       ? () async {
                           final ok = await mostrarRanchoModal(context);
@@ -170,8 +167,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                           }
                         }
                       : null,
-                  onMisGanaderos: vm.tieneRancho
+                  // Dueño → mis ganaderos | Ganadero → colegas del rancho
+                  onMisGanaderos: (vm.tieneRancho && vm.usuario.role == 'dueno')
                       ? () => context.push(AppRoutes.misGanaderos)
+                      : null,
+                  onVerColegas: (vm.tieneRancho && vm.usuario.role != 'dueno')
+                      ? () => context.push(AppRoutes.colegas)
                       : null,
                 ),
 

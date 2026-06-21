@@ -40,6 +40,10 @@ class ApiConstants {
   static String prediccionesBovino(String bovinoId) =>
       '/ganadero/bovinos/$bovinoId/predicciones';
 
+  /// GET /ganadero/bovinos/{bovino_id}/graficas
+  static String graficasBovino(String bovinoId) =>
+      '/ganadero/bovinos/$bovinoId/graficas';
+
   /// GET /ganadero/{ganadero_id}/predicciones  (historial global)
   static String prediccionesGanadero(String ganaderoId) =>
       '/ganadero/$ganaderoId/predicciones';
@@ -62,8 +66,12 @@ class ApiConstants {
       '/ganadero/alertas/$alertaId';
 
   // ── Ganadero — editar perfil ─────────────────────────────────────────────────
-  /// PATCH /ganadero/{ganadero_id}  { nombre?, email? }
-  static String actualizarPerfilGanadero(String id) => '/ganadero/$id';
+  /// PUT /ganadero/{ganadero_id}/perfil  { nombre?, email?, password? }
+  static String actualizarPerfilGanaderoV2(String id) => '/ganadero/$id/perfil';
+
+  // ── Ganadero — colegas ───────────────────────────────────────────────────────
+  /// GET /ganadero/colegas  — otros ganaderos del mismo rancho (sin email)
+  static const String colegasGanadero = '/ganadero/colegas';
 
   // ── Rancho — crear ───────────────────────────────────────────────────────────
   /// POST /dueno/ranchos  { nombre, municipio, estado }
@@ -105,4 +113,17 @@ class ApiConstants {
 
   /// POST /dueno/suscripcion   { plan, es_anual }
   static const String suscribirse = '/dueno/suscripcion';
+
+  // ── Dueño — vistas globales ───────────────────────────────────────────────────
+  /// GET /dueno/bovinos  — todos los bovinos de todos sus ranchos
+  static const String bovinosDueno = '/dueno/bovinos';
+
+  /// GET /dueno/predicciones  — últimas predicciones de sus ranchos
+  static const String prediccionesDueno = '/dueno/predicciones';
+
+  /// GET /dueno/historial  — historial completo rancho→ganadero→bovino→registros
+  static const String historialDueno = '/dueno/historial';
+
+  /// GET /dueno/reportes  — estadísticas y resumen por bovino
+  static const String reportesDueno = '/dueno/reportes';
 }

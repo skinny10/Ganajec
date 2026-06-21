@@ -10,19 +10,22 @@ enum RanchoDashboardStatus { idle, loading, success, error }
 
 class RanchoDashboardViewModel extends ChangeNotifier {
   final Dio _dio = ApiClient.instance;
-  final String ranchoId;
 
-  RanchoDashboardViewModel({required this.ranchoId});
+  /// Se inicializa con el RanchoInfo completo que ya tenemos del perfil.
+  /// Así nunca mostramos "—" por un endpoint de detalle con formato distinto.
+  RanchoInfo initialRancho;
+
+  RanchoDashboardViewModel({required this.initialRancho});
 
   RanchoDashboardStatus _status = RanchoDashboardStatus.idle;
   String? _error;
-  RanchoInfo? _rancho;
+  late RanchoInfo _rancho = initialRancho;
   List<Animal> _bovinos = [];
 
   RanchoDashboardStatus get status => _status;
   String? get error => _error;
   bool get isLoading => _status == RanchoDashboardStatus.loading;
-  RanchoInfo? get rancho => _rancho;
+  RanchoInfo get rancho => _rancho;
   List<Animal> get bovinos => _bovinos;
 
   Future<void> cargar() async {
@@ -31,29 +34,19 @@ class RanchoDashboardViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Detalle del rancho
-      final rRes = await _dio.get(ApiConstants.ranchoDetalle(ranchoId));
-      _rancho = RanchoInfo.fromJson(rRes.data as Map<String, dynamic>);
-
-      // 2. Bovinos del rancho
-      try {
-        final bRes =
-            await _dio.get(ApiConstants.bovinosDeRancho(ranchoId));
-        final raw = bRes.data;
-        final list =
-            raw is List ? raw : (raw['bovinos'] as List? ?? []);
-        _bovinos = list
-            .map((e) => AnimalModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } catch (_) {
-        _bovinos = [];
-      }
-
+      // Solo cargamos los bovinos — los datos del rancho vienen del perfil
+      final bRes = await _dio.get(
+          ApiConstants.bovinosDeRancho(initialRancho.id));
+      final raw = bRes.data;
+      final list = raw is List ? raw : (raw['bovinos'] as List? ?? []);
+      _bovinos = list
+          .map((e) => AnimalModel.fromJson(e as Map<String, dynamic>))
+          .toList();
       _status = RanchoDashboardStatus.success;
     } on DioException catch (e) {
       _error = e.response?.data?['detail']?.toString() ??
           e.message ??
-          'Error al cargar el rancho';
+          'Error al cargar bovinos';
       _status = RanchoDashboardStatus.error;
     } catch (e) {
       _error = e.toString();
@@ -64,6 +57,7 @@ class RanchoDashboardViewModel extends ChangeNotifier {
 
   void actualizarRancho(RanchoInfo actualizado) {
     _rancho = actualizado;
+    initialRancho = actualizado;
     notifyListeners();
   }
 }

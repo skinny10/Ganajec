@@ -61,11 +61,14 @@ class HomeAlertas extends StatelessWidget {
   }
 }
 
+// ── Mi hato (ganadero) / Mis ranchos (dueño) ─────────────────────────────────
+
 class HomeMiHato extends StatelessWidget {
   final List<Animal> animales;
   final List<Alerta> alertas;
   final VoidCallback onVerTodos;
   final void Function(Animal)? onAnimalTap;
+  final bool esDueno;
 
   const HomeMiHato({
     super.key,
@@ -73,6 +76,7 @@ class HomeMiHato extends StatelessWidget {
     required this.alertas,
     required this.onVerTodos,
     this.onAnimalTap,
+    this.esDueno = false,
   });
 
   String _estadoAnimal(String animalId, List<Alerta> alertas) {
@@ -82,34 +86,98 @@ class HomeMiHato extends StatelessWidget {
     return 'Observar';
   }
 
+  /// Agrupa animales por rancho_nombre para la vista del dueño
+  Map<String, List<Animal>> get _porRancho {
+    final map = <String, List<Animal>>{};
+    for (final a in animales) {
+      final key = a.ranchoNombre.isNotEmpty ? a.ranchoNombre : 'Sin rancho';
+      map.putIfAbsent(key, () => []).add(a);
+    }
+    return map;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Mi hato',
+              esDueno ? 'Mis ranchos' : 'Mi hato',
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            TextButton(
-              onPressed: onVerTodos,
-              child: const Text('Ver todos'),
-            ),
+            if (!esDueno)
+              TextButton(
+                onPressed: onVerTodos,
+                child: const Text('Ver todos'),
+              ),
           ],
         ),
-        ...animales.map(
-          (a) => AnimalListTile(
-            animal: a,
-            estado: _estadoAnimal(a.id, alertas),
-            onTap: onAnimalTap != null ? () => onAnimalTap!(a) : null,
+        if (animales.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              esDueno
+                  ? 'Aún no hay bovinos registrados en tus ranchos.'
+                  : 'Aún no tienes animales registrados.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          )
+        else if (esDueno)
+          // ── Vista dueño: agrupado por rancho ──────────────────────────────
+          ..._porRancho.entries.map((entry) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _RanchoHeader(nombre: entry.key),
+                  ...entry.value.map((a) => AnimalListTile(
+                        animal: a,
+                        estado: 'Saludable',
+                        onTap: null, // dueño no navega al detalle del bovino
+                      )),
+                ],
+              ))
+        else
+          // ── Vista ganadero: lista simple ──────────────────────────────────
+          ...animales.map(
+            (a) => AnimalListTile(
+              animal: a,
+              estado: _estadoAnimal(a.id, alertas),
+              onTap: onAnimalTap != null ? () => onAnimalTap!(a) : null,
+            ),
           ),
-        ),
       ],
+    );
+  }
+}
+
+class _RanchoHeader extends StatelessWidget {
+  final String nombre;
+  const _RanchoHeader({required this.nombre});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 6),
+      child: Row(
+        children: [
+          const Text('🏡', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 6),
+          Text(
+            nombre,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF8B4A2B),
+                ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -144,7 +212,18 @@ class HomePredicciones extends StatelessWidget {
             ),
           ],
         ),
-        ...predicciones.map((p) => PrediccionTile(prediccion: p)),
+        if (predicciones.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'No hay predicciones recientes.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          )
+        else
+          ...predicciones.map((p) => PrediccionTile(prediccion: p)),
       ],
     );
   }
