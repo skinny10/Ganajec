@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:ganajec/features/auth/presentation/widgets/auth_button.dart';
 import 'package:ganajec/features/auth/presentation/widgets/auth_error_text.dart';
@@ -43,7 +44,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       role: _selectedRole,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go(AppRoutes.home);
+      final role = TokenStorage.role;
+      if (role == 'dueno') {
+        context.go(AppRoutes.ranchoDashboard);
+      } else {
+        context.go(AppRoutes.home);
+      }
     }
   }
 
