@@ -103,6 +103,8 @@ class HomeViewModel extends ChangeNotifier {
       'en_buen_estado': _animales.length,
       'con_alertas':   _alertas.where((a) => !a.leida).length,
     };
+    debugPrint('🟢 _cargarGanadero() completado - animales: ${_animales.length}, alertas: ${_alertas.length}');
+    notifyListeners();
   }
 
   // ── Dueño: endpoints globales de la API ───────────────────────────────────
@@ -137,6 +139,9 @@ class HomeViewModel extends ChangeNotifier {
       'en_buen_estado': totalBovinos - conAlertas,
       'con_alertas':    conAlertas,
     };
+
+    debugPrint('🟢 _cargarDueno() completado - animales: ${_animales.length}, predicciones: ${_predicciones.length}');
+    notifyListeners();
   }
 
   // ── Parsers ───────────────────────────────────────────────────────────────

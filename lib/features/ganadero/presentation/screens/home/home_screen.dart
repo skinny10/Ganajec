@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -16,18 +17,47 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  GoRouter? _router;
+  String? _previousLocation;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final router = GoRouter.of(context);
+      _router = router;
+      final provider = router.routeInformationProvider;
+      _previousLocation = provider.value.uri.toString();
       _cargarDatos();
+      _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+        if (mounted) _cargarDatos();
+      });
+      provider.addListener(_onRouteChanged);
     });
+  }
+
+  void _onRouteChanged() {
+    final r = _router;
+    if (r == null) return;
+    final provider = r.routeInformationProvider;
+    final location = provider.value.uri.toString();
+    if (location == _previousLocation) return;
+    _previousLocation = location;
+    if (location == AppRoutes.home && mounted) {
+      debugPrint('🏠 HomeScreen detectó regreso a /home, refrescando...');
+      _cargarDatos();
+    }
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
+    final r = _router;
+    if (r != null) {
+      r.routeInformationProvider.removeListener(_onRouteChanged);
+    }
     super.dispose();
   }
 
@@ -231,6 +261,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             if (vm.isLoading)
               const LinearProgressIndicator(),
+            if (vm.hasError)
+              MaterialBanner(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                content: Text(
+                  vm.errorMessage ?? 'Error al cargar datos',
+                  style: const TextStyle(fontSize: 13),
+                ),
+                leading: const Icon(Icons.error_outline, color: Colors.red),
+                backgroundColor: Colors.red.shade50,
+                actions: [
+                  TextButton(
+                    onPressed: _cargarDatos,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
