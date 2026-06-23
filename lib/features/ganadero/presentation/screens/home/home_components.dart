@@ -144,8 +144,8 @@ class HomeMiHato extends StatelessWidget {
                 ],
               ))
         else
-          // ── Vista ganadero: lista simple ──────────────────────────────────
-          ...animales.map(
+          // ── Vista ganadero: lista simple (máximo 5) ───────────────────────
+          ...animales.take(5).map(
             (a) => AnimalListTile(
               animal: a,
               estado: _estadoAnimal(a.id, alertas),

@@ -221,7 +221,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             animales: vm.animales,
                             alertas: vm.alertas,
                             esDueno: _esDueno,
-                            onVerTodos: () {},
+                            onVerTodos: () async {
+                              await context.push(AppRoutes.historial);
+                              if (mounted) await _cargarDatos();
+                            },
                             onAnimalTap: _esDueno
                                 ? null
                                 : (animal) => context.push(
