@@ -36,7 +36,7 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () => context.go(AppRoutes.home),
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(

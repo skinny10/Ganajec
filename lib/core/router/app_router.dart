@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
+import 'package:ganajec/core/router/home_refresh_observer.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
@@ -89,8 +90,11 @@ class AppRoutes {
 class AppRouter {
   AppRouter._();
 
+  static final _homeRefreshObserver = HomeRefreshObserver();
+
   static final router = GoRouter(
     initialLocation: AppRoutes.login,
+    observers: [_homeRefreshObserver],
     routes: [
       GoRoute(
         path: AppRoutes.login,

@@ -6,6 +6,7 @@ import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:ganajec/features/auth/domain/usecase/register_usecase.dart';
 import 'package:ganajec/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 
+
 List<ChangeNotifierProvider> authProviders = [
   ChangeNotifierProvider<AuthViewModel>(
     create: (_) => AuthViewModel(

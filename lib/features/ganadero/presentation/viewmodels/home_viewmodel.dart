@@ -58,7 +58,20 @@ class HomeViewModel extends ChangeNotifier {
     return 'Buenas noches,';
   }
 
+  void reset() {
+    debugPrint('🔴 HomeViewModel.reset() llamado');
+    _animales = [];
+    _alertas = [];
+    _predicciones = [];
+    _resumen = {};
+    _errorMessage = null;
+    _status = HomeStatus.idle;
+    notifyListeners();
+  }
+
   Future<void> cargarDatos() async {
+    reset();
+    debugPrint('🟡 HomeViewModel.cargarDatos() iniciando');
     _setStatus(HomeStatus.loading);
     _errorMessage = null;
     try {
@@ -68,6 +81,7 @@ class HomeViewModel extends ChangeNotifier {
         await _cargarGanadero();
       }
       _setStatus(HomeStatus.success);
+      debugPrint('🟢 HomeViewModel.cargarDatos() completado - animales: ${_animales.length}');
     } catch (e) {
       _errorMessage = e.toString();
       _setStatus(HomeStatus.error);

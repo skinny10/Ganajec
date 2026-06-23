@@ -16,43 +16,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _awayFromHome = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Escucha cambios de ruta para recargar al volver a home
-      GoRouter.of(context).routerDelegate.addListener(_onRouteChanged);
       _cargarDatos();
     });
   }
 
   @override
   void dispose() {
-    // Intenta remover el listener (puede no estar montado si se llama tarde)
-    try {
-      GoRouter.of(context).routerDelegate.removeListener(_onRouteChanged);
-    } catch (_) {}
     super.dispose();
-  }
-
-  void _onRouteChanged() {
-    if (!mounted) return;
-    final location = GoRouter.of(context)
-        .routerDelegate
-        .currentConfiguration
-        .uri
-        .path;
-    if (location == AppRoutes.home) {
-      if (_awayFromHome) {
-        _awayFromHome = false;
-        _cargarDatos();
-      }
-    } else {
-      _awayFromHome = true;
-    }
   }
 
   Future<void> _cargarDatos() async {
@@ -77,24 +53,28 @@ class _HomeScreenState extends State<HomeScreen> {
       ? [HomeTab.inicio, HomeTab.buscar, HomeTab.reportes, HomeTab.perfil]
       : HomeTab.values;
 
-  void _onTabSelected(int index) {
+  Future<void> _onTabSelected(int index) async {
     final tab = _tabs[index];
     switch (tab) {
       case HomeTab.inicio:
         break;
       case HomeTab.buscar:
-        context.push(AppRoutes.alertas);
+        await context.push(AppRoutes.alertas);
+        if (mounted) await _cargarDatos();
         break;
       case HomeTab.registrar:
-        context.push(AppRoutes.registroBovino);
+        await context.push(AppRoutes.registroBovino);
+        if (mounted) await _cargarDatos();
         break;
       case HomeTab.reportes:
-        context.push(
+        await context.push(
           _esDueno ? AppRoutes.historialDueno : AppRoutes.historial,
         );
+        if (mounted) await _cargarDatos();
         break;
       case HomeTab.perfil:
-        context.push(AppRoutes.perfil);
+        await context.push(AppRoutes.perfil);
+        if (mounted) await _cargarDatos();
         break;
     }
   }
@@ -106,9 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: vm.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+        child: Stack(
+          children: [
+            RefreshIndicator(
                 onRefresh: _cargarDatos,
                 child: CustomScrollView(
                   slivers: [
@@ -176,7 +156,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () => context.push(AppRoutes.alertas),
+                              onPressed: () async {
+                                await context.push(AppRoutes.alertas);
+                                if (mounted) await _cargarDatos();
+                              },
                               icon: const Icon(Icons.notifications_outlined),
                             ),
                             const SizedBox(width: 8),
@@ -219,7 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (!_esDueno) ...[
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: () => context.push(AppRoutes.registroBovino),
+                              onPressed: () async {
+                                await context.push(AppRoutes.registroBovino);
+                                if (mounted) await _cargarDatos();
+                              },
                               icon: const Icon(Icons.add),
                               label: const Text('Registrar bovino'),
                             ),
@@ -227,11 +213,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 16),
                           HomePredicciones(
                             predicciones: vm.predicciones,
-                            onVerHistorial: () => context.push(
-                              _esDueno
-                                  ? AppRoutes.historialDueno
-                                  : AppRoutes.historial,
-                            ),
+                            onVerHistorial: () async {
+                              await context.push(
+                                _esDueno
+                                    ? AppRoutes.historialDueno
+                                    : AppRoutes.historial,
+                              );
+                              if (mounted) await _cargarDatos();
+                            },
                           ),
                           const SizedBox(height: 24),
                         ]),
@@ -240,6 +229,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+            if (vm.isLoading)
+              const LinearProgressIndicator(),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
