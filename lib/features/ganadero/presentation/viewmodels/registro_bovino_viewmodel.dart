@@ -27,9 +27,14 @@ class RegistroBovinoViewModel extends ChangeNotifier {
     required String raza,
     required int edad,
     required double pesoKg,
+    bool edadEnMeses = false,
   }) async {
     _setStatus(RegistroStatus.loading);
     try {
+      final now = DateTime.now();
+      final fechaNacimiento = edadEnMeses
+          ? DateTime(now.year, now.month - edad, now.day)
+          : DateTime(now.year - edad, now.month, now.day);
       final animal = Animal(
         id: '',
         ranchoId: '',  // se resuelve en el datasource desde TokenStorage
@@ -39,10 +44,10 @@ class RegistroBovinoViewModel extends ChangeNotifier {
         sexo: _sexoPorCategoria(categoria),
         categoria: categoria,
         proposito: proposito,
-        fechaNacimiento: DateTime(DateTime.now().year - edad),
+        fechaNacimiento: fechaNacimiento,
         pesoKg: pesoKg,
         idExterno: idExterno,
-        creadoEn: DateTime.now(),
+        creadoEn: now,
       );
       _createdAnimal = await _crearAnimal(animal);
       _setStatus(RegistroStatus.success);

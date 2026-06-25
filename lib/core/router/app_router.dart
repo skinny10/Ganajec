@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
@@ -46,6 +47,9 @@ import 'package:ganajec/features/ganadero/presentation/screens/colegas/colegas_s
 import 'package:ganajec/features/ganadero/presentation/viewmodels/colegas_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/historial_dueno/historial_dueno_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/historial_dueno_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/veterinarios/veterinarios_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/viewmodels/veterinario_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/todos_bovinos/todos_bovinos_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -84,13 +88,20 @@ class AppRoutes {
   static const String cambiarContrasena = '/cambiar-contrasena';
   static const String colegas = '/colegas';
   static const String historialDueno = '/historial-dueno';
+  static const String veterinarios = '/veterinarios';
+  static const String todosBovinos = '/todos-bovinos';
 }
 
 class AppRouter {
   AppRouter._();
 
+  /// Observador de rutas — permite que HomeScreen detecte cuándo vuelve
+  /// a ser la pantalla activa (didPopNext) para recargar datos.
+  static final routeObserver = RouteObserver<ModalRoute<void>>();
+
   static final router = GoRouter(
     initialLocation: AppRoutes.login,
+    observers: [routeObserver],
     routes: [
       GoRoute(
         path: AppRoutes.login,
@@ -277,6 +288,20 @@ class AppRouter {
         builder: (context, state) => ChangeNotifierProvider(
           create: (_) => HistorialDuenoViewModel(),
           child: const HistorialDuenoScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.todosBovinos,
+        builder: (context, state) {
+          final args = state.extra as TodosBovinosArgs;
+          return TodosBovinosScreen(args: args);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.veterinarios,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => VeterinarioViewModel(),
+          child: const VeterinariosScreen(),
         ),
       ),
       GoRoute(

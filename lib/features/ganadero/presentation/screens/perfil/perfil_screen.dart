@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import '../../viewmodels/perfil_viewmodel.dart';
+import '../../viewmodels/veterinario_viewmodel.dart';
 import '../../widgets/rancho_modal.dart';
 import 'perfil_components.dart';
 
@@ -37,6 +41,39 @@ class _PerfilScreenState extends State<PerfilScreen> {
         }
       }
     });
+  }
+
+  /// Bottom sheet read-only para ganadero: muestra teléfono del vet.
+  Future<void> _mostrarVetGanadero(BuildContext context) async {
+    final ranchoId = TokenStorage.ranchoId ?? '';
+    List<VeterinarioInfo> vets = [];
+    String? errorMsg;
+
+    if (ranchoId.isNotEmpty) {
+      try {
+        final res = await ApiClient.instance
+            .get(ApiConstants.veterinariosDeRancho(ranchoId));
+        final data = res.data;
+        final lista = data is Map
+            ? (data['veterinarios'] as List? ?? [])
+            : (data as List? ?? []);
+        vets = lista
+            .map((e) =>
+                VeterinarioInfo.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        errorMsg = 'No disponible';
+      }
+    }
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _VetGanaderoSheet(vets: vets, error: errorMsg),
+    );
   }
 
   void _mostrarLogoutModal(BuildContext context) {
@@ -149,6 +186,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   nombre: vm.usuario.name,
                   email: vm.usuario.email,
                   plan: vm.plan,
+                  onEditarPerfil: () => context
+                      .push(AppRoutes.editarPerfil)
+                      .then((_) {
+                    if (mounted) context.read<PerfilViewModel>().cargarPerfil();
+                  }),
                 ),
 
                 // ── Rancho ───────────────────────────────────────────────────
@@ -184,13 +226,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       icon: const SettingIcon(emoji: '👤', bg: Color(0xFFF5F3EE)),
                       name: 'Nombre completo',
                       desc: vm.usuario.name,
-                      onTap: () {},
+                      showChevron: false,
                     ),
                     PerfilSettingRow(
                       icon: const SettingIcon(emoji: '✉️', bg: Color(0xFFF5F3EE)),
                       name: 'Correo electrónico',
                       desc: vm.usuario.email,
-                      onTap: () {},
+                      showChevron: false,
                     ),
                     _LastRow(
                       child: PerfilSettingRow(
@@ -219,6 +261,29 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         name: 'Municipio y estado',
                         desc: '${vm.rancho.municipio}, ${vm.rancho.estado}',
                         onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ── Veterinario ───────────────────────────────────────────────
+                PerfilSection(
+                  label: 'Veterinario',
+                  children: [
+                    _LastRow(
+                      child: PerfilSettingRow(
+                        icon: const SettingIcon(
+                            emoji: '🩺', bg: Color(0xFFE8F5EF)),
+                        name: 'Veterinarios del rancho',
+                        desc: vm.usuario.role == 'dueno'
+                            ? 'Agregar, editar o eliminar veterinarios'
+                            : 'Ver teléfono del veterinario',
+                        trailingValue: vm.usuario.role == 'dueno'
+                            ? 'Gestionar'
+                            : 'Ver',
+                        onTap: vm.usuario.role == 'dueno'
+                            ? () => context.push(AppRoutes.veterinarios)
+                            : () => _mostrarVetGanadero(context),
                       ),
                     ),
                   ],
@@ -303,6 +368,148 @@ class _LastRow extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(),
       child: child,
+    );
+  }
+}
+
+// ── Bottom sheet read-only para ganadero ─────────────────────────────────────
+
+class _VetGanaderoSheet extends StatelessWidget {
+  final List<VeterinarioInfo> vets;
+  final String? error;
+
+  const _VetGanaderoSheet({required this.vets, this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFFAFAF7),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8E5DC),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Row(
+            children: [
+              Text('🩺', style: TextStyle(fontSize: 20)),
+              SizedBox(width: 8),
+              Text(
+                'Veterinario del rancho',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          if (error != null)
+            Text(
+              error!,
+              style: const TextStyle(color: Color(0xFF888880), fontSize: 14),
+            )
+          else if (vets.isEmpty)
+            const Text(
+              'El dueño del rancho aún no ha registrado un veterinario.',
+              style: TextStyle(color: Color(0xFF888880), fontSize: 14),
+            )
+          else
+            ...vets.map((v) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE8E5DC)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          v.nombre,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        if (v.lugar.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            v.lugar,
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF888880)),
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                        // Teléfono destacado
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5EF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.phone_outlined,
+                                  color: Color(0xFF2E7D32), size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                v.telefono,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF2E7D32),
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (v.ubicacion.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 14, color: Color(0xFF888880)),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  v.ubicacion,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF888880)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                )),
+        ],
+      ),
     );
   }
 }

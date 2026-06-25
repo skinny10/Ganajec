@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/home_viewmodel.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/todos_bovinos/todos_bovinos_screen.dart';
 import 'home_components.dart';
 import 'package:ganajec/core/router/app_router.dart';
 
@@ -15,44 +16,35 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool _awayFromHome = false;
-
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Escucha cambios de ruta para recargar al volver a home
-      GoRouter.of(context).routerDelegate.addListener(_onRouteChanged);
-      _cargarDatos();
-    });
+    Future.microtask(_cargarDatos);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Suscribirse al RouteObserver para detectar cuando la pantalla
+    // vuelve a ser visible (cualquier pop desde una ruta superior).
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      AppRouter.routeObserver.subscribe(this, route);
+    }
   }
 
   @override
   void dispose() {
-    // Intenta remover el listener (puede no estar montado si se llama tarde)
-    try {
-      GoRouter.of(context).routerDelegate.removeListener(_onRouteChanged);
-    } catch (_) {}
+    AppRouter.routeObserver.unsubscribe(this);
     super.dispose();
   }
 
-  void _onRouteChanged() {
-    if (!mounted) return;
-    final location = GoRouter.of(context)
-        .routerDelegate
-        .currentConfiguration
-        .uri
-        .path;
-    if (location == AppRoutes.home) {
-      if (_awayFromHome) {
-        _awayFromHome = false;
-        _cargarDatos();
-      }
-    } else {
-      _awayFromHome = true;
-    }
+  /// Se llama automáticamente cuando el usuario hace pop de cualquier
+  /// pantalla que estaba encima del Home (detalle, registro, síntomas, etc.)
+  @override
+  void didPopNext() {
+    _cargarDatos();
   }
 
   Future<void> _cargarDatos() async {
@@ -208,7 +200,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             animales: vm.animales,
                             alertas: vm.alertas,
                             esDueno: _esDueno,
-                            onVerTodos: () {},
+                            onVerTodos: () => context.push(
+                              AppRoutes.todosBovinos,
+                              extra: TodosBovinosArgs(
+                                animales: vm.animales,
+                                alertas: vm.alertas,
+                              ),
+                            ),
+                            onVerRanchoTodos: (animalesRancho) => context.push(
+                              AppRoutes.todosBovinos,
+                              extra: TodosBovinosArgs(
+                                animales: animalesRancho,
+                                alertas: vm.alertas,
+                              ),
+                            ),
                             onAnimalTap: _esDueno
                                 ? null
                                 : (animal) => context.push(

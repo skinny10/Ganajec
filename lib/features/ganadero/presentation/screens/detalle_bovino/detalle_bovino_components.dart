@@ -30,12 +30,6 @@ int _calcularEdad(DateTime fechaNacimiento) {
   return years;
 }
 
-String _calcularGrupo(String animalId) {
-  final perfiles = ['A', 'B', 'C', 'D'];
-  final idx = (int.tryParse(animalId) ?? 0) % perfiles.length;
-  return 'Perfil ${perfiles[idx]}';
-}
-
 String _severidadPrediccion(Prediccion p) {
   if (p.enfermedad.toLowerCase().contains('sin enfermedad')) return 'Leve';
   if (p.confianza >= 0.8) return 'Alta';
@@ -232,7 +226,6 @@ class DetalleInfoGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final edad = _calcularEdad(animal.fechaNacimiento);
-    final grupo = _calcularGrupo(animal.id);
     final prodHoy = vm.produccionHoy;
     final prodColor =
         vm.tieneAnomaliaActiva ? _kRed : _kGreen;
@@ -243,10 +236,9 @@ class DetalleInfoGrid extends StatelessWidget {
     final items = [
       _InfoItem(label: 'Raza', value: animal.raza),
       _InfoItem(label: 'Edad', value: '$edad años'),
-      _InfoItem(label: 'Peso', value: '${animal.pesoKg.toStringAsFixed(0)} kg'),
+      _InfoItem(label: 'Peso', value: '${animal.pesoKg.toStringAsFixed(1)} kg'),
       _InfoItem(label: 'Sexo', value: _capitalized(animal.sexo)),
       _InfoItem(label: 'Prod. hoy', value: prodLabel, valueColor: prodColor),
-      _InfoItem(label: 'Grupo', value: grupo),
     ];
 
     return Padding(
@@ -342,19 +334,14 @@ class DetalleTabBar extends StatelessWidget {
         child: Row(
           children: [
             _TabButton(
-              label: 'Producción',
+              label: 'Predicciones',
               isActive: selectedIndex == 0,
               onTap: () => onTabChanged(0),
             ),
             _TabButton(
-              label: 'Predicciones',
+              label: 'Gráficas',
               isActive: selectedIndex == 1,
               onTap: () => onTabChanged(1),
-            ),
-            _TabButton(
-              label: 'Gráficas',
-              isActive: selectedIndex == 2,
-              onTap: () => onTabChanged(2),
             ),
           ],
         ),

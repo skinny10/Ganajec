@@ -105,11 +105,7 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: switch (_selectedTab) {
-                          0 => DetalleProduccionTab(
-                              key: const ValueKey('produccion'),
-                              historial: vm.historial,
-                            ),
-                          1 => DetallePrediccionesTab(
+                          0 => DetallePrediccionesTab(
                               key: const ValueKey('predicciones'),
                               predicciones: vm.predicciones,
                             ),

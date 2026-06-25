@@ -59,19 +59,32 @@ class MisGanaderosViewModel extends ChangeNotifier {
   MisGanaderosStatus _status = MisGanaderosStatus.idle;
   String? _error;
   List<GanaderoItem> _ganaderos = [];
-  RanchoInfo? _rancho;
 
-  /// Todos los ranchos del dueño — para el selector "mover a otro rancho"
-  List<RanchoInfo> _otrosRanchos = [];
+  /// Todos los ranchos del dueño.
+  List<RanchoInfo> _todosRanchos = [];
+
+  /// Rancho actualmente seleccionado en la pantalla.
+  RanchoInfo? _ranchoActivo;
+
+  /// Indica que se están cargando ganaderos de un rancho recién seleccionado.
+  bool _cargandoGanaderos = false;
 
   MisGanaderosStatus get status => _status;
   String? get error => _error;
   bool get isLoading => _status == MisGanaderosStatus.loading;
+  bool get cargandoGanaderos => _cargandoGanaderos;
   List<GanaderoItem> get ganaderos => _ganaderos;
-  RanchoInfo? get rancho => _rancho;
+  List<RanchoInfo> get todosRanchos => _todosRanchos;
+  RanchoInfo? get ranchoActivo => _ranchoActivo;
 
-  /// Ranchos disponibles como destino al mover (excluye el actual)
-  List<RanchoInfo> get otrosRanchos => _otrosRanchos;
+  /// Alias para compatibilidad con código existente (p.ej. _RanchoHeaderCard).
+  RanchoInfo? get rancho => _ranchoActivo;
+
+  /// Ranchos disponibles como destino al mover (excluye el activo).
+  List<RanchoInfo> get otrosRanchos =>
+      _todosRanchos.where((r) => r.id != _ranchoActivo?.id).toList();
+
+  // ── Carga inicial ────────────────────────────────────────────────────────────
 
   Future<void> cargar() async {
     _status = MisGanaderosStatus.loading;
@@ -81,58 +94,32 @@ class MisGanaderosViewModel extends ChangeNotifier {
     try {
       final ranchoId = TokenStorage.ranchoId ?? '';
       final uid = TokenStorage.userId ?? '';
-
-      // 1. Perfil para obtener datos del rancho actual.
-      //    Si el usuario es dueño usamos GET /dueno/{id}; si es ganadero, GET /ganadero/{id}
       final role = TokenStorage.role ?? 'ganadero';
+
+      // 1. Perfil → obtener lista de ranchos del dueño.
       final perfilEndpoint = role == 'dueno'
           ? ApiConstants.perfilDueno(uid)
           : ApiConstants.perfilGanadero(uid);
       final perfilRes = await _dio.get(perfilEndpoint);
       final ranchosEnPerfil = perfilRes.data['ranchos'] as List?;
+
       if (ranchosEnPerfil != null && ranchosEnPerfil.isNotEmpty) {
-        final rData = ranchoId.isNotEmpty
-            ? (ranchosEnPerfil.firstWhere(
-                (r) => r['id'] == ranchoId,
-                orElse: () => ranchosEnPerfil.first,
-              ) as Map<String, dynamic>)
-            : (ranchosEnPerfil.first as Map<String, dynamic>);
-        _rancho = RanchoInfo.fromJson(rData);
+        _todosRanchos = ranchosEnPerfil
+            .map((r) => RanchoInfo.fromJson(r as Map<String, dynamic>))
+            .toList();
+
+        // Seleccionar el rancho del token como activo (o el primero).
+        _ranchoActivo = ranchoId.isNotEmpty
+            ? _todosRanchos.firstWhere(
+                (r) => r.id == ranchoId,
+                orElse: () => _todosRanchos.first,
+              )
+            : _todosRanchos.first;
       }
 
-      // 2. Lista completa de ranchos del dueño → GET /dueno/{id}/ranchos
-      //    Usamos try separado para que no falle toda la carga si el endpoint no está disponible.
-      try {
-        final ranchosRes =
-            await _dio.get(ApiConstants.ranchosDueno(uid));
-        final rawR = ranchosRes.data;
-        final listaR =
-            rawR is List ? rawR : (rawR['ranchos'] as List? ?? []);
-        final todos = listaR
-            .map((e) => RanchoInfo.fromJson(e as Map<String, dynamic>))
-            .toList();
-        // Excluimos el rancho actual del selector de destino
-        _otrosRanchos = todos
-            .where((r) => r.id != (_rancho?.id ?? ranchoId))
-            .toList();
-      } catch (_) {
-        // El endpoint puede no existir en todas las versiones del servidor
-        _otrosRanchos = [];
-      }
-
-      // 3. Ganaderos del rancho actual → GET /dueno/ranchos/{id}/ganaderos
-      //    El endpoint NO devuelve total_bovinos, así que también pedimos
-      //    los bovinos y contamos por ganadero_id.
-      final actualRanchoId = _rancho?.id ?? ranchoId;
-      if (actualRanchoId.isNotEmpty) {
-        // El endpoint ya incluye total_bovinos por ganadero (GROUP BY en el server).
-        final ganaderosRes =
-            await _dio.get(ApiConstants.ganaderosDeRancho(actualRanchoId));
-        final rawG = ganaderosRes.data;
-        final listG = rawG is List ? rawG : (rawG['ganaderos'] as List? ?? []);
-        _ganaderos = listG
-            .map((e) => GanaderoItem.fromJson(e as Map<String, dynamic>))
-            .toList();
+      // 2. Cargar ganaderos del rancho activo.
+      if (_ranchoActivo != null) {
+        await _cargarGanaderosDeRancho(_ranchoActivo!.id, notificar: false);
       }
 
       _status = MisGanaderosStatus.success;
@@ -148,8 +135,43 @@ class MisGanaderosViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Cambiar rancho activo ────────────────────────────────────────────────────
+
+  Future<void> seleccionarRancho(RanchoInfo r) async {
+    if (_ranchoActivo?.id == r.id) return;
+    _ranchoActivo = r;
+    notifyListeners();
+    await _cargarGanaderosDeRancho(r.id);
+  }
+
+  Future<void> _cargarGanaderosDeRancho(
+    String ranchoId, {
+    bool notificar = true,
+  }) async {
+    if (notificar) {
+      _cargandoGanaderos = true;
+      notifyListeners();
+    }
+    try {
+      final res = await _dio.get(ApiConstants.ganaderosDeRancho(ranchoId));
+      final raw = res.data;
+      final lista = raw is List ? raw : (raw['ganaderos'] as List? ?? []);
+      _ganaderos = lista
+          .map((e) => GanaderoItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      _ganaderos = [];
+    }
+    if (notificar) {
+      _cargandoGanaderos = false;
+      notifyListeners();
+    }
+  }
+
+  // ── Operaciones sobre ganaderos ──────────────────────────────────────────────
+
   Future<bool> eliminarGanadero(String ganaderoId) async {
-    final ranchoId = _rancho?.id ?? TokenStorage.ranchoId ?? '';
+    final ranchoId = _ranchoActivo?.id ?? TokenStorage.ranchoId ?? '';
     try {
       await _dio.delete(ApiConstants.ganaderoEnRancho(ranchoId, ganaderoId));
       _ganaderos.removeWhere((g) => g.id == ganaderoId);
@@ -168,9 +190,8 @@ class MisGanaderosViewModel extends ChangeNotifier {
     }
   }
 
-  /// Mover ganadero a otro rancho: PATCH /dueno/ranchos/{rancho_id}/ganaderos/{ganadero_id}
   Future<bool> moverGanadero(String ganaderoId, String nuevoRanchoId) async {
-    final ranchoId = _rancho?.id ?? TokenStorage.ranchoId ?? '';
+    final ranchoId = _ranchoActivo?.id ?? TokenStorage.ranchoId ?? '';
     try {
       await _dio.patch(
         ApiConstants.ganaderoEnRancho(ranchoId, ganaderoId),

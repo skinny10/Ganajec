@@ -6,7 +6,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.1.102:8000/api';
+  static const String baseUrl = 'http://192.168.3.181:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
@@ -105,6 +105,28 @@ class ApiConstants {
   /// PUT /dueno/ganaderos/{ganadero_id}
   static String ganaderoDetalle(String ganaderoId) =>
       '/dueno/ganaderos/$ganaderoId';
+
+  // ── Dueño — veterinarios ─────────────────────────────────────────────────────
+  /// GET  /dueno/veterinarios  — listar todos los vets del dueño
+  /// POST /dueno/veterinarios  — crear veterinario
+  static const String listarVeterinarios = '/dueno/veterinarios';
+  static const String crearVeterinario   = '/dueno/veterinarios';
+
+  /// PUT /dueno/veterinarios/{vet_id}
+  /// DELETE /dueno/veterinarios/{vet_id}
+  static String veterinario(String vetId) => '/dueno/veterinarios/$vetId';
+
+  /// GET /dueno/ranchos/{rancho_id}/veterinarios
+  static String veterinariosDeRancho(String ranchoId) =>
+      '/dueno/ranchos/$ranchoId/veterinarios';
+
+  /// POST /dueno/ranchos/{rancho_id}/veterinarios/{vet_id}
+  static String asociarVeterinario(String ranchoId, String vetId) =>
+      '/dueno/ranchos/$ranchoId/veterinarios/$vetId';
+
+  /// DELETE /dueno/ranchos/{rancho_id}/veterinarios/{vet_id}
+  static String desvincularVeterinario(String ranchoId, String vetId) =>
+      '/dueno/ranchos/$ranchoId/veterinarios/$vetId';
 
   // ── Dueño — suscripción ──────────────────────────────────────────────────────
   /// GET /dueno/{dueno_id}/suscripcion

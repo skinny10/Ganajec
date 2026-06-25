@@ -23,6 +23,7 @@ class _RegistroBovinoScreenState extends State<RegistroBovinoScreen> {
   String? _categoriaSelected;
   List<String> _propositosSelected = ['leche'];
   String? _razaSelected;
+  bool _edadEnMeses = false;
 
   @override
   void dispose() {
@@ -53,6 +54,7 @@ class _RegistroBovinoScreenState extends State<RegistroBovinoScreen> {
       raza: _razaSelected ?? '',
       edad: int.tryParse(_edadController.text) ?? 0,
       pesoKg: double.tryParse(_pesoController.text) ?? 0,
+      edadEnMeses: _edadEnMeses,
     );
     if (mounted && vm.status == RegistroStatus.success) {
       final nuevo = vm.createdAnimal;
@@ -138,15 +140,9 @@ class _RegistroBovinoScreenState extends State<RegistroBovinoScreen> {
               RbEdadPesoRow(
                 edadController: _edadController,
                 pesoController: _pesoController,
-              ),
-              const SizedBox(height: 12),
-              TextButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.add, color: colors.primary),
-                label: Text(
-                  AppStrings.agregarDatosOpcionales,
-                  style: TextStyle(color: colors.primary),
-                ),
+                enMeses: _edadEnMeses,
+                onToggleUnidad: () =>
+                    setState(() => _edadEnMeses = !_edadEnMeses),
               ),
               const SizedBox(height: 16),
               if (vm.status == RegistroStatus.error &&

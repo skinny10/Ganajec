@@ -63,12 +63,18 @@ class HomeAlertas extends StatelessWidget {
 
 // ── Mi hato (ganadero) / Mis ranchos (dueño) ─────────────────────────────────
 
+/// Número máximo de animales a mostrar en el home antes del "Ver todos".
+const _kLimiteHato = 5;
+
 class HomeMiHato extends StatelessWidget {
   final List<Animal> animales;
   final List<Alerta> alertas;
   final VoidCallback onVerTodos;
   final void Function(Animal)? onAnimalTap;
   final bool esDueno;
+  /// Solo para dueño: llamado con la lista filtrada del rancho cuando el user
+  /// toca "Ver todos" en un grupo de rancho concreto.
+  final void Function(List<Animal>)? onVerRanchoTodos;
 
   const HomeMiHato({
     super.key,
@@ -77,6 +83,7 @@ class HomeMiHato extends StatelessWidget {
     required this.onVerTodos,
     this.onAnimalTap,
     this.esDueno = false,
+    this.onVerRanchoTodos,
   });
 
   String _estadoAnimal(String animalId, List<Alerta> alertas) {
@@ -131,27 +138,62 @@ class HomeMiHato extends StatelessWidget {
             ),
           )
         else if (esDueno)
-          // ── Vista dueño: agrupado por rancho ──────────────────────────────
-          ..._porRancho.entries.map((entry) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _RanchoHeader(nombre: entry.key),
-                  ...entry.value.map((a) => AnimalListTile(
-                        animal: a,
-                        estado: 'Saludable',
-                        onTap: null, // dueño no navega al detalle del bovino
-                      )),
-                ],
-              ))
-        else
-          // ── Vista ganadero: lista simple ──────────────────────────────────
-          ...animales.map(
+          // ── Vista dueño: agrupado por rancho, máx 5 por grupo ────────────
+          ..._porRancho.entries.map((entry) {
+            final todos = entry.value;
+            final visibles = todos.take(_kLimiteHato).toList();
+            final restantes = todos.length - visibles.length;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _RanchoHeader(nombre: entry.key),
+                ...visibles.map((a) => AnimalListTile(
+                      animal: a,
+                      estado: 'Saludable',
+                      onTap: null,
+                    )),
+                if (restantes > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2, bottom: 4),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: onVerRanchoTodos != null
+                            ? () => onVerRanchoTodos!(todos)
+                            : null,
+                        child: Text(
+                          'Ver los $restantes restantes',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          })
+        else ...[
+          // ── Vista ganadero: lista simple, máximo 5 ────────────────────────
+          ...animales.take(_kLimiteHato).map(
             (a) => AnimalListTile(
               animal: a,
               estado: _estadoAnimal(a.id, alertas),
               onTap: onAnimalTap != null ? () => onAnimalTap!(a) : null,
             ),
           ),
+          // "Ver todos" extra si hay más de 5
+          if (animales.length > _kLimiteHato)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Center(
+                child: TextButton(
+                  onPressed: onVerTodos,
+                  child: Text(
+                    'Ver los ${animales.length - _kLimiteHato} restantes',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }

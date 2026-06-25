@@ -316,41 +316,84 @@ class RbRazaDropdown extends StatelessWidget {
 class RbEdadPesoRow extends StatelessWidget {
   final TextEditingController edadController;
   final TextEditingController pesoController;
+  final bool enMeses;
+  final VoidCallback onToggleUnidad;
 
   const RbEdadPesoRow({
     super.key,
     required this.edadController,
     required this.pesoController,
+    this.enMeses = false,
+    required this.onToggleUnidad,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                AppStrings.edadAnios,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                      letterSpacing: 0.8,
-                      fontWeight: FontWeight.w600,
+              // Label + toggle unidad en la misma fila
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      enMeses ? 'EDAD EN MESES' : AppStrings.edadAnios,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
+                  ),
+                  GestureDetector(
+                    onTap: onToggleUnidad,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: enMeses
+                            ? colors.primaryContainer
+                            : colors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: enMeses
+                              ? colors.primary
+                              : colors.outlineVariant,
+                        ),
+                      ),
+                      child: Text(
+                        enMeses ? 'meses' : 'años',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: enMeses
+                                  ? colors.onPrimaryContainer
+                                  : colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: edadController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: AppStrings.edadHint,
+                  hintText: enMeses ? 'ej. 6' : AppStrings.edadHint,
                   prefixIcon: const Icon(Icons.calendar_today_outlined),
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return AppStrings.edadInvalida;
-                  if (int.tryParse(v) == null) return AppStrings.edadInvalida;
+                  final n = int.tryParse(v);
+                  if (n == null || n < 0) return AppStrings.edadInvalida;
+                  if (enMeses && n > 11) return 'Máx. 11 meses';
                   return null;
                 },
               ),
@@ -373,9 +416,9 @@ class RbEdadPesoRow extends StatelessWidget {
               const SizedBox(height: 6),
               TextFormField(
                 controller: pesoController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  hintText: AppStrings.pesoHint,
+                  hintText: 'ej. 0.5',
                   prefixIcon: const Icon(Icons.monitor_weight_outlined),
                 ),
                 validator: (v) {

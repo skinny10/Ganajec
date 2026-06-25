@@ -141,8 +141,18 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
                           context.read<MisGanaderosViewModel>().clearError(),
                     ),
 
-                  // Card del rancho con código
-                  if (vm.rancho != null) _RanchoHeaderCard(rancho: vm.rancho!),
+                  // Selector de ranchos (visible sólo si hay más de uno)
+                  if (vm.todosRanchos.length > 1)
+                    _RanchoSelector(
+                      ranchos: vm.todosRanchos,
+                      seleccionado: vm.ranchoActivo,
+                      onSeleccionar: (r) =>
+                          context.read<MisGanaderosViewModel>().seleccionarRancho(r),
+                    ),
+
+                  // Card del rancho activo con código e invitación
+                  if (vm.ranchoActivo != null)
+                    _RanchoHeaderCard(rancho: vm.ranchoActivo!),
 
                   const SizedBox(height: 12),
 
@@ -166,7 +176,12 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
                   const SizedBox(height: 8),
 
                   // Lista de ganaderos
-                  if (vm.ganaderos.isEmpty)
+                  if (vm.cargandoGanaderos)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (vm.ganaderos.isEmpty)
                     _EmptyGanaderos()
                   else
                     ...vm.ganaderos.map(
@@ -550,6 +565,99 @@ class _ErrorBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Selector horizontal de ranchos ──────────────────────────────────────────
+
+class _RanchoSelector extends StatelessWidget {
+  final List<RanchoInfo> ranchos;
+  final RanchoInfo? seleccionado;
+  final void Function(RanchoInfo) onSeleccionar;
+
+  const _RanchoSelector({
+    required this.ranchos,
+    required this.seleccionado,
+    required this.onSeleccionar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'MIS RANCHOS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF888880),
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ranchos.map((r) {
+                final activo = r.id == seleccionado?.id;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => onSeleccionar(r),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: activo
+                            ? const Color(0xFF2E7D32)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: activo
+                              ? const Color(0xFF2E7D32)
+                              : const Color(0xFFE8E5DC),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '🏡',
+                            style: TextStyle(
+                              fontSize: activo ? 14 : 13,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            r.nombre,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: activo
+                                  ? Colors.white
+                                  : const Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          if (activo) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.check_circle,
+                                color: Colors.white, size: 13),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

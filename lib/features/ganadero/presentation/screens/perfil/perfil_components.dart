@@ -21,6 +21,7 @@ class PerfilHeroCard extends StatelessWidget {
   final String nombre;
   final String email;
   final String plan;
+  final VoidCallback? onEditarPerfil;
 
   const PerfilHeroCard({
     super.key,
@@ -28,6 +29,7 @@ class PerfilHeroCard extends StatelessWidget {
     required this.nombre,
     required this.email,
     required this.plan,
+    this.onEditarPerfil,
   });
 
   @override
@@ -77,7 +79,9 @@ class PerfilHeroCard extends StatelessWidget {
               Positioned(
                 bottom: -4,
                 right: -4,
-                child: Container(
+                child: GestureDetector(
+                  onTap: onEditarPerfil,
+                  child: Container(
                   width: 22,
                   height: 22,
                   decoration: BoxDecoration(
@@ -91,6 +95,7 @@ class PerfilHeroCard extends StatelessWidget {
                     size: 10,
                     color: Colors.white,
                   ),
+                ),
                 ),
               ),
             ],
@@ -371,6 +376,7 @@ class PerfilSettingRow extends StatelessWidget {
   final String? desc;
   final String? trailingValue;
   final bool isDanger;
+  final bool showChevron;
   final VoidCallback? onTap;
 
   const PerfilSettingRow({
@@ -380,6 +386,7 @@ class PerfilSettingRow extends StatelessWidget {
     this.desc,
     this.trailingValue,
     this.isDanger = false,
+    this.showChevron = true,
     this.onTap,
   });
 
@@ -434,12 +441,14 @@ class PerfilSettingRow extends StatelessWidget {
                   fontWeight: FontWeight.w300,
                 ),
               ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: isDanger ? _kRed : _kTextMuted,
-            ),
+            if (showChevron) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: isDanger ? _kRed : _kTextMuted,
+              ),
+            ],
           ],
         ),
       ),
