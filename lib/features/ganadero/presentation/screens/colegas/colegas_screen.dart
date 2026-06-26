@@ -158,23 +158,6 @@ class _ColegaCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: _kGreenLight,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFA5D6A7)),
-            ),
-            child: const Text(
-              'Activo',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: _kGreen,
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -72,33 +72,13 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
           child: Container(height: 1, color: _kBorder),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Asociar vet ya existente
-          FloatingActionButton.extended(
-            heroTag: 'fab_asociar',
-            onPressed: () => _mostrarAsociarExistente(context),
-            backgroundColor: Colors.white,
-            foregroundColor: _kGreen,
-            elevation: 2,
-            icon: const Icon(Icons.link, size: 18),
-            label: const Text('Asociar existente',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-          ),
-          const SizedBox(height: 10),
-          // Crear nuevo
-          FloatingActionButton.extended(
-            heroTag: 'fab_nuevo',
-            onPressed: () => _mostrarFormulario(context, null),
-            backgroundColor: _kGreen,
-            foregroundColor: Colors.white,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Agregar veterinario',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _mostrarFormulario(context, null),
+        backgroundColor: _kGreen,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add, size: 18),
+        label: const Text('Agregar veterinario',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -320,7 +300,7 @@ class _VetTile extends StatelessWidget {
                 ),
               ],
               if (vet.notas != null && vet.notas!.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
@@ -335,6 +315,41 @@ class _VetTile extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF888880)),
                   ),
+                ),
+              ],
+              if (vet.ranchos.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: vet.ranchos
+                      .map((r) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5EF),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: const Color(0xFFA5D6A7)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('🏡',
+                                    style: TextStyle(fontSize: 10)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  r.nombre,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF1D7A55),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
                 ),
               ],
             ],
@@ -447,6 +462,7 @@ class _VetFormModalState extends State<_VetFormModal> {
   late final TextEditingController _ubicacion;
   late final TextEditingController _lugar;
   late final TextEditingController _notas;
+  String? _ranchoIdSeleccionado;
 
   bool get _esEdicion => widget.vet != null;
 
@@ -473,6 +489,16 @@ class _VetFormModalState extends State<_VetFormModal> {
 
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_esEdicion && _ranchoIdSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecciona un rancho para el veterinario'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFFC0392B),
+        ),
+      );
+      return;
+    }
     final vm = context.read<VeterinarioViewModel>();
 
     String? err;
@@ -492,6 +518,7 @@ class _VetFormModalState extends State<_VetFormModal> {
         ubicacion: _ubicacion.text.trim(),
         lugar: _lugar.text.trim(),
         notas: _notas.text.trim().isEmpty ? null : _notas.text.trim(),
+        ranchoId: _ranchoIdSeleccionado,
       );
     }
 
@@ -586,6 +613,15 @@ class _VetFormModalState extends State<_VetFormModal> {
                   hint: 'Disponible lunes a sábado...',
                   maxLines: 3,
                 ),
+                if (!_esEdicion) ...[
+                  const SizedBox(height: 12),
+                  _DropdownRanchoVet(
+                    ranchos: vm.ranchosDisponibles,
+                    seleccionadoId: _ranchoIdSeleccionado,
+                    onChanged: (id) =>
+                        setState(() => _ranchoIdSeleccionado = id),
+                  ),
+                ],
                 const SizedBox(height: 24),
 
                 Row(
@@ -841,6 +877,75 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Dropdown selector de rancho ───────────────────────────────────────────────
+
+class _DropdownRanchoVet extends StatelessWidget {
+  final List<VetRanchoRef> ranchos;
+  final String? seleccionadoId;
+  final void Function(String?) onChanged;
+
+  const _DropdownRanchoVet({
+    required this.ranchos,
+    required this.seleccionadoId,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Rancho *',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF555550),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE8E5DC)),
+          ),
+          child: ranchos.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'No hay ranchos disponibles',
+                    style: TextStyle(fontSize: 13, color: Color(0xFFB0AEA8)),
+                  ),
+                )
+              : DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: seleccionadoId,
+                    hint: const Text(
+                      'Selecciona un rancho',
+                      style:
+                          TextStyle(fontSize: 13, color: Color(0xFFB0AEA8)),
+                    ),
+                    items: ranchos
+                        .map((r) => DropdownMenuItem(
+                              value: r.id,
+                              child: Text(
+                                r.nombre,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: onChanged,
+                  ),
+                ),
+        ),
+      ],
     );
   }
 }

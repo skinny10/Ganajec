@@ -58,6 +58,7 @@ class VeterinarioViewModel extends ChangeNotifier {
   VeterinarioStatus _status = VeterinarioStatus.idle;
   String? _error;
   List<VeterinarioInfo> _vets = [];
+  List<VetRanchoRef> _ranchosDisponibles = [];
   bool _guardando = false;
 
   VeterinarioStatus get status => _status;
@@ -65,24 +66,21 @@ class VeterinarioViewModel extends ChangeNotifier {
   bool get isLoading => _status == VeterinarioStatus.loading;
   bool get guardando => _guardando;
   List<VeterinarioInfo> get vets => _vets;
+  List<VetRanchoRef> get ranchosDisponibles => _ranchosDisponibles;
 
-  // ── Cargar veterinarios del rancho ────────────────────────────────────────
+  // ── Cargar todos los veterinarios del dueño (incluye ranchos por vet) ────
 
-  Future<void> cargar() async {
-    final ranchoId = TokenStorage.ranchoId ?? '';
-    if (ranchoId.isEmpty) {
-      _vets = [];
-      _status = VeterinarioStatus.success;
-      notifyListeners();
-      return;
-    }
-
+  Future<void> cargar({String? ranchoIdOverride}) async {
     _status = VeterinarioStatus.loading;
     _error = null;
     notifyListeners();
 
     try {
-      final res = await _dio.get(ApiConstants.veterinariosDeRancho(ranchoId));
+      // Cargar ranchos disponibles para el dropdown de creación
+      await _cargarRanchos();
+
+      // GET /dueno/veterinarios — devuelve todos los vets con sus ranchos asociados
+      final res = await _dio.get(ApiConstants.listarVeterinarios);
       final data = res.data;
       final lista = data is Map
           ? (data['veterinarios'] as List? ?? [])
@@ -105,6 +103,18 @@ class VeterinarioViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _cargarRanchos() async {
+    final uid = TokenStorage.userId ?? '';
+    if (uid.isEmpty) return;
+    try {
+      final res = await _dio.get(ApiConstants.perfilDueno(uid));
+      final raw = res.data['ranchos'] as List? ?? [];
+      _ranchosDisponibles = raw
+          .map((r) => VetRanchoRef.fromJson(r as Map<String, dynamic>))
+          .toList();
+    } catch (_) {}
+  }
+
   // ── Crear veterinario y asociarlo al rancho ───────────────────────────────
 
   Future<String?> crear({
@@ -113,8 +123,9 @@ class VeterinarioViewModel extends ChangeNotifier {
     required String ubicacion,
     required String lugar,
     String? notas,
+    String? ranchoId,
   }) async {
-    final ranchoId = TokenStorage.ranchoId ?? '';
+    final rid = ranchoId ?? TokenStorage.ranchoId ?? '';
     _guardando = true;
     _error = null;
     notifyListeners();
@@ -133,16 +144,16 @@ class VeterinarioViewModel extends ChangeNotifier {
       );
       final vetId = createRes.data['id'] as String? ?? '';
 
-      // 2. Asociar al rancho si tenemos ranchoId
-      if (ranchoId.isNotEmpty && vetId.isNotEmpty) {
-        await _dio.post(ApiConstants.asociarVeterinario(ranchoId, vetId));
+      // 2. Asociar al rancho seleccionado
+      if (rid.isNotEmpty && vetId.isNotEmpty) {
+        await _dio.post(ApiConstants.asociarVeterinario(rid, vetId));
       }
 
-      // 3. Recargar lista
+      // 3. Recargar lista completa con ranchos
       await cargar();
       _guardando = false;
       notifyListeners();
-      return null; // éxito — sin error
+      return null;
     } on DioException catch (e) {
       _error = e.response?.data?['detail']?.toString() ??
           e.message ??

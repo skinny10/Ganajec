@@ -9,8 +9,9 @@ enum RegistrarGanaderoStatus { idle, loading, success, error }
 class RegistrarGanaderoViewModel extends ChangeNotifier {
   final Dio _dio = ApiClient.instance;
 
-  final nombreCtrl = TextEditingController();
-  final emailCtrl = TextEditingController();
+  final nombreCtrl    = TextEditingController();
+  final emailCtrl     = TextEditingController();
+  final passwordCtrl  = TextEditingController();
 
   RegistrarGanaderoStatus _status = RegistrarGanaderoStatus.idle;
   String? _error;
@@ -21,10 +22,17 @@ class RegistrarGanaderoViewModel extends ChangeNotifier {
   bool get isSuccess => _status == RegistrarGanaderoStatus.success;
 
   Future<void> registrar() async {
-    final nombre = nombreCtrl.text.trim();
-    final email = emailCtrl.text.trim().toLowerCase();
-    if (nombre.isEmpty || email.isEmpty) {
-      _error = 'Nombre y correo son obligatorios';
+    final nombre   = nombreCtrl.text.trim();
+    final email    = emailCtrl.text.trim().toLowerCase();
+    final password = passwordCtrl.text;
+    if (nombre.isEmpty || email.isEmpty || password.isEmpty) {
+      _error = 'Nombre, correo y contraseña son obligatorios';
+      _status = RegistrarGanaderoStatus.error;
+      notifyListeners();
+      return;
+    }
+    if (password.length < 6) {
+      _error = 'La contraseña debe tener al menos 6 caracteres';
       _status = RegistrarGanaderoStatus.error;
       notifyListeners();
       return;
@@ -37,8 +45,9 @@ class RegistrarGanaderoViewModel extends ChangeNotifier {
     try {
       final ranchoId = TokenStorage.ranchoId ?? '';
       final body = <String, dynamic>{
-        'nombre': nombre,
-        'email': email,
+        'nombre':   nombre,
+        'email':    email,
+        'password': password,
         if (ranchoId.isNotEmpty) 'rancho_id': ranchoId,
       };
       await _dio.post(ApiConstants.crearGanadero, data: body);
@@ -59,6 +68,7 @@ class RegistrarGanaderoViewModel extends ChangeNotifier {
   void dispose() {
     nombreCtrl.dispose();
     emailCtrl.dispose();
+    passwordCtrl.dispose();
     super.dispose();
   }
 }

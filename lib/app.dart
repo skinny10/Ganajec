@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
@@ -16,20 +16,16 @@ class GanajecApp extends StatelessWidget {
         ...authProviders,
         ...ganaderoProviders,
       ],
-      child: Builder(
-        builder: (context) {
-          return MaterialApp.router(
-            title: 'GANAJEC',
-            debugShowCheckedModeBanner: false,
-            useInheritedMediaQuery: true,
-            locale: DevicePreview.locale(context),
-            builder: DevicePreview.appBuilder,
-            theme: AppTheme.light(context),
-            darkTheme: AppTheme.dark(context),
-            themeMode: ThemeMode.system,
-            routerConfig: AppRouter.router,
-          );
-        },
+      child: MaterialApp.router(
+        title: 'GANAJEC',
+        debugShowCheckedModeBanner: false,
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
+        theme: AppTheme.light(context),
+        darkTheme: AppTheme.dark(context),
+        themeMode: ThemeMode.system,
+        routerConfig: AppRouter.router,
       ),
     );
   }

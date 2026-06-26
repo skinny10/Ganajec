@@ -21,6 +21,8 @@ class _RegistrarGanaderoScreenState
   static const _kGreen = Color(0xFF1D7A55);
   static const _kRed = Color(0xFFC0392B);
 
+  bool _passwordVisible = false;
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +163,15 @@ class _RegistrarGanaderoScreenState
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16),
+            _PasswordField(
+              label: 'Contraseña',
+              ctrl: vm.passwordCtrl,
+              hint: 'Mínimo 6 caracteres',
+              visible: _passwordVisible,
+              onToggle: () =>
+                  setState(() => _passwordVisible = !_passwordVisible),
+            ),
             const SizedBox(height: 32),
 
             SizedBox(
@@ -247,6 +258,85 @@ class _Field extends StatelessWidget {
             hintStyle: const TextStyle(
                 color: _kTextMuted, fontWeight: FontWeight.w300),
             prefixIcon: Icon(icon, color: _kTextMuted, size: 18),
+            filled: true,
+            fillColor: _kSurface,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: _kBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: _kBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  const BorderSide(color: _kTextPrimary, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PasswordField extends StatelessWidget {
+  final String label;
+  final TextEditingController ctrl;
+  final String hint;
+  final bool visible;
+  final VoidCallback onToggle;
+
+  static const _kSurface = Color(0xFFFFFFFF);
+  static const _kBorder = Color(0xFFE8E5DC);
+  static const _kTextPrimary = Color(0xFF1A1A1A);
+  static const _kTextMuted = Color(0xFFAEADA6);
+
+  const _PasswordField({
+    required this.label,
+    required this.ctrl,
+    required this.hint,
+    required this.visible,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: _kTextPrimary,
+            letterSpacing: 0.2,
+          ),
+        ),
+        const SizedBox(height: 7),
+        TextField(
+          controller: ctrl,
+          obscureText: !visible,
+          style: const TextStyle(fontSize: 14, color: _kTextPrimary),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+                color: _kTextMuted, fontWeight: FontWeight.w300),
+            prefixIcon: const Icon(Icons.lock_outline,
+                color: _kTextMuted, size: 18),
+            suffixIcon: GestureDetector(
+              onTap: onToggle,
+              child: Icon(
+                visible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: _kTextMuted,
+                size: 18,
+              ),
+            ),
             filled: true,
             fillColor: _kSurface,
             contentPadding: const EdgeInsets.symmetric(

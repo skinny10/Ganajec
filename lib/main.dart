@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:flutter/material.dart';
 import 'package:ganajec/core/network/token_storage.dart';
 import 'app.dart';
 
@@ -9,7 +9,7 @@ void main() async {
   runApp(
     DevicePreview(
       enabled: true,
-      builder: (_) => const GanajecApp(),
+      builder: (context) => const GanajecApp(),
     ),
   );
 }

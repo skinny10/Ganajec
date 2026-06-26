@@ -6,7 +6,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.3.181:8000/api';
+  static const String baseUrl = 'http://192.168.0.18:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
@@ -68,6 +68,14 @@ class ApiConstants {
   // ── Ganadero — editar perfil ─────────────────────────────────────────────────
   /// PUT /ganadero/{ganadero_id}/perfil  { nombre?, email?, password? }
   static String actualizarPerfilGanaderoV2(String id) => '/ganadero/$id/perfil';
+
+  // ── Dueño — editar perfil ────────────────────────────────────────────────────
+  /// PUT /dueno/{dueno_id}/perfil  { nombre?, email? }
+  static String actualizarPerfilDueno(String id) => '/dueno/$id/perfil';
+
+  // ── Ganadero — veterinarios de su rancho ─────────────────────────────────────
+  /// GET /ganadero/veterinarios  — vets del rancho al que pertenece el ganadero
+  static const String veterinariosGanadero = '/ganadero/veterinarios';
 
   // ── Ganadero — colegas ───────────────────────────────────────────────────────
   /// GET /ganadero/colegas  — otros ganaderos del mismo rancho (sin email)

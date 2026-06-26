@@ -7,6 +7,7 @@ import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/core/network/token_storage.dart';
 import '../../viewmodels/perfil_viewmodel.dart';
 import '../../viewmodels/veterinario_viewmodel.dart';
+import '../../viewmodels/mis_ganaderos_viewmodel.dart';
 import '../../widgets/rancho_modal.dart';
 import 'perfil_components.dart';
 
@@ -45,25 +46,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   /// Bottom sheet read-only para ganadero: muestra teléfono del vet.
   Future<void> _mostrarVetGanadero(BuildContext context) async {
-    final ranchoId = TokenStorage.ranchoId ?? '';
     List<VeterinarioInfo> vets = [];
     String? errorMsg;
 
-    if (ranchoId.isNotEmpty) {
-      try {
-        final res = await ApiClient.instance
-            .get(ApiConstants.veterinariosDeRancho(ranchoId));
-        final data = res.data;
-        final lista = data is Map
-            ? (data['veterinarios'] as List? ?? [])
-            : (data as List? ?? []);
-        vets = lista
-            .map((e) =>
-                VeterinarioInfo.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } catch (_) {
-        errorMsg = 'No disponible';
-      }
+    try {
+      final res = await ApiClient.instance
+          .get(ApiConstants.veterinariosGanadero);
+      final data = res.data as Map<String, dynamic>;
+      final lista = data['veterinarios'] as List? ?? [];
+      vets = lista
+          .map((e) => VeterinarioInfo.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      errorMsg = 'No disponible';
     }
 
     if (!mounted) return;
@@ -253,14 +248,52 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       icon: const SettingIcon(emoji: '🏡', bg: Color(0xFFFEF9E7)),
                       name: 'Nombre del rancho',
                       desc: vm.rancho.nombre,
-                      onTap: () {},
+                      showChevron: vm.usuario.role == 'dueno',
+                      onTap: vm.usuario.role == 'dueno'
+                          ? () {
+                              final r = vm.rancho;
+                              context.push(
+                                AppRoutes.editarRancho,
+                                extra: RanchoInfo(
+                                  id: r.id,
+                                  nombre: r.nombre,
+                                  municipio: r.municipio,
+                                  estado: r.estado,
+                                  codigoInvitacion: '',
+                                ),
+                              ).then((_) {
+                                if (mounted) {
+                                  context.read<PerfilViewModel>().cargarPerfil();
+                                }
+                              });
+                            }
+                          : null,
                     ),
                     _LastRow(
                       child: PerfilSettingRow(
                         icon: const SettingIcon(emoji: '📍', bg: Color(0xFFFEF9E7)),
                         name: 'Municipio y estado',
                         desc: '${vm.rancho.municipio}, ${vm.rancho.estado}',
-                        onTap: () {},
+                        showChevron: vm.usuario.role == 'dueno',
+                        onTap: vm.usuario.role == 'dueno'
+                            ? () {
+                                final r = vm.rancho;
+                                context.push(
+                                  AppRoutes.editarRancho,
+                                  extra: RanchoInfo(
+                                    id: r.id,
+                                    nombre: r.nombre,
+                                    municipio: r.municipio,
+                                    estado: r.estado,
+                                    codigoInvitacion: '',
+                                  ),
+                                ).then((_) {
+                                  if (mounted) {
+                                    context.read<PerfilViewModel>().cargarPerfil();
+                                  }
+                                });
+                              }
+                            : null,
                       ),
                     ),
                   ],

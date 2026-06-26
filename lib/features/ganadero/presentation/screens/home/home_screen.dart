@@ -78,7 +78,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         context.push(AppRoutes.alertas);
         break;
       case HomeTab.registrar:
-        context.push(AppRoutes.registroBovino);
+        context.push(AppRoutes.registroBovino).then((_) {
+          if (mounted) _cargarDatos();
+        });
         break;
       case HomeTab.reportes:
         context.push(
@@ -194,8 +196,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         delegate: SliverChildListDelegate([
                           HomeResumen(resumen: vm.resumen),
                           const SizedBox(height: 16),
-                          HomeAlertas(alertas: vm.alertas),
-                          const SizedBox(height: 8),
+                          // HomeAlertas(alertas: vm.alertas),
+                          // const SizedBox(height: 8),
                           HomeMiHato(
                             animales: vm.animales,
                             alertas: vm.alertas,
@@ -224,7 +226,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                           if (!_esDueno) ...[
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: () => context.push(AppRoutes.registroBovino),
+                              onPressed: () => context
+                                  .push(AppRoutes.registroBovino)
+                                  .then((_) {
+                                if (mounted) _cargarDatos();
+                              }),
                               icon: const Icon(Icons.add),
                               label: const Text('Registrar bovino'),
                             ),

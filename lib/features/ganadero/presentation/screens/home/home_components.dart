@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/alerta.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
@@ -42,16 +43,63 @@ class HomeResumen extends StatelessWidget {
   }
 }
 
-class HomeAlertas extends StatelessWidget {
+class HomeAlertas extends StatefulWidget {
   final List<Alerta> alertas;
 
   const HomeAlertas({super.key, required this.alertas});
 
   @override
+  State<HomeAlertas> createState() => _HomeAlertasState();
+}
+
+class _HomeAlertasState extends State<HomeAlertas> {
+  bool _visible = false;
+  Timer? _timer;
+  // IDs de alertas ya mostradas en esta sesión — no vuelven a aparecer
+  final Set<String> _alertasMostradas = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _evaluarNuevas(widget.alertas);
+  }
+
+  @override
+  void didUpdateWidget(HomeAlertas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _evaluarNuevas(widget.alertas);
+  }
+
+  void _evaluarNuevas(List<Alerta> alertas) {
+    if (alertas.isEmpty) return;
+    final nuevas = alertas
+        .map((a) => a.id)
+        .where((id) => !_alertasMostradas.contains(id))
+        .toSet();
+    if (nuevas.isEmpty) return; // todas ya fueron mostradas
+    _alertasMostradas.addAll(nuevas);
+    setState(() => _visible = true);
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer(const Duration(seconds: 5), () {
+      if (mounted) setState(() => _visible = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (alertas.isEmpty) return const SizedBox.shrink();
+    if (widget.alertas.isEmpty || !_visible) return const SizedBox.shrink();
     return Column(
-      children: alertas
+      children: widget.alertas
           .map((a) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AlertaBanner(alerta: a),

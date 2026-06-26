@@ -41,11 +41,12 @@ class EditarPerfilViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final uid = TokenStorage.userId ?? '';
-      await _dio.put(
-        ApiConstants.actualizarPerfilGanaderoV2(uid),
-        data: {'nombre': nombre, 'email': email},
-      );
+      final uid  = TokenStorage.userId ?? '';
+      final role = TokenStorage.role ?? 'ganadero';
+      final endpoint = role == 'dueno'
+          ? ApiConstants.actualizarPerfilDueno(uid)
+          : ApiConstants.actualizarPerfilGanaderoV2(uid);
+      await _dio.put(endpoint, data: {'nombre': nombre, 'email': email});
       // Actualizar caché local
       await TokenStorage.saveSession(
         token: TokenStorage.token ?? '',

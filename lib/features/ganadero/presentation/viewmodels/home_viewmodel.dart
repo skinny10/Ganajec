@@ -82,7 +82,9 @@ class HomeViewModel extends ChangeNotifier {
       _getPredicciones(),
     ]);
     _animales     = results[0] as List<Animal>;
-    _alertas      = results[1] as List<Alerta>;
+    _animales.sort((a, b) => b.creadoEn.compareTo(a.creadoEn));
+    // Solo alertas NO leídas para el banner del home
+    _alertas      = (results[1] as List<Alerta>).where((a) => !a.leida).toList();
     _predicciones = results[2] as List<Prediccion>;
     _resumen = {
       'total':         _animales.length,
@@ -104,7 +106,8 @@ class HomeViewModel extends ChangeNotifier {
     final rawBovinos   = bovinosData['bovinos'] as List? ?? [];
     _animales = rawBovinos
         .map((b) => _animalDesdeDueno(b as Map<String, dynamic>))
-        .toList();
+        .toList()
+      ..sort((a, b) => b.creadoEn.compareTo(a.creadoEn));
 
     // Predicciones (solo las 5 más recientes en home)
     final predsData = results[1].data as Map<String, dynamic>;
