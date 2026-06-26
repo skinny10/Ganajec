@@ -1,4 +1,3 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
@@ -19,9 +18,6 @@ class GanajecApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'GANAJEC',
         debugShowCheckedModeBanner: false,
-        useInheritedMediaQuery: true,
-        locale: DevicePreview.locale(context),
-        builder: DevicePreview.appBuilder,
         theme: AppTheme.light(context),
         darkTheme: AppTheme.dark(context),
         themeMode: ThemeMode.system,
