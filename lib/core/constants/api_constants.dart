@@ -6,13 +6,14 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.0.18:8000/api';
+  static const String baseUrl = 'http://192.168.0.24:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   /// POST /auth/change-password  { password_actual, nueva_password }
   static const String cambiarContrasena = '/auth/change-password';
+  static const String verificarEmail = '/auth/verificar-email';
 
   // ── Ganadero — perfil ────────────────────────────────────────────────────────
   /// GET /ganadero/{ganadero_id}

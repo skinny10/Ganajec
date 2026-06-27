@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
+import 'package:ganajec/features/auth/presentation/screens/verificar_email/verificar_email_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_screen.dart';
@@ -90,6 +91,7 @@ class AppRoutes {
   static const String historialDueno = '/historial-dueno';
   static const String veterinarios = '/veterinarios';
   static const String todosBovinos = '/todos-bovinos';
+  static const String verificarEmail = '/verificar-email';
 }
 
 class AppRouter {
@@ -110,6 +112,16 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verificarEmail,
+        builder: (context, state) {
+          final args = state.extra as Map<String, String>;
+          return VerificarEmailScreen(
+            email: args['email']!,
+            nombre: args['nombre']!,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.home,

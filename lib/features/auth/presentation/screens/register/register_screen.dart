@@ -43,7 +43,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       role: _selectedRole,
     );
     if (mounted && vm.status == AuthStatus.success) {
-      context.go(AppRoutes.home);
+      context.push(AppRoutes.verificarEmail, extra: {
+        'email': _emailController.text.trim(),
+        'nombre': _nameController.text.trim(),
+      });
     }
   }
 

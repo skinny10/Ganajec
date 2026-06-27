@@ -42,8 +42,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String role,
   }) async {
-    // v2: POST /register ya no devuelve access_token, solo { message, usuario }
-    await _dio.post(
+    final response = await _dio.post(
       ApiConstants.register,
       data: {
         'nombre': name,
@@ -52,8 +51,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'rol': role,
       },
     );
-    // Obtenemos el token haciendo login inmediatamente después
-    return login(email: email, password: password);
+    return UserModel.fromJson(
+      response.data['usuario'] as Map<String, dynamic>,
+    );
   }
 
   @override
