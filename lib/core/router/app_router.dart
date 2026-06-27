@@ -50,6 +50,7 @@ import 'package:ganajec/features/ganadero/presentation/viewmodels/historial_duen
 import 'package:ganajec/features/ganadero/presentation/screens/veterinarios/veterinarios_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/veterinario_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/todos_bovinos/todos_bovinos_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/politica_privacidad/politica_privacidad_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -90,6 +91,7 @@ class AppRoutes {
   static const String historialDueno = '/historial-dueno';
   static const String veterinarios = '/veterinarios';
   static const String todosBovinos = '/todos-bovinos';
+  static const String politicaPrivacidad = '/politica-privacidad';
 }
 
 class AppRouter {
@@ -303,6 +305,10 @@ class AppRouter {
           create: (_) => VeterinarioViewModel(),
           child: const VeterinariosScreen(),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.politicaPrivacidad,
+        builder: (context, state) => const PoliticaPrivacidadScreen(),
       ),
       GoRoute(
         path: AppRoutes.elegirPlan,

@@ -367,6 +367,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ],
                 ),
 
+                // ── Legal ─────────────────────────────────────────────────────
+                PerfilSection(
+                  label: 'Legal',
+                  children: [
+                    _LastRow(
+                      child: PerfilSettingRow(
+                        icon: const SettingIcon(emoji: '📄', bg: Color(0xFFF5F3EE)),
+                        name: 'Política de Privacidad',
+                        desc: 'Cómo manejamos tus datos',
+                        onTap: () => context.push(AppRoutes.politicaPrivacidad),
+                      ),
+                    ),
+                  ],
+                ),
+
                 // ── Sesión ────────────────────────────────────────────────────
                 PerfilSection(
                   label: 'Sesión',

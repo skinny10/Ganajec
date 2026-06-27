@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/home_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/todos_bovinos/todos_bovinos_screen.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 import 'home_components.dart';
 import 'package:ganajec/core/router/app_router.dart';
 
@@ -78,8 +79,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         context.push(AppRoutes.alertas);
         break;
       case HomeTab.registrar:
-        context.push(AppRoutes.registroBovino).then((_) {
-          if (mounted) _cargarDatos();
+        context.push<Animal?>(AppRoutes.registroBovino).then((nuevo) {
+          if (!mounted) return;
+          _cargarDatos();
+          if (nuevo != null) {
+            context.push(AppRoutes.detalleBovino, extra: nuevo);
+          }
         });
         break;
       case HomeTab.reportes:
@@ -227,9 +232,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
                               onPressed: () => context
-                                  .push(AppRoutes.registroBovino)
-                                  .then((_) {
-                                if (mounted) _cargarDatos();
+                                  .push<Animal?>(AppRoutes.registroBovino)
+                                  .then((nuevo) {
+                                if (!mounted) return;
+                                _cargarDatos();
+                                if (nuevo != null) {
+                                  context.push(AppRoutes.detalleBovino, extra: nuevo);
+                                }
                               }),
                               icon: const Icon(Icons.add),
                               label: const Text('Registrar bovino'),

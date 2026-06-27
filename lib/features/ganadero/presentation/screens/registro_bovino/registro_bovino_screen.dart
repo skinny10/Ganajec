@@ -58,12 +58,9 @@ class _RegistroBovinoScreenState extends State<RegistroBovinoScreen> {
     );
     if (mounted && vm.status == RegistroStatus.success) {
       final nuevo = vm.createdAnimal;
-      if (nuevo != null) {
-        // Reemplaza la pantalla de registro con el detalle del nuevo bovino
-        context.pushReplacement(AppRoutes.detalleBovino, extra: nuevo);
-      } else {
-        context.pop();
-      }
+      // Pop con el animal creado para que home lo reciba en .then()
+      // y navegue al detalle sin romper el stack de rutas
+      context.pop(nuevo);
     }
   }
 
