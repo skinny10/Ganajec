@@ -254,6 +254,45 @@ En `lib/core/providers/ganadero_providers.dart` se registra:
 
 Así, la pantalla obtiene sus dependencias de forma centralizada y fácil de probar.
 
+## Feature de suscripción
+
+La feature de `suscripcion` permite mostrar el plan actual del usuario, explorar planes disponibles y confirmar una nueva suscripción desde la app.
+
+### Estructura principal
+
+- `lib/features/suscripcion/presentation`: contiene las pantallas y los viewmodels que controlan la experiencia de usuario.
+- `lib/features/suscripcion/domain`: define contratos de repositorio y los casos de uso de negocio.
+- `lib/features/suscripcion/data`: implementa la integración con datos remotos y el mapeo a modelos.
+
+### Carpetas y responsabilidades
+
+- `lib/features/suscripcion/presentation/screens/elegir_plan/`
+  - Contiene la pantalla para elegir un plan, junto con sus componentes visuales como tarjetas de planes, toggle mensual/anual y la UI de confirmación.
+- `lib/features/suscripcion/presentation/screens/mi_plan/`
+  - Muestra el plan activo, el uso actual del usuario y las opciones de upgrade disponibles.
+- `lib/features/suscripcion/presentation/viewmodels/`
+  - Implementa la lógica de estado para cargar planes, seleccionar uno, alternar pago anual y confirmar la suscripción.
+- `lib/features/suscripcion/domain/repositories/`
+  - Define la interfaz del repositorio de suscripción.
+- `lib/features/suscripcion/domain/usecase/`
+  - Agrupa los casos de uso para obtener la suscripción actual, listar planes y suscribirse.
+- `lib/features/suscripcion/data/datasource/`
+  - Encapsula la comunicación con la API, por ejemplo para consultar la suscripción actual o crear una nueva suscripción.
+- `lib/features/suscripcion/data/models/`
+  - Convierte respuestas JSON del backend en modelos que luego se transforman a entidades del dominio.
+- `lib/features/suscripcion/data/repositories/`
+  - Implementa el repositorio de dominio usando el datasource remoto.
+
+### Flujo de la feature
+
+1. La pantalla `MiPlanScreen` o `ElegirPlanScreen` solicita datos al `ViewModel` correspondiente.
+2. El `ViewModel` invoca casos de uso del dominio como `GetSuscripcionUseCase`, `GetPlanesUseCase` o `SuscribirseUseCase`.
+3. Los casos de uso delegan en el repositorio.
+4. El repositorio usa el datasource remoto para consumir la API.
+5. Los datos regresan al `ViewModel` y se renderizan en la UI.
+
+
+
 ## Notas finales
 
 - El flujo actual es local/mock, pero la estructura ya está preparada para integrar backend real.

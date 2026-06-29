@@ -4,6 +4,7 @@ import 'package:ganajec/share/domain/entities/suscripcion_info.dart';
 import 'package:ganajec/features/suscripcion/domain/usecase/get_suscripcion_usecase.dart';
 import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.dart';
 import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
+import 'package:ganajec/features/suscripcion/data/datasource/payment_remote_ds.dart';
 
 enum ElegirPlanStatus { idle, loading, subscribing, subscribed, error }
 
@@ -11,6 +12,7 @@ class ElegirPlanViewModel extends ChangeNotifier {
   final GetSuscripcionUseCase _getSuscripcion;
   final GetPlanesUseCase _getPlanes;
   final SuscribirseUseCase _suscribirse;
+  final PaymentRemoteDataSource _paymentDs = PaymentRemoteDataSourceImpl();
 
   ElegirPlanViewModel({
     required GetSuscripcionUseCase getSuscripcion,
@@ -85,6 +87,13 @@ class ElegirPlanViewModel extends ChangeNotifier {
   void togglePagoAnual() {
     _esPagoAnual = !_esPagoAnual;
     notifyListeners();
+  }
+
+  Future<String?> obtenerClientSecret() async {
+    final p = planSeleccionadoObj;
+    if (p == null || p.esGratuito) return null;
+    final amount = _esPagoAnual ? p.precioAnual * 100 : p.precioMensual * 100;
+    return await _paymentDs.createPaymentIntent(amount, 'mxn');
   }
 
   Future<bool> confirmarSuscripcion() async {

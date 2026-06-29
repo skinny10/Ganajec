@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
 import 'package:ganajec/share/domain/entities/plan.dart';
-import '../../viewmodels/elegir_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/elegir_plan_viewmodel.dart';
 import 'elegir_plan_components.dart';
 
 class ElegirPlanScreen extends StatefulWidget {
@@ -25,51 +26,73 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
     Future.microtask(() => context.read<ElegirPlanViewModel>().cargar());
   }
 
-  Future<void> _abrirGPlaySheet() async {
+  Future<void> _abrirStripeSheet() async {
     final vm = context.read<ElegirPlanViewModel>();
     final plan = vm.planSeleccionadoObj;
     if (plan == null || plan.esGratuito) return;
 
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ChangeNotifierProvider.value(
-        value: vm,
-        child: Consumer<ElegirPlanViewModel>(
-          builder: (ctx, vm, _) => GooglePlayBillingSheet(
-            plan: plan,
-            isAnual: vm.esPagoAnual,
-            isLoading: vm.isSubscribing,
-            onConfirm: () async {
-              final ok = await vm.confirmarSuscripcion();
-              if (!context.mounted) return;
-              Navigator.of(ctx).pop(); // cierra sheet
-              if (ok) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('¡Suscripción al Plan ${plan.nombre} activada!'),
-                    backgroundColor: const Color(0xFF1D7A55),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                await Future.delayed(const Duration(milliseconds: 800));
-                if (context.mounted) context.go(AppRoutes.perfil);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(vm.error ?? 'Error al procesar la suscripción'),
-                    backgroundColor: const Color(0xFFC0392B),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                vm.resetStatus();
-              }
-            },
-          ),
+    try {
+      // 1. Obtener clientSecret desde tu API
+      final clientSecret = await vm.obtenerClientSecret();
+      if (clientSecret == null) return;
+
+      // 2. Inicializar PaymentSheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'GANAJEC',
+          style: ThemeMode.light,
         ),
-      ),
-    );
+      );
+
+      // 3. Mostrar PaymentSheet
+      await Stripe.instance.presentPaymentSheet();
+
+      // 4. Pago exitoso — confirmar suscripción en tu backend
+      final ok = await vm.confirmarSuscripcion();
+      if (!context.mounted) return;
+
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('¡Suscripción al Plan ${plan.nombre} activada!'),
+            backgroundColor: const Color(0xFF1D7A55),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (context.mounted) context.go(AppRoutes.perfil);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(vm.error ?? 'Error al confirmar la suscripción'),
+            backgroundColor: const Color(0xFFC0392B),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        vm.resetStatus();
+      }
+    } on StripeException catch (e) {
+      if (!context.mounted) return;
+      if (e.error.code != FailureCode.Canceled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error en el pago: ${e.error.localizedMessage}'),
+            backgroundColor: const Color(0xFFC0392B),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: const Color(0xFFC0392B),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -122,18 +145,13 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
     return ListView(
       padding: const EdgeInsets.only(top: 14, bottom: 24),
       children: [
-        // Promo header
         ElegirPlanPromoHeader(
           planActualNombre: vm.suscripcion?.planActual.nombre ?? 'Gratuito',
         ),
-
-        // Toggle mensual/anual
         ElegirPlanBillingToggle(
           isAnual: vm.esPagoAnual,
           onToggle: () => context.read<ElegirPlanViewModel>().togglePagoAnual(),
         ),
-
-        // Plan cards
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Column(
@@ -152,8 +170,6 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
             }).toList(),
           ),
         ),
-
-        // Google Play info
         const ElegirPlanGPlayInfo(),
         const SizedBox(height: 16),
       ],
@@ -189,7 +205,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                   elevation: 4,
                   shadowColor: Colors.black.withOpacity(0.18),
                 ),
-                onPressed: disabled ? null : _abrirGPlaySheet,
+                onPressed: disabled ? null : _abrirStripeSheet,
                 child: vm.isSubscribing
                     ? const SizedBox(
                         width: 18,

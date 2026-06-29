@@ -6,7 +6,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://192.168.0.24:8000/api';
+  static const String baseUrl = 'http://192.168.1.35:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
@@ -157,4 +157,8 @@ class ApiConstants {
 
   /// GET /dueno/reportes  — estadísticas y resumen por bovino
   static const String reportesDueno = '/dueno/reportes';
+
+// ── Pagos ────────────────────────────────────────────────────────────────────
+/// POST /payments/create-intent  { amount, currency }
+static const String createPaymentIntent = '/payments/create-intent';
 }
