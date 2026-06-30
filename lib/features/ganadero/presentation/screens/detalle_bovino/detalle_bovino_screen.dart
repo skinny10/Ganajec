@@ -8,8 +8,13 @@ import 'detalle_bovino_components.dart';
 
 class DetalleBovinoScreen extends StatefulWidget {
   final Animal animal;
+  final bool soloLectura;
 
-  const DetalleBovinoScreen({super.key, required this.animal});
+  const DetalleBovinoScreen({
+    super.key,
+    required this.animal,
+    this.soloLectura = false,
+  });
 
   @override
   State<DetalleBovinoScreen> createState() => _DetalleBovinoScreenState();
@@ -59,23 +64,24 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
         ),
         centerTitle: true,
         actions: [
-          GestureDetector(
-            onTap: () =>
-                context.push(AppRoutes.editarBovino, extra: widget.animal),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE8E5DC)),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(6),
-                child: Icon(Icons.edit_outlined,
-                    color: Color(0xFF1A1A1A), size: 16),
+          if (!widget.soloLectura)
+            GestureDetector(
+              onTap: () =>
+                  context.push(AppRoutes.editarBovino, extra: widget.animal),
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE8E5DC)),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.edit_outlined,
+                      color: Color(0xFF1A1A1A), size: 16),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: vm.isLoading
@@ -118,13 +124,15 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
                     ],
                   ),
                 ),
-      bottomNavigationBar: DetalleBottomCta(
-        animal: widget.animal,
-        onRegistrarSintomas: () => context.push(
-          AppRoutes.registrarSintomas,
-          extra: widget.animal,
-        ),
-      ),
+      bottomNavigationBar: widget.soloLectura
+          ? null
+          : DetalleBottomCta(
+              animal: widget.animal,
+              onRegistrarSintomas: () => context.push(
+                AppRoutes.registrarSintomas,
+                extra: widget.animal,
+              ),
+            ),
     );
   }
 }

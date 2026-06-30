@@ -2,8 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'auth_interceptor.dart';
 
-/// Singleton de Dio configurado con baseUrl y AuthInterceptor.
-/// Usa [ApiClient.instance] para hacer peticiones HTTP.
 class ApiClient {
   ApiClient._();
 

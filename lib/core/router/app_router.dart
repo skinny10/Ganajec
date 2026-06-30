@@ -51,6 +51,7 @@ import 'package:ganajec/features/ganadero/presentation/screens/veterinarios/vete
 import 'package:ganajec/features/ganadero/presentation/viewmodels/veterinario_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/todos_bovinos/todos_bovinos_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/politica_privacidad/politica_privacidad_screen.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_args.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_bovino_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/perfil_viewmodel.dart';
@@ -124,7 +125,16 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.detalleBovino,
         builder: (context, state) {
-          final animal = state.extra as Animal;
+          final extra = state.extra;
+          final Animal animal;
+          final bool soloLectura;
+          if (extra is DetalleBovinoArgs) {
+            animal = extra.animal;
+            soloLectura = extra.soloLectura;
+          } else {
+            animal = extra as Animal;
+            soloLectura = false;
+          }
           final ds = GanaderoRemoteDataSourceImpl();
           final repo = GanaderoRepositoryImpl(ds);
           return ChangeNotifierProvider(
@@ -132,7 +142,7 @@ class AppRouter {
               getHistorialAnimal: GetHistorialAnimalUseCase(repo),
               getPrediccionesAnimal: GetPrediccionesAnimalUseCase(repo),
             ),
-            child: DetalleBovinoScreen(animal: animal),
+            child: DetalleBovinoScreen(animal: animal, soloLectura: soloLectura),
           );
         },
       ),

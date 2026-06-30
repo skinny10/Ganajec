@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
+import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/historial_item.dart';
+import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_args.dart';
 import '../../viewmodels/historial_viewmodel.dart';
 import 'historial_components.dart';
 
@@ -25,13 +27,21 @@ class _HistorialScreenState extends State<HistorialScreen> {
   }
 
   void _onCardTap(HistorialItem item) {
-    // TODO: navegar a resultado_prediccion con el item (cuando la API entregue el objeto completo)
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${item.enfermedad} · ${item.animalNombre}'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 1),
-      ),
+    final animal = Animal(
+      id: item.animalId,
+      ranchoId: '',
+      ganaderoId: '',
+      nombre: item.animalNombre,
+      raza: '',
+      sexo: '',
+      fechaNacimiento: DateTime(2000),
+      pesoKg: 0,
+      idExterno: item.animalIdExterno,
+      creadoEn: item.fecha,
+    );
+    context.push(
+      AppRoutes.detalleBovino,
+      extra: DetalleBovinoArgs(animal: animal, soloLectura: true),
     );
   }
 
