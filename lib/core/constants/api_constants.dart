@@ -5,8 +5,8 @@ class ApiConstants {
   ApiConstants._();
 
   static String get baseUrl => kIsWeb
-      ? 'http://localhost:8000/api'
-      : 'http://192.168.0.15:8000/api';
+      ? 'http://184.72.150.86:8000/api'
+      : 'http://184.72.150.86:8000/api';
 
   // ── Autenticación ────────────────────────────────────────────────────────────
   static const String login = '/auth/login';
