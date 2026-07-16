@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'GANAJEC AI',
                           style: Theme.of(context)
-                              .textThemefind /Users/jaredtm/StudioProjects/Ganajec/lib -name "*injection*" -o -name "*locator*" -o -name "*di*" -o -name "*dependencies*" 2>/dev/null
+                              .textTheme
                               .titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,

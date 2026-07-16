@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/core/router/app_router.dart';
 
 class VerificarEmailScreen extends StatefulWidget {
@@ -20,43 +21,32 @@ class VerificarEmailScreen extends StatefulWidget {
 }
 
 class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
-  final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes =
-      List.generate(6, (_) => FocusNode());
+  final _codeController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
+    _codeController.dispose();
     super.dispose();
   }
 
-  void _onDigitChanged(int index, String value) {
-    if (value.length == 1 && index < 5) {
-      _focusNodes[index + 1].requestFocus();
-    }
-  }
-
-  String get _codigo =>
-      _controllers.map((c) => c.text).join();
+  String get _codigo => _codeController.text;
 
   Future<void> _verificar() async {
     if (_codigo.length != 6) return;
     setState(() => _isLoading = true);
     try {
-      await ApiClient.instance.post(
+      final response = await ApiClient.instance.post(
         ApiConstants.baseUrl + ApiConstants.verificarEmail,
         data: {
           'email': widget.email,
           'codigo': _codigo,
         },
       );
+      final accessToken = response.data['access_token'];
+      if (accessToken != null) {
+        await TokenStorage.init(); await TokenStorage.saveSession(token: accessToken, userId: "", role: "", name: "", email: "");
+      }
       if (mounted) {
         context.go(AppRoutes.login);
       }
@@ -136,47 +126,49 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(6, (i) {
-                return SizedBox(
-                  width: 45,
-                  height: 55,
-                  child: TextField(
-                    controller: _controllers[i],
-                    focusNode: _focusNodes[i],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    onChanged: (v) => _onDigitChanged(i, v),
+            Center(
+              child: SizedBox(
+                width: 260,
+                child: TextField(
+                  controller: _codeController,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 12,
                   ),
-                );
-              }),
+                  decoration: InputDecoration(
+                    counterText: '',
+                    hintText: '000000',
+                    hintStyle: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 12,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 32),
             SizedBox(

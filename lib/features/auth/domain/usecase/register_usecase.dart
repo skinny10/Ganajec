@@ -6,7 +6,7 @@ class RegisterUseCase {
 
   const RegisterUseCase(this.repository);
 
-  Future<User> call({
+  Future<User?> call({
     required String name,
     required String email,
     required String password,

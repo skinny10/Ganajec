@@ -6,7 +6,7 @@ import 'package:ganajec/features/auth/data/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required String email, required String password});
-  Future<UserModel> register({
+  Future<UserModel?> register({
     required String name,
     required String email,
     required String password,
@@ -36,14 +36,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> register({
+  Future<UserModel?> register({
     required String name,
     required String email,
     required String password,
     required String role,
   }) async {
-    final response = await _dio.post(
-      ApiConstants.register,
+    await _dio.post(
+      ApiConstants.preRegister,
       data: {
         'nombre': name,
         'email': email,
@@ -51,9 +51,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'rol': role,
       },
     );
-    return UserModel.fromJson(
-      response.data['usuario'] as Map<String, dynamic>,
-    );
+    return null;
   }
 
   @override

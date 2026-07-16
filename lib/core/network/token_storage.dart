@@ -39,6 +39,10 @@ class TokenStorage {
   }
 
   // ── Persistencia ──────────────────────────────────────────────────────────────
+  static Future<void> _ensurePrefs() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
+
   static Future<void> saveSession({
     required String token,
     required String userId,
@@ -46,6 +50,7 @@ class TokenStorage {
     String? name,
     String? email,
   }) async {
+    await _ensurePrefs();
     await Future.wait([
       _prefs!.setString(_kToken, token),
       _prefs!.setString(_kUserId, userId),

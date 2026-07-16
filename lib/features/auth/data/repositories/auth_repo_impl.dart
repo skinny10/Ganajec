@@ -13,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> register({
+  Future<User?> register({
     required String name,
     required String email,
     required String password,
