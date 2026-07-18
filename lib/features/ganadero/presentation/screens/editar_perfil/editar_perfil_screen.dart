@@ -11,17 +11,9 @@ class EditarPerfilScreen extends StatefulWidget {
 }
 
 class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreen = Color(0xFF2E7D32);
-
   @override
   void initState() {
     super.initState();
-    // Escuchamos cambios para reaccionar al éxito UNA sola vez
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EditarPerfilViewModel>().addListener(_onVmChange);
     });
@@ -30,10 +22,11 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   void _onVmChange() {
     final vm = context.read<EditarPerfilViewModel>();
     if (vm.isSuccess && mounted) {
+      final cs = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Perfil actualizado'),
-          backgroundColor: Color(0xFF2E7D32),
+        SnackBar(
+          content: const Text('Perfil actualizado'),
+          backgroundColor: cs.tertiary,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -43,19 +36,20 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
 
   @override
   void dispose() {
-    // Removemos el listener para no llamar al vm después de dispose
     context.read<EditarPerfilViewModel>().removeListener(_onVmChange);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<EditarPerfilViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -63,21 +57,20 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Editar perfil',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
@@ -87,15 +80,16 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                 ? null
                 : () => context.read<EditarPerfilViewModel>().guardar(),
             child: vm.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: cs.tertiary),
                   )
-                : const Text(
+                : Text(
                     'Guardar',
-                    style: TextStyle(
-                      color: _kGreen,
+                    style: tt.labelLarge?.copyWith(
+                      color: cs.tertiary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -104,7 +98,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: ListView(
@@ -119,11 +113,11 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                   listenable: vm.nombreCtrl,
                   builder: (_, __) => CircleAvatar(
                     radius: 36,
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: cs.primary,
                     child: Text(
                       _initials(vm.nombreCtrl.text),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: tt.titleMedium?.copyWith(
+                        color: cs.onPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -133,8 +127,10 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Foto de perfil — próximamente',
-                  style:
-                      TextStyle(fontSize: 12, color: _kTextSecondary),
+                  style: tt.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 28),
               ],
@@ -146,22 +142,25 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFFDEDEC),
+                color: cs.errorContainer,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 vm.error!,
-                style: const TextStyle(
-                    color: Color(0xFFC0392B), fontSize: 13),
+                style: tt.bodySmall?.copyWith(
+                  color: cs.onErrorContainer,
+                  fontSize: 13,
+                ),
               ),
             ),
             const SizedBox(height: 16),
           ],
 
           // Campo nombre
-          _label('Nombre completo'),
+          _label(context, 'Nombre completo'),
           const SizedBox(height: 6),
           _field(
+            context,
             controller: vm.nombreCtrl,
             hint: 'Tu nombre completo',
             icon: Icons.person_outline,
@@ -169,9 +168,10 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
           const SizedBox(height: 20),
 
           // Campo email
-          _label('Correo electrónico'),
+          _label(context, 'Correo electrónico'),
           const SizedBox(height: 6),
           _field(
+            context,
             controller: vm.emailCtrl,
             hint: 'correo@ejemplo.com',
             icon: Icons.email_outlined,
@@ -186,21 +186,21 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             child: ElevatedButton(
               onPressed: vm.isLoading
                   ? null
-                  : () =>
-                      context.read<EditarPerfilViewModel>().guardar(),
+                  : () => context.read<EditarPerfilViewModel>().guardar(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kGreen,
-                foregroundColor: Colors.white,
+                backgroundColor: cs.tertiary,
+                foregroundColor: cs.onTertiary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               child: vm.isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2)
-                  : const Text(
+                  ? CircularProgressIndicator(
+                      color: cs.onTertiary, strokeWidth: 2)
+                  : Text(
                       'Guardar cambios',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: tt.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600),
                     ),
             ),
           ),
@@ -220,45 +220,55 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         .toUpperCase();
   }
 
-  Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: _kTextSecondary,
-          letterSpacing: 0.3,
-        ),
-      );
+  Widget _label(BuildContext context, String text) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
-  Widget _field({
+    return Text(
+      text,
+      style: tt.labelSmall?.copyWith(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: cs.onSurfaceVariant,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+
+  Widget _field(
+    BuildContext context, {
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     TextInputType? keyboardType,
-  }) =>
-      Container(
-        decoration: BoxDecoration(
-          color: _kSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: tt.bodyMedium?.copyWith(
+          fontSize: 15,
+          color: cs.onSurface,
+          fontWeight: FontWeight.w400,
         ),
-        child: TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          style: const TextStyle(
-              fontSize: 15,
-              color: _kTextPrimary,
-              fontWeight: FontWeight.w400),
-          decoration: InputDecoration(
-            prefixIcon:
-                Icon(icon, color: _kTextSecondary, size: 18),
-            hintText: hint,
-            hintStyle:
-                TextStyle(color: _kTextSecondary.withOpacity(0.6)),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 14),
-          ),
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: cs.onSurfaceVariant, size: 18),
+          hintText: hint,
+          hintStyle: tt.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant.withOpacity(0.6)),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
-      );
+      ),
+    );
+  }
 }

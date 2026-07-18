@@ -16,15 +16,6 @@ class RanchoDashboardScreen extends StatefulWidget {
 }
 
 class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-
   @override
   void initState() {
     super.initState();
@@ -35,11 +26,13 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RanchoDashboardViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -47,57 +40,56 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
         title: Text(
           vm.rancho.nombre,
-          style: const TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         actions: [
           GestureDetector(
-              onTap: () async {
-                await context.push(
-                  AppRoutes.editarRancho,
-                  extra: vm.rancho,
-                );
-                if (context.mounted) {
-                  context.read<RanchoDashboardViewModel>().cargar();
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: _kSurface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: _kBorder),
-                ),
-                child: const Icon(Icons.edit_outlined,
-                    color: _kTextPrimary, size: 16),
+            onTap: () async {
+              await context.push(
+                AppRoutes.editarRancho,
+                extra: vm.rancho,
+              );
+              if (context.mounted) {
+                context.read<RanchoDashboardViewModel>().cargar();
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: cs.outlineVariant),
               ),
+              child: Icon(Icons.edit_outlined,
+                  color: cs.onSurface, size: 16),
             ),
+          ),
           IconButton(
             onPressed: () =>
                 context.read<RanchoDashboardViewModel>().cargar(),
-            icon: const Icon(Icons.refresh_outlined,
-                color: _kTextSecondary, size: 20),
+            icon: Icon(Icons.refresh_outlined,
+                color: cs.onSurfaceVariant, size: 20),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -114,18 +106,17 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
 
   Widget _buildContent(
       BuildContext context, RanchoDashboardViewModel vm) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return RefreshIndicator(
       onRefresh: () =>
           context.read<RanchoDashboardViewModel>().cargar(),
       child: ListView(
         padding: const EdgeInsets.only(top: 16, bottom: 40),
         children: [
-          // Card info del rancho
           _RanchoInfoCard(rancho: vm.rancho),
-
           const SizedBox(height: 16),
-
-          // Sección bovinos
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -133,10 +124,10 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
               children: [
                 Text(
                   'Bovinos (${vm.bovinos.length})',
-                  style: const TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -144,7 +135,6 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
           if (vm.bovinos.isEmpty)
             const _EmptyBovinos()
           else
@@ -159,38 +149,32 @@ class _RanchoDashboardScreenState extends State<RanchoDashboardScreen> {
 
 class _RanchoInfoCard extends StatelessWidget {
   final RanchoInfo rancho;
-
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-
   const _RanchoInfoCard({required this.rancho});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: _kGreenLight,
+                    color: cs.tertiaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
@@ -204,17 +188,18 @@ class _RanchoInfoCard extends StatelessWidget {
                     children: [
                       Text(
                         rancho.nombre,
-                        style: const TextStyle(
+                        style: tt.titleMedium?.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          color: _kTextPrimary,
                           letterSpacing: -0.4,
                         ),
                       ),
                       Text(
                         '${rancho.municipio}, ${rancho.estado}',
-                        style: const TextStyle(
-                            fontSize: 12, color: _kTextSecondary),
+                        style: tt.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -222,15 +207,14 @@ class _RanchoInfoCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(height: 0, thickness: 0.5, color: _kBorder),
+            Divider(height: 0, thickness: 0.5, color: cs.outlineVariant),
             const SizedBox(height: 14),
-            // Código
-            const Text(
+            Text(
               'CÓDIGO DE INVITACIÓN',
-              style: TextStyle(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: _kTextSecondary,
+                color: cs.onSurfaceVariant,
                 letterSpacing: 1.0,
               ),
             ),
@@ -250,26 +234,26 @@ class _RanchoInfoCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: _kGreenLight,
+                  color: cs.tertiaryContainer,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: _kGreen.withOpacity(0.25)),
+                      color: cs.tertiary.withOpacity(0.25)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       rancho.codigoInvitacion,
-                      style: const TextStyle(
+                      style: tt.bodyLarge?.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 3,
-                        color: _kGreen,
+                        color: cs.tertiary,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Icon(Icons.copy_outlined,
-                        color: _kGreen, size: 16),
+                    Icon(Icons.copy_outlined,
+                        color: cs.tertiary, size: 16),
                   ],
                 ),
               ),
@@ -285,25 +269,21 @@ class _RanchoInfoCard extends StatelessWidget {
 
 class _BovinoTile extends StatelessWidget {
   final Animal animal;
-
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   const _BovinoTile({required this.animal});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           children: [
@@ -311,7 +291,7 @@ class _BovinoTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F3EE),
+                color: cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Center(
@@ -325,16 +305,17 @@ class _BovinoTile extends StatelessWidget {
                 children: [
                   Text(
                     animal.nombre,
-                    style: const TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: _kTextPrimary,
                     ),
                   ),
                   Text(
                     '${animal.raza} · ${animal.idExterno}',
-                    style: const TextStyle(
-                        fontSize: 11.5, color: _kTextSecondary),
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 11.5,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -344,16 +325,17 @@ class _BovinoTile extends StatelessWidget {
               children: [
                 Text(
                   '${animal.pesoKg.toStringAsFixed(0)} kg',
-                  style: const TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
                   ),
                 ),
                 Text(
                   animal.sexo,
-                  style: const TextStyle(
-                      fontSize: 11, color: _kTextMuted),
+                  style: tt.bodySmall?.copyWith(
+                    fontSize: 11,
+                    color: cs.outline,
+                  ),
                 ),
               ],
             ),
@@ -371,26 +353,32 @@ class _EmptyBovinos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(40),
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          Text('🐄', style: TextStyle(fontSize: 40)),
-          SizedBox(height: 12),
+          const Text('🐄', style: TextStyle(fontSize: 40)),
+          const SizedBox(height: 12),
           Text(
             'Sin bovinos registrados en este rancho',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: tt.bodyMedium?.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+              color: cs.onSurface,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             'Los ganaderos que se unan al rancho podrán registrar su hato.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Color(0xFF888880)),
+            style: tt.bodySmall?.copyWith(
+              fontSize: 12,
+              color: cs.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -408,18 +396,22 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                color: Color(0xFFC0392B), size: 48),
+            Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888880))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
                 onPressed: onRetry,

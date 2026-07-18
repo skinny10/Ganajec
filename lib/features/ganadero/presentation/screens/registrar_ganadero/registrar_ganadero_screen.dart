@@ -13,14 +13,6 @@ class RegistrarGanaderoScreen extends StatefulWidget {
 
 class _RegistrarGanaderoScreenState
     extends State<RegistrarGanaderoScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kRed = Color(0xFFC0392B);
-
   bool _passwordVisible = false;
 
   @override
@@ -43,11 +35,12 @@ class _RegistrarGanaderoScreenState
     final vm = context.read<RegistrarGanaderoViewModel>();
     if (vm.isSuccess) {
       context.pop(true);
+      final cs = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ganadero registrado exitosamente'),
+        SnackBar(
+          content: const Text('Ganadero registrado exitosamente'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF1D7A55),
+          backgroundColor: cs.tertiary,
         ),
       );
     }
@@ -56,11 +49,13 @@ class _RegistrarGanaderoScreenState
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RegistrarGanaderoViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -68,27 +63,26 @@ class _RegistrarGanaderoScreenState
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Registrar ganadero',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: SingleChildScrollView(
@@ -96,25 +90,23 @@ class _RegistrarGanaderoScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Descripción
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFE8F5EF),
+                color: cs.tertiaryContainer,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: _kGreen.withOpacity(0.2)),
+                border: Border.all(color: cs.tertiary.withOpacity(0.2)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Text('👨‍🌾', style: TextStyle(fontSize: 20)),
-                  SizedBox(width: 10),
+                  const Text('👨‍🌾', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'El ganadero recibirá acceso al rancho y podrá registrar y monitorear su hato.',
-                      style: TextStyle(
+                      style: tt.bodySmall?.copyWith(
                         fontSize: 12.5,
-                        color: Color(0xFF1D7A55),
+                        color: cs.onTertiaryContainer,
                         height: 1.5,
                       ),
                     ),
@@ -124,23 +116,25 @@ class _RegistrarGanaderoScreenState
             ),
             const SizedBox(height: 24),
 
-            // Error banner
             if (vm.error != null) ...[
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDEDEC),
+                  color: cs.errorContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: _kRed, size: 16),
+                    Icon(Icons.error_outline, color: cs.error, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(vm.error!,
-                          style: const TextStyle(
-                              color: _kRed, fontSize: 13)),
+                      child: Text(
+                        vm.error!,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onErrorContainer,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -179,8 +173,8 @@ class _RegistrarGanaderoScreenState
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kTextPrimary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: cs.onSurface,
+                  foregroundColor: cs.surface,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
@@ -191,19 +185,20 @@ class _RegistrarGanaderoScreenState
                         .read<RegistrarGanaderoViewModel>()
                         .registrar(),
                 child: vm.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: cs.surface,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Registrar ganadero',
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500),
+                        style: tt.labelLarge?.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
               ),
             ),
@@ -221,11 +216,6 @@ class _Field extends StatelessWidget {
   final IconData icon;
   final TextInputType keyboardType;
 
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   const _Field({
     required this.label,
     required this.ctrl,
@@ -236,15 +226,17 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: 0.2,
           ),
         ),
@@ -252,28 +244,29 @@ class _Field extends StatelessWidget {
         TextField(
           controller: ctrl,
           keyboardType: keyboardType,
-          style: const TextStyle(fontSize: 14, color: _kTextPrimary),
+          style: tt.bodyMedium?.copyWith(fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-                color: _kTextMuted, fontWeight: FontWeight.w300),
-            prefixIcon: Icon(icon, color: _kTextMuted, size: 18),
+            hintStyle: tt.bodySmall?.copyWith(
+              color: cs.outline,
+              fontWeight: FontWeight.w300,
+            ),
+            prefixIcon: Icon(icon, color: cs.outline, size: 18),
             filled: true,
-            fillColor: _kSurface,
+            fillColor: cs.surfaceContainerLowest,
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: _kTextPrimary, width: 1.5),
+              borderSide: BorderSide(color: cs.onSurface, width: 1.5),
             ),
           ),
         ),
@@ -289,11 +282,6 @@ class _PasswordField extends StatelessWidget {
   final bool visible;
   final VoidCallback onToggle;
 
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   const _PasswordField({
     required this.label,
     required this.ctrl,
@@ -304,15 +292,17 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: 0.2,
           ),
         ),
@@ -320,39 +310,39 @@ class _PasswordField extends StatelessWidget {
         TextField(
           controller: ctrl,
           obscureText: !visible,
-          style: const TextStyle(fontSize: 14, color: _kTextPrimary),
+          style: tt.bodyMedium?.copyWith(fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-                color: _kTextMuted, fontWeight: FontWeight.w300),
-            prefixIcon: const Icon(Icons.lock_outline,
-                color: _kTextMuted, size: 18),
+            hintStyle: tt.bodySmall?.copyWith(
+              color: cs.outline,
+              fontWeight: FontWeight.w300,
+            ),
+            prefixIcon: Icon(Icons.lock_outline, color: cs.outline, size: 18),
             suffixIcon: GestureDetector(
               onTap: onToggle,
               child: Icon(
                 visible
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: _kTextMuted,
+                color: cs.outline,
                 size: 18,
               ),
             ),
             filled: true,
-            fillColor: _kSurface,
+            fillColor: cs.surfaceContainerLowest,
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: _kTextPrimary, width: 1.5),
+              borderSide: BorderSide(color: cs.onSurface, width: 1.5),
             ),
           ),
         ),

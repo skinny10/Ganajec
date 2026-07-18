@@ -17,13 +17,6 @@ class RegistrarSintomasScreen extends StatefulWidget {
 class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
   late TextEditingController _descripcionCtrl;
 
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kInputBg = Color(0xFFFDFCFA);
-
   @override
   void initState() {
     super.initState();
@@ -43,6 +36,7 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
 
   Future<void> _analizarConIA() async {
     final vm = context.read<RegistrarSintomasViewModel>();
+    final cs = Theme.of(context).colorScheme;
     final ok = await vm.analizarConIA();
     if (!mounted) return;
 
@@ -62,7 +56,7 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(vm.error ?? 'Error al analizar. Intenta de nuevo.'),
-          backgroundColor: const Color(0xFFC0392B),
+          backgroundColor: cs.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -72,12 +66,14 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<RegistrarSintomasViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kSurface,
+        backgroundColor: cs.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -85,27 +81,26 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kBg,
+              color: cs.surface,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Registrar síntomas',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: SingleChildScrollView(
@@ -125,18 +120,18 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
                   // ── Síntomas ────────────────────────────────────────────
                   SintomasChipGrid(
                     seleccionados: vm.seleccionados,
-                    onToggle: (label) =>
-                        context.read<RegistrarSintomasViewModel>().toggleSintoma(label),
+                    onToggle: (label) => context
+                        .read<RegistrarSintomasViewModel>()
+                        .toggleSintoma(label),
                   ),
                   const SizedBox(height: 20),
 
                   // ── Datos del día ────────────────────────────────────────
-                  const Text(
+                  Text(
                     'Datos del día',
-                    style: TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: _kTextPrimary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -187,12 +182,11 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
                   const SizedBox(height: 20),
 
                   // ── Descripción libre ────────────────────────────────────
-                  const Text(
+                  Text(
                     'Describe lo que ves',
-                    style: TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: _kTextPrimary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -203,74 +197,71 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
                         controller: _descripcionCtrl,
                         maxLines: 4,
                         maxLength: 300,
-                        style: const TextStyle(
+                        style: tt.bodySmall?.copyWith(
                           fontSize: 13.5,
-                          color: _kTextPrimary,
+                          color: cs.onSurface,
                           fontWeight: FontWeight.w300,
                           height: 1.6,
                         ),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: _kInputBg,
+                          fillColor: cs.surfaceContainerLowest,
                           hintText:
                               'Ej. la vaca no come desde ayer y se ve muy decaída, está parada sola en un rincón...',
-                          hintStyle: const TextStyle(
-                            color: _kTextMuted,
+                          hintStyle: tt.bodySmall?.copyWith(
+                            color: cs.outline,
                             fontSize: 13,
                             fontWeight: FontWeight.w300,
                           ),
-                          contentPadding: const EdgeInsets.fromLTRB(
-                              38, 13, 13, 13),
-                          counterStyle: const TextStyle(
+                          contentPadding:
+                              const EdgeInsets.fromLTRB(38, 13, 13, 13),
+                          counterStyle: tt.labelSmall?.copyWith(
                             fontSize: 10,
-                            color: _kTextMuted,
+                            color: cs.outline,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(13),
-                            borderSide:
-                                const BorderSide(color: _kBorder),
+                            borderSide: BorderSide(color: cs.outlineVariant),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(13),
-                            borderSide:
-                                const BorderSide(color: _kBorder),
+                            borderSide: BorderSide(color: cs.outlineVariant),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(13),
-                            borderSide: const BorderSide(
-                                color: _kTextPrimary, width: 1.5),
+                            borderSide:
+                                BorderSide(color: cs.onSurface, width: 1.5),
                           ),
                         ),
                       ),
-                      const Positioned(
+                      Positioned(
                         left: 13,
                         top: 14,
                         child: Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 15,
-                          color: _kTextMuted,
+                          color: cs.outline,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'El módulo NLP procesará tu descripción en español para extraer síntomas adicionales.',
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 10.5,
-                      color: _kTextMuted,
+                      color: cs.outline,
                       fontWeight: FontWeight.w300,
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // ── Severidad estimada ────────────────────────────────────
-                  const Text(
+                  Text(
                     'Severidad estimada',
-                    style: TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: _kTextPrimary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -282,11 +273,14 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomCta(vm),
+      bottomNavigationBar: _buildBottomCta(context, vm),
     );
   }
 
-  Widget _buildBottomCta(RegistrarSintomasViewModel vm) {
+  Widget _buildBottomCta(BuildContext context, RegistrarSintomasViewModel vm) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: EdgeInsets.fromLTRB(
         18,
@@ -294,9 +288,9 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
         18,
         MediaQuery.of(context).padding.bottom + 16,
       ),
-      decoration: const BoxDecoration(
-        color: _kSurface,
-        border: Border(top: BorderSide(color: _kBorder)),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -306,17 +300,17 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kTextPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: cs.onSurface,
+                foregroundColor: cs.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
                 elevation: 4,
-                shadowColor: Colors.black.withOpacity(0.18),
+                shadowColor: cs.onSurface.withOpacity(0.18),
               ),
               onPressed: vm.isAnalyzing ? null : _analizarConIA,
               child: vm.isAnalyzing
-                  ? const Row(
+                  ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
@@ -324,27 +318,27 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: cs.surface,
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
                           'Analizando...',
-                          style: TextStyle(
+                          style: tt.labelLarge?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_rounded, size: 16),
-                        SizedBox(width: 8),
+                        const Icon(Icons.search_rounded, size: 16),
+                        const SizedBox(width: 8),
                         Text(
                           'Analizar con IA',
-                          style: TextStyle(
+                          style: tt.labelLarge?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -354,11 +348,11 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'El resultado estará listo en segundos',
-            style: TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 10.5,
-              color: _kTextMuted,
+              color: cs.outline,
               fontWeight: FontWeight.w300,
             ),
           ),

@@ -24,14 +24,14 @@ class HomeResumen extends StatelessWidget {
           icono: Icons.pets,
           color: colors.primary,
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         ResumenCard(
           valor: '${resumen['en_buen_estado'] ?? 0}',
           etiqueta: 'En buen\nestado',
-          icono: Icons.check_circle_outline,
+          icono: Icons.favorite_outline,
           color: colors.tertiary,
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         ResumenCard(
           valor: '${resumen['con_alertas'] ?? 0}',
           etiqueta: 'Con alertas\nactivas',
@@ -153,26 +153,53 @@ class HomeMiHato extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ── Section header ──────────────────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              esDueno ? 'Mis ranchos' : 'Mi hato',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                const Text('🐄', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                Text(
+                  esDueno ? 'Mis ranchos' : 'Mi hato',
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                    fontSize: 16,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
             ),
             if (!esDueno)
-              TextButton(
-                onPressed: onVerTodos,
-                child: const Text('Ver todos'),
+              GestureDetector(
+                onTap: onVerTodos,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Ver todas',
+                      style: tt.labelMedium?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, size: 16, color: cs.primary),
+                  ],
+                ),
               ),
           ],
         ),
+        const SizedBox(height: 12),
+
         if (animales.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -180,13 +207,11 @@ class HomeMiHato extends StatelessWidget {
               esDueno
                   ? 'Aún no hay bovinos registrados en tus ranchos.'
                   : 'Aún no tienes animales registrados.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
           )
         else if (esDueno)
-          // ── Vista dueño: agrupado por rancho, máx 5 por grupo ────────────
+          // ── Vista dueño: agrupado por rancho, máx 5 por grupo ──────
           ..._porRancho.entries.map((entry) {
             final todos = entry.value;
             final visibles = todos.take(_kLimiteHato).toList();
@@ -204,13 +229,24 @@ class HomeMiHato extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 2, bottom: 4),
                     child: Center(
-                      child: TextButton(
-                        onPressed: onVerRanchoTodos != null
+                      child: GestureDetector(
+                        onTap: onVerRanchoTodos != null
                             ? () => onVerRanchoTodos!(todos)
                             : null,
-                        child: Text(
-                          'Ver los $restantes restantes',
-                          style: const TextStyle(fontSize: 13),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Ver los $restantes restantes',
+                              style: tt.labelMedium?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                            Icon(Icons.chevron_right,
+                                size: 16, color: cs.primary),
+                          ],
                         ),
                       ),
                     ),
@@ -219,7 +255,7 @@ class HomeMiHato extends StatelessWidget {
             );
           })
         else ...[
-          // ── Vista ganadero: lista simple, máximo 5 ────────────────────────
+          // ── Vista ganadero: lista simple, máximo 5 ──────────────────
           ...animales.take(_kLimiteHato).map(
             (a) => AnimalListTile(
               animal: a,
@@ -227,16 +263,25 @@ class HomeMiHato extends StatelessWidget {
               onTap: onAnimalTap != null ? () => onAnimalTap!(a) : null,
             ),
           ),
-          // "Ver todos" extra si hay más de 5
           if (animales.length > _kLimiteHato)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Center(
-                child: TextButton(
-                  onPressed: onVerTodos,
-                  child: Text(
-                    'Ver los ${animales.length - _kLimiteHato} restantes',
-                    style: const TextStyle(fontSize: 13),
+                child: GestureDetector(
+                  onTap: onVerTodos,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Ver los ${animales.length - _kLimiteHato} restantes',
+                        style: tt.labelMedium?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Icon(Icons.chevron_right, size: 16, color: cs.primary),
+                    ],
                   ),
                 ),
               ),
@@ -263,7 +308,7 @@ class _RanchoHeader extends StatelessWidget {
             nombre,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF8B4A2B),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
           ),
         ],
@@ -284,32 +329,56 @@ class HomePredicciones extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       children: [
+        // ── Section header ────────────────────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Últimas predicciones',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                const Text('📈', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                Text(
+                  'Últimas predicciones',
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                    fontSize: 16,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: onVerHistorial,
-              child: const Text('Ver historial'),
+            GestureDetector(
+              onTap: onVerHistorial,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ver historial',
+                    style: tt.labelMedium?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, size: 16, color: cs.primary),
+                ],
+              ),
             ),
           ],
         ),
+        const SizedBox(height: 12),
         if (predicciones.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(
               'No hay predicciones recientes.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
           )
         else

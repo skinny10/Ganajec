@@ -14,10 +14,6 @@ class HistorialScreen extends StatefulWidget {
 }
 
 class _HistorialScreenState extends State<HistorialScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-
   @override
   void initState() {
     super.initState();
@@ -25,7 +21,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
   }
 
   void _onCardTap(HistorialItem item) {
-    // TODO: navegar a resultado_prediccion con el item (cuando la API entregue el objeto completo)
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${item.enfermedad} · ${item.animalNombre}'),
@@ -37,12 +32,14 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<HistorialViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -51,27 +48,25 @@ class _HistorialScreenState extends State<HistorialScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Historial de predicciones',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -81,11 +76,11 @@ class _HistorialScreenState extends State<HistorialScreen> {
                   message: vm.error ?? 'Error al cargar el historial',
                   onRetry: () => context.read<HistorialViewModel>().cargar(),
                 )
-              : _buildContent(vm),
+              : _buildContent(context, vm),
     );
   }
 
-  Widget _buildContent(HistorialViewModel vm) {
+  Widget _buildContent(BuildContext context, HistorialViewModel vm) {
     final grupos = vm.grupos;
     final hasFilters = vm.filtroTipo != HistorialFiltroTipo.todos ||
         vm.animalFiltro != null ||
@@ -98,9 +93,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 14),
-              // Filtros (búsqueda + chips)
               HistorialFilterBar(vm: vm),
-              // Quick stats
               HistorialQuickStats(
                 alta: vm.countAlta,
                 total: vm.countMes,
@@ -110,7 +103,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
           ),
         ),
 
-        // Lista o empty state
         if (vm.isEmpty)
           SliverToBoxAdapter(
             child: HistorialEmptyState(
@@ -144,18 +136,22 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                color: Color(0xFFC0392B), size: 48),
+            Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888880))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
                 onPressed: onRetry, child: const Text('Reintentar')),

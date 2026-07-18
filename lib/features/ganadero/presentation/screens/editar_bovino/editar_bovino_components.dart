@@ -1,21 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kCream = Color(0xFFF5F3EE);
-const _kInputBg = Color(0xFFFDFCFA);
-const _kChanged = Color(0xFFF39C12);
-const _kChangedBg = Color(0xFFFEFDF5);
-
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum CategoriaAnimal {
@@ -85,8 +70,8 @@ PropositoAnimal derivarProposito(String raza) {
     return PropositoAnimal.leche;
   }
   if (r.contains('brahman') || r.contains('cebú') || r.contains('cebuíno') ||
-      r.contains('charolais') || r.contains('limousin') || r.contains('brangus') ||
-      r.contains('angus')) {
+      r.contains('charolais') || r.contains('limousin') ||
+      r.contains('brangus') || r.contains('angus')) {
     return PropositoAnimal.carne;
   }
   return PropositoAnimal.doble;
@@ -119,6 +104,8 @@ class EditarMiniCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final edad = calcularEdad(animal.fechaNacimiento);
     final categoria = derivarCategoria(animal.sexo, edad);
     final esAlta = severidad.toLowerCase().contains('alta');
@@ -127,9 +114,9 @@ class EditarMiniCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
@@ -137,7 +124,7 @@ class EditarMiniCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: _kRedLight,
+              color: cs.primaryContainer,
               borderRadius: BorderRadius.circular(13),
             ),
             child: const Center(
@@ -151,19 +138,18 @@ class EditarMiniCard extends StatelessWidget {
               children: [
                 Text(
                   animal.nombre,
-                  style: const TextStyle(
+                  style: tt.titleSmall?.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: _kTextPrimary,
                     letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${animal.raza} · ${categoria.label} · ${animal.idExterno}',
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 11.5,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -173,15 +159,15 @@ class EditarMiniCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color: esAlta ? _kRedLight : _kGreenLight,
+              color: esAlta ? cs.errorContainer : cs.tertiaryContainer,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               severidad,
-              style: TextStyle(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: esAlta ? _kRed : _kGreen,
+                color: esAlta ? cs.error : cs.tertiary,
               ),
             ),
           ),
@@ -198,25 +184,28 @@ class EditarChangeBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF9E7),
+        color: cs.secondaryContainer,
         borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: const Color(0xFFF7DC6F)),
+        border: Border.all(color: cs.secondary.withOpacity(0.3)),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('✏️', style: TextStyle(fontSize: 14)),
-          SizedBox(width: 9),
+          const Text('✏️', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 9),
           Expanded(
             child: Text(
               'Tienes cambios sin guardar. Presiona Guardar para aplicarlos.',
-              style: TextStyle(
+              style: tt.bodySmall?.copyWith(
                 fontSize: 11.5,
-                color: Color(0xFF7D6608),
+                color: cs.onSecondaryContainer,
                 fontWeight: FontWeight.w300,
                 height: 1.4,
               ),
@@ -236,14 +225,17 @@ class EditarSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(
+        style: tt.labelSmall?.copyWith(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: _kTextSecondary,
+          color: cs.onSurfaceVariant,
           letterSpacing: 0.6,
         ),
       ),
@@ -251,7 +243,7 @@ class EditarSectionLabel extends StatelessWidget {
   }
 }
 
-// ─── Campo de texto estilizado ─────────────────────────────────────────────
+// ─── Campo de texto estilizado ────────────────────────────────────────────────
 
 class EditarTextField extends StatelessWidget {
   final String label;
@@ -275,6 +267,9 @@ class EditarTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -283,21 +278,18 @@ class EditarTextField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: const TextStyle(
+          style: tt.bodyMedium?.copyWith(
             fontSize: 14,
-            color: _kTextPrimary,
             fontWeight: FontWeight.w400,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: changed ? _kChangedBg : _kInputBg,
-            prefixIcon: Icon(
-              iconData,
-              size: 16,
-              color: _kTextMuted,
-            ),
-            hintStyle: const TextStyle(
-              color: _kTextMuted,
+            fillColor: changed
+                ? cs.primaryContainer.withOpacity(0.3)
+                : cs.surfaceContainerLowest,
+            prefixIcon: Icon(iconData, size: 16, color: cs.outline),
+            hintStyle: tt.bodySmall?.copyWith(
+              color: cs.outline,
               fontWeight: FontWeight.w300,
               fontSize: 14,
             ),
@@ -308,17 +300,16 @@ class EditarTextField extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
               borderSide: BorderSide(
-                  color: changed ? _kChanged : _kBorder),
+                  color: changed ? cs.primary : cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
               borderSide: BorderSide(
-                  color: changed ? _kChanged : _kBorder),
+                  color: changed ? cs.primary : cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(
-                  color: _kTextPrimary, width: 1.5),
+              borderSide: BorderSide(color: cs.onSurface, width: 1.5),
             ),
           ),
         ),
@@ -326,9 +317,9 @@ class EditarTextField extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             changedHint!,
-            style: const TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 10.5,
-              color: Color(0xFFB7770D),
+              color: cs.onSecondaryContainer,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -338,7 +329,7 @@ class EditarTextField extends StatelessWidget {
   }
 }
 
-// ─── Selector de Raza (tappable → bottom sheet) ───────────────────────────
+// ─── Selector de Raza ────────────────────────────────────────────────────────
 
 class EditarRazaField extends StatelessWidget {
   final String label;
@@ -356,6 +347,9 @@ class EditarRazaField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -363,31 +357,31 @@ class EditarRazaField extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 13, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
             decoration: BoxDecoration(
-              color: changed ? _kChangedBg : _kInputBg,
+              color: changed
+                  ? cs.primaryContainer.withOpacity(0.3)
+                  : cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
-                  color: changed ? _kChanged : _kBorder),
+                  color: changed ? cs.primary : cs.outlineVariant),
             ),
             child: Row(
               children: [
-                const Icon(Icons.local_offer_outlined,
-                    size: 16, color: _kTextMuted),
+                Icon(Icons.local_offer_outlined,
+                    size: 16, color: cs.outline),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     value,
-                    style: const TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: _kTextPrimary,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down_rounded,
-                    size: 18, color: _kTextMuted),
+                Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 18, color: cs.outline),
               ],
             ),
           ),
@@ -406,7 +400,25 @@ void showRazaSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     isScrollControlled: true,
-    builder: (_) => DraggableScrollableSheet(
+    builder: (ctx) => _RazaSheetContent(
+      current: current,
+      onSelect: onSelect,
+    ),
+  );
+}
+
+class _RazaSheetContent extends StatelessWidget {
+  final String current;
+  final ValueChanged<String> onSelect;
+
+  const _RazaSheetContent({required this.current, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.65,
       maxChildSize: 0.9,
@@ -415,19 +427,19 @@ void showRazaSheet(
         children: [
           const SizedBox(height: 12),
           Container(
-            width: 36, height: 4,
+            width: 36,
+            height: 4,
             decoration: BoxDecoration(
-              color: _kBorder,
+              color: cs.outlineVariant,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Seleccionar raza',
-            style: TextStyle(
+            style: tt.titleSmall?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: _kTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -441,33 +453,33 @@ void showRazaSheet(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       entry.key,
-                      style: const TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: _kTextMuted,
+                        color: cs.outline,
                         letterSpacing: 0.6,
                       ),
                     ),
                   ),
                   ...entry.value.map((raza) => ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 4),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 4),
                         dense: true,
                         title: Text(
                           raza,
-                          style: TextStyle(
+                          style: tt.bodyMedium?.copyWith(
                             fontSize: 14,
                             fontWeight: raza == current
                                 ? FontWeight.w600
                                 : FontWeight.w400,
                             color: raza == current
-                                ? _kTextPrimary
-                                : _kTextSecondary,
+                                ? cs.onSurface
+                                : cs.onSurfaceVariant,
                           ),
                         ),
                         trailing: raza == current
-                            ? const Icon(Icons.check_rounded,
-                                color: _kGreen, size: 18)
+                            ? Icon(Icons.check_rounded,
+                                color: cs.tertiary, size: 18)
                             : null,
                         onTap: () {
                           onSelect(raza);
@@ -480,8 +492,8 @@ void showRazaSheet(
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 // ─── Grid de categoría ────────────────────────────────────────────────────────
@@ -535,16 +547,19 @@ class _CatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? _kTextPrimary : _kInputBg,
+          color: isSelected ? cs.onSurface : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(11),
           border: Border.all(
-            color: isSelected ? _kTextPrimary : _kBorder,
+            color: isSelected ? cs.onSurface : cs.outlineVariant,
             width: 1.5,
           ),
         ),
@@ -559,21 +574,20 @@ class _CatCard extends StatelessWidget {
                 children: [
                   Text(
                     cat.label,
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
-                      color:
-                          isSelected ? Colors.white : _kTextPrimary,
+                      color: isSelected ? cs.surface : cs.onSurface,
                     ),
                   ),
                   Text(
                     cat.desc,
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
                       color: isSelected
-                          ? Colors.white.withOpacity(0.6)
-                          : _kTextMuted,
+                          ? cs.surface.withOpacity(0.6)
+                          : cs.outline,
                     ),
                   ),
                 ],
@@ -633,25 +647,28 @@ class _PropositoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? _kGreen : _kInputBg,
+          color: isSelected ? cs.tertiary : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? _kGreen : _kBorder,
+            color: isSelected ? cs.tertiary : cs.outlineVariant,
             width: 1.5,
           ),
         ),
         child: Text(
           prop.label,
-          style: TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: isSelected ? Colors.white : _kTextSecondary,
+            color: isSelected ? cs.onTertiary : cs.onSurfaceVariant,
           ),
         ),
       ),
@@ -675,6 +692,9 @@ class EditarFechaField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -682,24 +702,24 @@ class EditarFechaField extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 13, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
             decoration: BoxDecoration(
-              color: changed ? _kChangedBg : _kInputBg,
+              color: changed
+                  ? cs.primaryContainer.withOpacity(0.3)
+                  : cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
-                  color: changed ? _kChanged : _kBorder),
+                  color: changed ? cs.primary : cs.outlineVariant),
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today_outlined,
-                    size: 16, color: _kTextMuted),
+                Icon(Icons.calendar_today_outlined,
+                    size: 16, color: cs.outline),
                 const SizedBox(width: 10),
                 Text(
                   formatFecha(value),
-                  style: const TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 14,
-                    color: _kTextPrimary,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -730,11 +750,14 @@ class EditarDeleteModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 36),
-      decoration: const BoxDecoration(
-        color: _kSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -745,7 +768,7 @@ class EditarDeleteModal extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder,
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -753,19 +776,18 @@ class EditarDeleteModal extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             '¿Eliminar a $animalNombre?',
-            style: const TextStyle(
+            style: tt.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: _kTextPrimary,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Esta acción eliminará al bovino y todo su historial de predicciones y producción. No se puede deshacer.',
-            style: TextStyle(
+            style: tt.bodySmall?.copyWith(
               fontSize: 13,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w300,
               height: 1.5,
             ),
@@ -776,8 +798,8 @@ class EditarDeleteModal extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kRed,
-                foregroundColor: Colors.white,
+                backgroundColor: cs.error,
+                foregroundColor: cs.onError,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
@@ -785,18 +807,20 @@ class EditarDeleteModal extends StatelessWidget {
               ),
               onPressed: isDeleting ? null : onConfirm,
               child: isDeleting
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: cs.onError,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Sí, eliminar bovino',
-                      style: TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w500),
+                      style: tt.labelLarge?.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
             ),
           ),
@@ -806,16 +830,19 @@ class EditarDeleteModal extends StatelessWidget {
             height: 50,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: _kTextPrimary,
-                side: const BorderSide(color: _kBorder),
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: cs.outlineVariant),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
               ),
               onPressed: isDeleting ? null : onCancel,
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                style: tt.labelLarge?.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ),

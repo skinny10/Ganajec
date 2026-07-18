@@ -12,15 +12,6 @@ class CambiarContrasenaScreen extends StatefulWidget {
 }
 
 class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kRed = Color(0xFFC0392B);
-  static const _kRedLight = Color(0xFFFDEDEC);
-
   bool _verNueva = false;
   bool _verConfirmar = false;
 
@@ -40,11 +31,12 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
     final vm = context.read<CambiarContrasenaViewModel>();
     if (!mounted) return;
     if (vm.isSuccess) {
+      final cs = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Contraseña actualizada correctamente'),
+        SnackBar(
+          content: const Text('Contraseña actualizada correctamente'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF2E7D32),
+          backgroundColor: cs.tertiary,
         ),
       );
       context.pop();
@@ -53,12 +45,14 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<CambiarContrasenaViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -66,30 +60,29 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.chevron_left_rounded,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               size: 20,
             ),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Cambiar contraseña',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: ListView(
@@ -101,9 +94,9 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F3EE),
+                color: cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _kBorder),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: const Center(
                 child: Text('🔑', style: TextStyle(fontSize: 30)),
@@ -111,23 +104,25 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Center(
+          Center(
             child: Text(
               'Nueva contraseña',
-              style: TextStyle(
+              style: tt.titleSmall?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: _kTextPrimary,
                 letterSpacing: -0.4,
               ),
             ),
           ),
           const SizedBox(height: 4),
-          const Center(
+          Center(
             child: Text(
               'Define tu nueva contraseña de acceso.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: _kTextSecondary),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 28),
@@ -137,18 +132,21 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _kRedLight,
+                color: cs.errorContainer,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFF5C6C2)),
+                border: Border.all(color: cs.error.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: _kRed, size: 16),
+                  Icon(Icons.error_outline, color: cs.error, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       vm.error!,
-                      style: const TextStyle(color: _kRed, fontSize: 13),
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onErrorContainer,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -158,9 +156,10 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
           ],
 
           // Campo: nueva contraseña
-          _label('Nueva contraseña'),
+          _label(context, 'Nueva contraseña'),
           const SizedBox(height: 6),
           _passwordField(
+            context,
             controller: vm.nuevaCtrl,
             hint: 'Mínimo 6 caracteres',
             visible: _verNueva,
@@ -169,9 +168,10 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
           const SizedBox(height: 16),
 
           // Campo: confirmar nueva
-          _label('Confirmar nueva contraseña'),
+          _label(context, 'Confirmar nueva contraseña'),
           const SizedBox(height: 6),
           _passwordField(
+            context,
             controller: vm.confirmarCtrl,
             hint: 'Repite tu nueva contraseña',
             visible: _verConfirmar,
@@ -186,24 +186,26 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
             child: ElevatedButton(
               onPressed: vm.isLoading ? null : vm.cambiar,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kGreen,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: _kGreen.withOpacity(0.5),
+                backgroundColor: cs.tertiary,
+                foregroundColor: cs.onTertiary,
+                disabledBackgroundColor: cs.tertiary.withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
               child: vm.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                          color: cs.onTertiary, strokeWidth: 2),
                     )
-                  : const Text(
+                  : Text(
                       'Actualizar contraseña',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w600),
+                      style: tt.labelLarge?.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
             ),
           ),
@@ -212,51 +214,64 @@ class _CambiarContrasenaScreenState extends State<CambiarContrasenaScreen> {
     );
   }
 
-  Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: _kTextSecondary,
-          letterSpacing: 0.3,
-        ),
-      );
+  Widget _label(BuildContext context, String text) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
-  Widget _passwordField({
+    return Text(
+      text,
+      style: tt.labelSmall?.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: cs.onSurfaceVariant,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+
+  Widget _passwordField(
+    BuildContext context, {
     required TextEditingController controller,
     required String hint,
     required bool visible,
     required VoidCallback onToggle,
-  }) =>
-      Container(
-        decoration: BoxDecoration(
-          color: _kSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
-        ),
-        child: TextField(
-          controller: controller,
-          obscureText: !visible,
-          style: const TextStyle(fontSize: 14, color: _kTextPrimary),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFFAEADA6), fontSize: 13),
-            prefixIcon: const Icon(Icons.lock_outline,
-                color: _kTextSecondary, size: 18),
-            suffixIcon: GestureDetector(
-              onTap: onToggle,
-              child: Icon(
-                visible
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: _kTextSecondary,
-                size: 18,
-              ),
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: !visible,
+        style: tt.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: tt.bodySmall?.copyWith(
+              color: cs.outline,
+              fontSize: 13,
+              fontWeight: FontWeight.w300),
+          prefixIcon: Icon(Icons.lock_outline,
+              color: cs.onSurfaceVariant, size: 18),
+          suffixIcon: GestureDetector(
+            onTap: onToggle,
+            child: Icon(
+              visible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: cs.onSurfaceVariant,
+              size: 18,
             ),
-            border: InputBorder.none,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
-      );
+      ),
+    );
+  }
 }

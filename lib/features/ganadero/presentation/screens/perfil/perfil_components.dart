@@ -1,19 +1,5 @@
 import 'package:flutter/material.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kCream = Color(0xFFF5F3EE);
-const _kCow = Color(0xFF8B4A2B);
-const _kCowLight = Color(0xFFF5EBE0);
-
 // ─── Hero de perfil ───────────────────────────────────────────────────────────
 
 class PerfilHeroCard extends StatelessWidget {
@@ -34,13 +20,16 @@ class PerfilHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,49 +42,47 @@ class PerfilHeroCard extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: _kCow,
+                  color: cs.primary,
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x4D8B4A2B),
+                      color: cs.primary.withOpacity(0.3),
                       blurRadius: 14,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Center(
                   child: Text(
                     iniciales,
-                    style: const TextStyle(
+                    style: tt.titleMedium?.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: cs.onPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
                 ),
               ),
-              // Botón editar avatar
               Positioned(
                 bottom: -4,
                 right: -4,
                 child: GestureDetector(
                   onTap: onEditarPerfil,
                   child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: _kTextPrimary,
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                        color: const Color(0xFFFAFAF7), width: 2),
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: cs.onSurface,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(color: cs.surface, width: 2),
+                    ),
+                    child: Icon(
+                      Icons.edit_rounded,
+                      size: 10,
+                      color: cs.surface,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.edit_rounded,
-                    size: 10,
-                    color: Colors.white,
-                  ),
-                ),
                 ),
               ),
             ],
@@ -108,19 +95,18 @@ class PerfilHeroCard extends StatelessWidget {
               children: [
                 Text(
                   nombre,
-                  style: const TextStyle(
+                  style: tt.titleMedium?.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: _kTextPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   email,
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -129,16 +115,16 @@ class PerfilHeroCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
-                    color: _kCream,
+                    color: cs.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _kBorder),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
                   child: Text(
                     '🐄 $plan',
-                    style: const TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: _kTextSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -159,10 +145,10 @@ class PerfilRanchoCard extends StatelessWidget {
   final String estado;
   final String duenoNombre;
   final int totalBovinos;
-  final VoidCallback? onUnirseRancho;   // si no tiene rancho
-  final VoidCallback? onMisGanaderos;   // dueño: ver ganaderos
-  final VoidCallback? onVerColegas;     // ganadero: ver colegas del rancho
-  final String ganaderosBtnLabel;       // "Ver ganaderos del rancho"
+  final VoidCallback? onUnirseRancho;
+  final VoidCallback? onMisGanaderos;
+  final VoidCallback? onVerColegas;
+  final String ganaderosBtnLabel;
 
   const PerfilRanchoCard({
     super.key,
@@ -181,13 +167,16 @@ class PerfilRanchoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
-        color: _kCowLight,
+        color: cs.primaryContainer,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8D5C4)),
+        border: Border.all(color: cs.primary.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,10 +191,10 @@ class PerfilRanchoCard extends StatelessWidget {
                   children: [
                     Text(
                       _tieneRancho ? nombre : 'Sin rancho asignado',
-                      style: const TextStyle(
+                      style: tt.bodyMedium?.copyWith(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w500,
-                        color: _kCow,
+                        color: cs.onPrimaryContainer,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -213,9 +202,9 @@ class PerfilRanchoCard extends StatelessWidget {
                       _tieneRancho
                           ? '$municipio, $estado'
                           : 'Únete o crea un rancho para comenzar',
-                      style: TextStyle(
+                      style: tt.bodySmall?.copyWith(
                         fontSize: 11,
-                        color: _kCow.withOpacity(0.7),
+                        color: cs.onPrimaryContainer.withOpacity(0.7),
                         fontWeight: FontWeight.w300,
                       ),
                     ),
@@ -225,10 +214,9 @@ class PerfilRanchoCard extends StatelessWidget {
             ],
           ),
 
-          // Dueño y bovinos — solo cuando tiene rancho
           if (_tieneRancho) ...[
             const SizedBox(height: 10),
-            const Divider(color: Color(0xFFE8D5C4), height: 1),
+            Divider(color: cs.primary.withOpacity(0.15), height: 1),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -247,7 +235,6 @@ class PerfilRanchoCard extends StatelessWidget {
             ),
           ],
 
-          // Botón de acción
           if (onUnirseRancho != null ||
               onMisGanaderos != null ||
               onVerColegas != null) ...[
@@ -258,9 +245,9 @@ class PerfilRanchoCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: _kCow.withOpacity(0.1),
+                  color: cs.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _kCow.withOpacity(0.25)),
+                  border: Border.all(color: cs.primary.withOpacity(0.25)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -269,7 +256,7 @@ class PerfilRanchoCard extends StatelessWidget {
                       onUnirseRancho != null
                           ? Icons.add_home_outlined
                           : Icons.people_outlined,
-                      color: _kCow,
+                      color: cs.onPrimaryContainer,
                       size: 14,
                     ),
                     const SizedBox(width: 6),
@@ -279,10 +266,10 @@ class PerfilRanchoCard extends StatelessWidget {
                           : onVerColegas != null
                               ? 'Ver colegas del rancho'
                               : ganaderosBtnLabel,
-                      style: const TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: _kCow,
+                        color: cs.onPrimaryContainer,
                       ),
                     ),
                   ],
@@ -303,16 +290,19 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: const Color(0xFF8B6914)),
+        Icon(icon, size: 12, color: cs.onPrimaryContainer),
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 11,
-            color: Color(0xFF8B6914),
+            color: cs.onPrimaryContainer,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -335,6 +325,9 @@ class PerfilSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
       child: Column(
@@ -344,23 +337,21 @@ class PerfilSection extends StatelessWidget {
             padding: const EdgeInsets.only(left: 2, bottom: 7),
             child: Text(
               label.toUpperCase(),
-              style: const TextStyle(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: _kTextMuted,
+                color: cs.outline,
                 letterSpacing: 0.08 * 10,
               ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
@@ -392,14 +383,17 @@ class PerfilSettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(13),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Color(0xFFE8E5DC), width: 0.5),
+            bottom: BorderSide(color: cs.outlineVariant, width: 0.5),
           ),
         ),
         child: Row(
@@ -412,19 +406,19 @@ class PerfilSettingRow extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: isDanger ? _kRed : _kTextPrimary,
+                      color: isDanger ? cs.error : cs.onSurface,
                     ),
                   ),
                   if (desc != null) ...[
                     const SizedBox(height: 1),
                     Text(
                       desc!,
-                      style: const TextStyle(
+                      style: tt.bodySmall?.copyWith(
                         fontSize: 11,
-                        color: _kTextMuted,
+                        color: cs.outline,
                         fontWeight: FontWeight.w300,
                       ),
                     ),
@@ -435,9 +429,9 @@ class PerfilSettingRow extends StatelessWidget {
             if (trailingValue != null)
               Text(
                 trailingValue!,
-                style: const TextStyle(
+                style: tt.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: _kTextMuted,
+                  color: cs.outline,
                   fontWeight: FontWeight.w300,
                 ),
               ),
@@ -446,7 +440,7 @@ class PerfilSettingRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: isDanger ? _kRed : _kTextMuted,
+                color: isDanger ? cs.error : cs.outline,
               ),
             ],
           ],
@@ -478,13 +472,16 @@ class PerfilToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         border: isLast
             ? null
-            : const Border(
-                bottom: BorderSide(color: Color(0xFFE8E5DC), width: 0.5),
+            : Border(
+                bottom: BorderSide(color: cs.outlineVariant, width: 0.5),
               ),
       ),
       child: Row(
@@ -497,19 +494,18 @@ class PerfilToggleRow extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: _kTextPrimary,
                   ),
                 ),
                 if (desc != null) ...[
                   const SizedBox(height: 1),
                   Text(
                     desc!,
-                    style: const TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: _kTextMuted,
+                      color: cs.outline,
                       fontWeight: FontWeight.w300,
                     ),
                   ),
@@ -532,6 +528,8 @@ class _ToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -540,7 +538,7 @@ class _ToggleSwitch extends StatelessWidget {
         height: 22,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(11),
-          color: value ? _kGreen : _kBorder,
+          color: value ? cs.tertiary : cs.outlineVariant,
         ),
         child: Padding(
           padding: const EdgeInsets.all(2),
@@ -551,7 +549,7 @@ class _ToggleSwitch extends StatelessWidget {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(9),
                 boxShadow: const [
                   BoxShadow(
@@ -593,7 +591,7 @@ class SettingIcon extends StatelessWidget {
   }
 }
 
-// ─── Último separador transparente en la card (eliminar border-bottom) ────────
+// ─── Último separador transparente en la card ─────────────────────────────────
 class PerfilRowLast extends StatelessWidget {
   final Widget child;
   const PerfilRowLast({super.key, required this.child});
@@ -609,14 +607,17 @@ class PerfilVersionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
         child: Text(
           'GANAJEC · Versión 1.0.4 · Chiapas, México',
-          style: TextStyle(
+          style: tt.bodySmall?.copyWith(
             fontSize: 11,
-            color: _kTextMuted,
+            color: cs.outline,
             fontWeight: FontWeight.w300,
           ),
         ),
@@ -645,11 +646,14 @@ class PerfilLogoutModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 36),
-      decoration: const BoxDecoration(
-        color: _kSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -660,27 +664,26 @@ class PerfilLogoutModal extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder,
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             '¿Cerrar sesión?',
-            style: TextStyle(
+            style: tt.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: _kTextPrimary,
               letterSpacing: -0.4,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'Tendrás que volver a iniciar sesión para acceder a tu cuenta y al historial de tus bovinos.',
-            style: const TextStyle(
+            style: tt.bodySmall?.copyWith(
               fontSize: 13,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w300,
               height: 1.5,
             ),
@@ -688,9 +691,9 @@ class PerfilLogoutModal extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '$nombreUsuario · $email',
-            style: const TextStyle(
+            style: tt.bodySmall?.copyWith(
               fontSize: 11,
-              color: _kTextMuted,
+              color: cs.outline,
               fontWeight: FontWeight.w300,
             ),
           ),
@@ -700,8 +703,8 @@ class PerfilLogoutModal extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kRed,
-                foregroundColor: Colors.white,
+                backgroundColor: cs.error,
+                foregroundColor: cs.onError,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
@@ -709,17 +712,17 @@ class PerfilLogoutModal extends StatelessWidget {
               ),
               onPressed: isLoading ? null : onConfirm,
               child: isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: cs.onError,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Sí, cerrar sesión',
-                      style: TextStyle(
+                      style: tt.labelLarge?.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -732,16 +735,16 @@ class PerfilLogoutModal extends StatelessWidget {
             height: 50,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: _kTextPrimary,
-                side: const BorderSide(color: _kBorder),
+                foregroundColor: cs.onSurface,
+                side: BorderSide(color: cs.outlineVariant),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
               ),
               onPressed: isLoading ? null : onCancel,
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(
+                style: tt.labelLarge?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),

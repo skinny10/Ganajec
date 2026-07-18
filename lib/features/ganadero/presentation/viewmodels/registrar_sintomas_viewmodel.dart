@@ -34,9 +34,9 @@ enum SeveridadEstimada { leve, moderada, alta }
 extension SeveridadExt on SeveridadEstimada {
   String get titulo {
     switch (this) {
-      case SeveridadEstimada.leve: return 'Severidad leve';
+      case SeveridadEstimada.leve:     return 'Severidad leve';
       case SeveridadEstimada.moderada: return 'Severidad moderada';
-      case SeveridadEstimada.alta: return 'Severidad alta';
+      case SeveridadEstimada.alta:     return 'Severidad alta';
     }
   }
 
@@ -53,25 +53,27 @@ extension SeveridadExt on SeveridadEstimada {
 
   String get emoji {
     switch (this) {
-      case SeveridadEstimada.leve: return '🟢';
+      case SeveridadEstimada.leve:     return '🟢';
       case SeveridadEstimada.moderada: return '🟡';
-      case SeveridadEstimada.alta: return '🔴';
+      case SeveridadEstimada.alta:     return '🔴';
     }
   }
 
-  Color get bgColor {
+  /// Color de fondo según el ColorScheme del tema.
+  Color bgColor(ColorScheme cs) {
     switch (this) {
-      case SeveridadEstimada.leve: return const Color(0xFFE8F5EF);
-      case SeveridadEstimada.moderada: return const Color(0xFFFEF9E7);
-      case SeveridadEstimada.alta: return const Color(0xFFFDEDEC);
+      case SeveridadEstimada.leve:     return cs.tertiaryContainer;
+      case SeveridadEstimada.moderada: return cs.secondaryContainer;
+      case SeveridadEstimada.alta:     return cs.errorContainer;
     }
   }
 
-  Color get borderColor {
+  /// Color de borde según el ColorScheme del tema.
+  Color borderColor(ColorScheme cs) {
     switch (this) {
-      case SeveridadEstimada.leve: return const Color(0xFFA8D5BC);
-      case SeveridadEstimada.moderada: return const Color(0xFFF7DC6F);
-      case SeveridadEstimada.alta: return const Color(0xFFF5C6C2);
+      case SeveridadEstimada.leve:     return cs.tertiary.withOpacity(0.3);
+      case SeveridadEstimada.moderada: return cs.secondary.withOpacity(0.3);
+      case SeveridadEstimada.alta:     return cs.error.withOpacity(0.3);
     }
   }
 }
@@ -84,27 +86,29 @@ extension TempBadgeExt on TempBadge {
   String get label {
     switch (this) {
       case TempBadge.hipotermia: return 'Hipotermia';
-      case TempBadge.normal: return 'Normal';
-      case TempBadge.subfebril: return 'Subfebril';
-      case TempBadge.fiebre: return 'Fiebre';
+      case TempBadge.normal:     return 'Normal';
+      case TempBadge.subfebril:  return 'Subfebril';
+      case TempBadge.fiebre:     return 'Fiebre';
     }
   }
 
-  Color get color {
+  /// Color de texto según el ColorScheme del tema.
+  Color color(ColorScheme cs) {
     switch (this) {
-      case TempBadge.hipotermia: return const Color(0xFFB8860B);
-      case TempBadge.normal: return const Color(0xFF1D7A55);
-      case TempBadge.subfebril: return const Color(0xFFB8860B);
-      case TempBadge.fiebre: return const Color(0xFFC0392B);
+      case TempBadge.hipotermia: return cs.secondary;
+      case TempBadge.normal:     return cs.tertiary;
+      case TempBadge.subfebril:  return cs.secondary;
+      case TempBadge.fiebre:     return cs.error;
     }
   }
 
-  Color get bg {
+  /// Color de fondo según el ColorScheme del tema.
+  Color bg(ColorScheme cs) {
     switch (this) {
-      case TempBadge.hipotermia: return const Color(0xFFFEF9E7);
-      case TempBadge.normal: return const Color(0xFFE8F5EF);
-      case TempBadge.subfebril: return const Color(0xFFFEF9E7);
-      case TempBadge.fiebre: return const Color(0xFFFDEDEC);
+      case TempBadge.hipotermia: return cs.secondaryContainer;
+      case TempBadge.normal:     return cs.tertiaryContainer;
+      case TempBadge.subfebril:  return cs.secondaryContainer;
+      case TempBadge.fiebre:     return cs.errorContainer;
     }
   }
 }

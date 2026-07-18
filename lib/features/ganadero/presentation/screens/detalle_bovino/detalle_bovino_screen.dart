@@ -27,57 +27,13 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<DetalleBovinoViewModel>();
+    final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAF7),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAF7),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE8E5DC)),
-            ),
-            child: const Icon(Icons.chevron_left,
-                color: Color(0xFF1A1A1A), size: 20),
-          ),
-        ),
-        title: const Text(
-          'Detalle del animal',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A1A),
-            letterSpacing: -0.3,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          GestureDetector(
-            onTap: () =>
-                context.push(AppRoutes.editarBovino, extra: widget.animal),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE8E5DC)),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(6),
-                child: Icon(Icons.edit_outlined,
-                    color: Color(0xFF1A1A1A), size: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: cs.surface,
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : vm.status == DetalleBovinoStatus.error
@@ -88,20 +44,129 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
                       .cargarDatos(widget.animal.id),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 16, bottom: 16),
+                  padding: EdgeInsets.zero,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Hero
-                      DetalleAnimalHero(animal: widget.animal, vm: vm),
-                      // Info grid
+                      // ── Hero banner + card ───────────────────────────
+                      SizedBox(
+                        height: topPad + 268,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Farm background image
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: topPad + 190,
+                              child: Image.asset(
+                                'assets/images/fondo.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            // Gradient overlay at bottom of image
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: topPad + 100,
+                              height: 90,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      cs.surface.withOpacity(0),
+                                      cs.surface.withOpacity(0.15),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Back button
+                            Positioned(
+                              top: topPad + 10,
+                              left: 8,
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).pop(),
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: cs.surfaceContainerLowest,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border:
+                                        Border.all(color: cs.outlineVariant),
+                                  ),
+                                  child: Icon(Icons.chevron_left,
+                                      color: cs.onSurface, size: 20),
+                                ),
+                              ),
+                            ),
+                            // Title
+                            Positioned(
+                              top: topPad + 10,
+                              left: 56,
+                              right: 56,
+                              child: SizedBox(
+                                height: 38,
+                                child: Center(
+                                  child: Text(
+                                    'Detalle del animal',
+                                    style: tt.titleMedium?.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Edit button
+                            Positioned(
+                              top: topPad + 10,
+                              right: 8,
+                              child: GestureDetector(
+                                onTap: () => context.push(
+                                    AppRoutes.editarBovino,
+                                    extra: widget.animal),
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: cs.surfaceContainerLowest,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border:
+                                        Border.all(color: cs.outlineVariant),
+                                  ),
+                                  child: Icon(Icons.edit_outlined,
+                                      color: cs.onSurface, size: 16),
+                                ),
+                              ),
+                            ),
+                            // Hero card (overlaps image bottom)
+                            Positioned(
+                              top: topPad + 136,
+                              left: 16,
+                              right: 16,
+                              bottom: 0,
+                              child: DetalleAnimalHero(
+                                  animal: widget.animal, vm: vm),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // ── Info grid ────────────────────────────────────
+                      const SizedBox(height: 4),
                       DetalleInfoGrid(animal: widget.animal, vm: vm),
-                      // Tabs
+                      // ── Tab bar ──────────────────────────────────────
                       DetalleTabBar(
                         selectedIndex: _selectedTab,
-                        onTabChanged: (i) => setState(() => _selectedTab = i),
+                        onTabChanged: (i) =>
+                            setState(() => _selectedTab = i),
                       ),
-                      // Contenido del tab
+                      // ── Tab content ──────────────────────────────────
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: switch (_selectedTab) {
@@ -115,6 +180,17 @@ class _DetalleBovinoScreenState extends State<DetalleBovinoScreen> {
                             ),
                         },
                       ),
+                      // ── Footer landscape ─────────────────────────────
+                      SizedBox(
+                        height: 160,
+                        width: double.infinity,
+                        child: Image.asset(
+                          'assets/images/footer.png',
+                          fit: BoxFit.cover,
+                          alignment: Alignment.bottomCenter,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -137,18 +213,22 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                color: Color(0xFFC0392B), size: 48),
+            Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888880))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,

@@ -6,19 +6,7 @@ import 'package:ganajec/share/domain/entities/historial_productivo.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/detalle_bovino_viewmodel.dart';
 
-// ─── Paleta fija (del diseño HTML) ───────────────────────────────────────────
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kCream = Color(0xFFF5F3EE);
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 int _calcularEdad(DateTime fechaNacimiento) {
   final now = DateTime.now();
@@ -50,6 +38,37 @@ String _fechaRelativa(DateTime fecha) {
   return 'Hace ${diff.inDays} días';
 }
 
+// ─── Metadatos de métricas ────────────────────────────────────────────────────
+
+class _MetricaMeta {
+  final String label;
+  final String unidad;
+  const _MetricaMeta(this.label, this.unidad);
+}
+
+const _metricasMeta = <String, _MetricaMeta>{
+  'temperatura_corporal':    _MetricaMeta('Temperatura corporal',   '°C'),
+  'produccion_leche_litros': _MetricaMeta('Producción de leche',    'L'),
+  'consumo_alimento_kg':     _MetricaMeta('Consumo de alimento',    'kg'),
+  'consumo_agua_litros':     _MetricaMeta('Consumo de agua',        'L'),
+  'frecuencia_cardiaca':     _MetricaMeta('Frecuencia cardíaca',    'bpm'),
+  'frecuencia_respiratoria': _MetricaMeta('Frec. respiratoria',     'rpm'),
+  'condicion_corporal':      _MetricaMeta('Condición corporal',     ''),
+};
+
+Color _metricaColor(String key, ColorScheme cs) {
+  switch (key) {
+    case 'temperatura_corporal':    return cs.error;
+    case 'produccion_leche_litros': return cs.secondary;
+    case 'consumo_alimento_kg':     return cs.tertiary;
+    case 'consumo_agua_litros':     return cs.onTertiaryContainer;
+    case 'frecuencia_cardiaca':     return cs.onSecondaryContainer;
+    case 'frecuencia_respiratoria': return cs.onPrimaryContainer;
+    case 'condicion_corporal':      return cs.primary;
+    default:                        return cs.onSurface;
+  }
+}
+
 // ─── Hero card ────────────────────────────────────────────────────────────────
 
 class DetalleAnimalHero extends StatelessWidget {
@@ -64,46 +83,50 @@ class DetalleAnimalHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final edad = _calcularEdad(animal.fechaNacimiento);
     final esAlerta = vm.tieneAnomaliaActiva;
-    final accentColor = esAlerta ? _kRed : _kGreen;
-    final badgeBg = esAlerta ? _kRedLight : _kGreenLight;
+    final accentColor = esAlerta ? cs.error : cs.tertiary;
+    final badgeBg    = esAlerta ? cs.errorContainer : cs.tertiaryContainer;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: [
+          BoxShadow(
+            color: cs.onSurface.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       clipBehavior: Clip.hardEdge,
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Franja de color izquierda
             Container(width: 5, color: accentColor),
-            // Contenido
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 20, 18, 20),
+                padding: const EdgeInsets.fromLTRB(14, 18, 18, 18),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Avatar
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
-                        color: _kRedLight,
-                        borderRadius: BorderRadius.circular(16),
+                        color: cs.primaryContainer,
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: const Center(
-                        child: Text('🐄', style: TextStyle(fontSize: 28)),
+                        child: Text('🐄', style: TextStyle(fontSize: 30)),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Datos
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,24 +134,23 @@ class DetalleAnimalHero extends StatelessWidget {
                         children: [
                           Text(
                             animal.nombre,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: _kTextPrimary,
-                              letterSpacing: -0.6,
+                            style: tt.titleMedium?.copyWith(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.8,
+                              color: cs.onSurface,
                             ),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             '${animal.raza} · $edad años · ${animal.idExterno}',
-                            style: const TextStyle(
+                            style: tt.bodySmall?.copyWith(
                               fontSize: 12,
-                              color: _kTextSecondary,
-                              fontWeight: FontWeight.w300,
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          // Badge de severidad
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 4),
@@ -139,13 +161,16 @@ class DetalleAnimalHero extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                _PulsingDot(color: accentColor),
+                                Text(
+                                  esAlerta ? '⚠️' : '❤️',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
                                 const SizedBox(width: 5),
                                 Text(
                                   vm.severidadLabel,
-                                  style: TextStyle(
+                                  style: tt.labelSmall?.copyWith(
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                     color: accentColor,
                                   ),
                                 ),
@@ -225,34 +250,80 @@ class DetalleInfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final edad = _calcularEdad(animal.fechaNacimiento);
     final prodHoy = vm.produccionHoy;
-    final prodColor =
-        vm.tieneAnomaliaActiva ? _kRed : _kGreen;
+    final prodColor = vm.tieneAnomaliaActiva ? cs.error : cs.tertiary;
     final prodLabel = vm.tieneAnomaliaActiva
         ? '${prodHoy.toStringAsFixed(0)} L ↓'
         : '${prodHoy.toStringAsFixed(0)} L';
 
+    final isMacho = animal.sexo.toLowerCase() == 'macho';
+
     final items = [
-      _InfoItem(label: 'Raza', value: animal.raza),
-      _InfoItem(label: 'Edad', value: '$edad años'),
-      _InfoItem(label: 'Peso', value: '${animal.pesoKg.toStringAsFixed(1)} kg'),
-      _InfoItem(label: 'Sexo', value: _capitalized(animal.sexo)),
-      _InfoItem(label: 'Prod. hoy', value: prodLabel, valueColor: prodColor),
+      _InfoItem(
+        label: 'Raza',
+        value: animal.raza,
+        icon: Icons.pets,
+        iconBg: cs.primaryContainer,
+        iconColor: cs.onPrimaryContainer,
+      ),
+      _InfoItem(
+        label: 'Edad',
+        value: '$edad años',
+        icon: Icons.calendar_today_outlined,
+        iconBg: cs.surfaceContainerLow,
+        iconColor: cs.onSurfaceVariant,
+      ),
+      _InfoItem(
+        label: 'Peso',
+        value: '${animal.pesoKg.toStringAsFixed(1)} kg',
+        icon: Icons.monitor_weight_outlined,
+        iconBg: cs.surfaceContainerLow,
+        iconColor: cs.onSurfaceVariant,
+      ),
+      _InfoItem(
+        label: 'Sexo',
+        value: _capitalized(animal.sexo),
+        icon: isMacho ? Icons.male : Icons.female,
+        iconBg: cs.tertiaryContainer,
+        iconColor: cs.tertiary,
+      ),
+      _InfoItem(
+        label: 'Prod. hoy',
+        value: prodLabel,
+        valueColor: prodColor,
+        icon: Icons.water_drop_outlined,
+        iconBg: cs.surfaceContainerLow,
+        iconColor: cs.onSurfaceVariant,
+      ),
     ];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 2.4,
-        children: items
-            .map((item) => _InfoCard(item: item))
-            .toList(),
+      child: Column(
+        children: [
+          // Row 1: Raza | Edad
+          Row(
+            children: [
+              Expanded(child: _InfoCard(item: items[0])),
+              const SizedBox(width: 8),
+              Expanded(child: _InfoCard(item: items[1])),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Row 2: Peso | Sexo
+          Row(
+            children: [
+              Expanded(child: _InfoCard(item: items[2])),
+              const SizedBox(width: 8),
+              Expanded(child: _InfoCard(item: items[3])),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Row 3: Prod. hoy (full width)
+          _InfoCard(item: items[4]),
+        ],
       ),
     );
   }
@@ -265,7 +336,17 @@ class _InfoItem {
   final String label;
   final String value;
   final Color? valueColor;
-  const _InfoItem({required this.label, required this.value, this.valueColor});
+  final IconData? icon;
+  final Color? iconBg;
+  final Color? iconColor;
+  const _InfoItem({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.icon,
+    this.iconBg,
+    this.iconColor,
+  });
 }
 
 class _InfoCard extends StatelessWidget {
@@ -274,33 +355,58 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
         children: [
-          Text(
-            item.label.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 10,
-              color: _kTextMuted,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.6,
+          if (item.icon != null) ...[
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: item.iconBg ?? cs.surfaceContainerLow,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                item.icon,
+                color: item.iconColor ?? cs.onSurfaceVariant,
+                size: 18,
+              ),
             ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            item.value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: item.valueColor ?? _kTextPrimary,
+            const SizedBox(width: 10),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  item.label.toUpperCase(),
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 9.5,
+                    color: cs.outline,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  item.value,
+                  style: tt.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: item.valueColor ?? cs.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -323,23 +429,27 @@ class DetalleTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: _kCream,
+          color: cs.surfaceContainerLow,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             _TabButton(
               label: 'Predicciones',
+              emoji: '📊',
               isActive: selectedIndex == 0,
               onTap: () => onTabChanged(0),
             ),
             _TabButton(
               label: 'Gráficas',
+              emoji: '📈',
               isActive: selectedIndex == 1,
               onTap: () => onTabChanged(1),
             ),
@@ -352,25 +462,30 @@ class DetalleTabBar extends StatelessWidget {
 
 class _TabButton extends StatelessWidget {
   final String label;
+  final String emoji;
   final bool isActive;
   final VoidCallback onTap;
 
   const _TabButton({
     required this.label,
+    required this.emoji,
     required this.isActive,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 9),
           decoration: BoxDecoration(
-            color: isActive ? _kSurface : Colors.transparent,
+            color: isActive ? cs.surfaceContainerLowest : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isActive
                 ? [
@@ -383,14 +498,20 @@ class _TabButton extends StatelessWidget {
                 : null,
           ),
           child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight:
-                    isActive ? FontWeight.w500 : FontWeight.w400,
-                color: isActive ? _kTextPrimary : _kTextMuted,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(emoji, style: const TextStyle(fontSize: 13)),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 12,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                    color: isActive ? cs.onSurface : cs.outline,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -399,7 +520,7 @@ class _TabButton extends StatelessWidget {
   }
 }
 
-// ─── Tab Producción ──────────────────────────────────────────────────────────
+// ─── Tab Producción ───────────────────────────────────────────────────────────
 
 class DetalleProduccionTab extends StatelessWidget {
   final List<HistorialProductivo> historial;
@@ -408,6 +529,8 @@ class DetalleProduccionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final hayAnomalia = historial.any((h) => h.anomaliaDetectada);
 
     return Padding(
@@ -415,35 +538,33 @@ class DetalleProduccionTab extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Producción de leche',
-                        style: TextStyle(
+                        style: tt.bodyMedium?.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: _kTextPrimary,
                           letterSpacing: -0.3,
                         ),
                       ),
-                      SizedBox(height: 1),
+                      const SizedBox(height: 1),
                       Text(
                         'Últimos 7 días · litros/día',
-                        style: TextStyle(
+                        style: tt.bodySmall?.copyWith(
                           fontSize: 11,
-                          color: _kTextMuted,
+                          color: cs.outline,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
@@ -455,49 +576,57 @@ class DetalleProduccionTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 9, vertical: 3),
                     decoration: BoxDecoration(
-                      color: _kRedLight,
+                      color: cs.errorContainer,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
+                    child: Text(
                       '⚠ Anomalía detectada',
-                      style: TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: _kRed,
+                        color: cs.error,
                       ),
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 14),
-            // Chart
             if (historial.isNotEmpty)
               SizedBox(
                 height: 140,
                 child: CustomPaint(
-                  painter: ProductionChartPainter(data: historial),
+                  painter: ProductionChartPainter(
+                    data: historial,
+                    gridColor: cs.outlineVariant,
+                    normalColor: cs.tertiary,
+                    anomalyColor: cs.error,
+                    labelColor: cs.outline,
+                    anomalyFillColor: cs.errorContainer,
+                  ),
                   child: const SizedBox.expand(),
                 ),
               )
             else
-              const SizedBox(
+              SizedBox(
                 height: 100,
                 child: Center(
                   child: Text(
                     'Sin datos de producción',
-                    style: TextStyle(color: _kTextMuted, fontSize: 12),
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.outline,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
             const SizedBox(height: 10),
-            // Leyenda
             Row(
               children: [
-                _LegendItem(color: _kGreen, label: 'Producción normal'),
+                _LegendItem(color: cs.tertiary, label: 'Producción normal'),
                 const SizedBox(width: 14),
-                _LegendItem(color: _kRed, label: 'Caída anómala'),
+                _LegendItem(color: cs.error, label: 'Caída anómala'),
                 const SizedBox(width: 14),
-                _LegendItemDash(label: 'Alerta IA'),
+                const _LegendItemDash(label: 'Alerta IA'),
               ],
             ),
           ],
@@ -514,6 +643,9 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -522,8 +654,10 @@ class _LegendItem extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
-        Text(label,
-            style: const TextStyle(fontSize: 10, color: _kTextMuted)),
+        Text(
+          label,
+          style: tt.labelSmall?.copyWith(fontSize: 10, color: cs.outline),
+        ),
       ],
     );
   }
@@ -535,19 +669,24 @@ class _LegendItemDash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 12, height: 2,
           decoration: BoxDecoration(
-            color: _kTextMuted,
+            color: cs.outline,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 5),
-        Text(label,
-            style: const TextStyle(fontSize: 10, color: _kTextMuted)),
+        Text(
+          label,
+          style: tt.labelSmall?.copyWith(fontSize: 10, color: cs.outline),
+        ),
       ],
     );
   }
@@ -557,8 +696,20 @@ class _LegendItemDash extends StatelessWidget {
 
 class ProductionChartPainter extends CustomPainter {
   final List<HistorialProductivo> data;
+  final Color gridColor;
+  final Color normalColor;
+  final Color anomalyColor;
+  final Color labelColor;
+  final Color anomalyFillColor;
 
-  const ProductionChartPainter({required this.data});
+  const ProductionChartPainter({
+    required this.data,
+    required this.gridColor,
+    required this.normalColor,
+    required this.anomalyColor,
+    required this.labelColor,
+    required this.anomalyFillColor,
+  });
 
   static const _chartLeft = 28.0;
   static const _chartTopPad = 12.0;
@@ -583,7 +734,7 @@ class ProductionChartPainter extends CustomPainter {
 
     // ── Grid lines ──
     final gridPaint = Paint()
-      ..color = _kBorder
+      ..color = gridColor
       ..strokeWidth = 0.5;
 
     for (final v in [5.0, 10.0, 15.0, 20.0]) {
@@ -591,14 +742,13 @@ class ProductionChartPainter extends CustomPainter {
       canvas.drawLine(
           Offset(_chartLeft, y), Offset(size.width, y), gridPaint);
       _drawText(canvas, '${v.toInt()}L',
-          Offset(0, y - 5), _kTextMuted, 8);
+          Offset(0, y - 5), labelColor, 8);
     }
 
     // ── Puntos ──
     final points = List.generate(
         n, (i) => Offset(xOf(i), yOf(data[i].litrosLeche)));
 
-    // Índice del primer dato anómalo
     int? firstAnomalyIdx;
     for (int i = 0; i < n; i++) {
       if (data[i].anomaliaDetectada) {
@@ -632,8 +782,8 @@ class ProductionChartPainter extends CustomPainter {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              _kGreen.withOpacity(0.18),
-              _kGreen.withOpacity(0.0),
+              normalColor.withOpacity(0.18),
+              normalColor.withOpacity(0.0),
             ],
           ).createShader(chartRect),
       );
@@ -662,8 +812,8 @@ class ProductionChartPainter extends CustomPainter {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              _kRed.withOpacity(0.15),
-              _kRed.withOpacity(0.0),
+              anomalyColor.withOpacity(0.15),
+              anomalyColor.withOpacity(0.0),
             ],
           ).createShader(chartRect),
       );
@@ -672,14 +822,14 @@ class ProductionChartPainter extends CustomPainter {
 
     // ── Segmentos de línea ──
     final greenLine = Paint()
-      ..color = _kGreen
+      ..color = normalColor
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke;
 
     final redLine = Paint()
-      ..color = _kRed
+      ..color = anomalyColor
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
@@ -690,7 +840,6 @@ class ProductionChartPainter extends CustomPainter {
       for (int i = 1; i < n; i++) path.lineTo(points[i].dx, points[i].dy);
       canvas.drawPath(path, greenLine);
     } else {
-      // Verde: 0 → firstAnomalyIdx
       if (firstAnomalyIdx > 0) {
         final gPath = Path()..moveTo(points[0].dx, points[0].dy);
         for (int i = 1; i <= firstAnomalyIdx; i++) {
@@ -698,7 +847,6 @@ class ProductionChartPainter extends CustomPainter {
         }
         canvas.drawPath(gPath, greenLine);
       }
-      // Rojo: desde punto anterior a anomalía → fin
       final rStart = firstAnomalyIdx == 0 ? 0 : firstAnomalyIdx - 1;
       final rPath = Path()..moveTo(points[rStart].dx, points[rStart].dy);
       for (int i = rStart + 1; i < n; i++) {
@@ -712,16 +860,16 @@ class ProductionChartPainter extends CustomPainter {
       final isAnomaly = data[i].anomaliaDetectada;
       if (isAnomaly) {
         canvas.drawCircle(
-            points[i], 4.5, Paint()..color = const Color(0xFFFEF2F2));
+            points[i], 4.5, Paint()..color = anomalyFillColor);
         canvas.drawCircle(
             points[i],
             4.5,
             Paint()
-              ..color = _kRed
+              ..color = anomalyColor
               ..strokeWidth = 1.5
               ..style = PaintingStyle.stroke);
       } else {
-        canvas.drawCircle(points[i], 3.0, Paint()..color = _kGreen);
+        canvas.drawCircle(points[i], 3.0, Paint()..color = normalColor);
       }
     }
 
@@ -733,11 +881,11 @@ class ProductionChartPainter extends CustomPainter {
         Offset(vx, _chartTopPad),
         Offset(vx, chartBottom),
         Paint()
-          ..color = _kRed.withOpacity(0.5)
+          ..color = anomalyColor.withOpacity(0.5)
           ..strokeWidth = 0.8,
       );
       _drawText(canvas, 'Isolation Forest',
-          Offset(vx + 3, _chartTopPad + 2), _kRed, 7.5, bold: true);
+          Offset(vx + 3, _chartTopPad + 2), anomalyColor, 7.5, bold: true);
     }
 
     // ── Etiquetas eje X ──
@@ -749,7 +897,7 @@ class ProductionChartPainter extends CustomPainter {
         canvas,
         days[dayIdx],
         Offset(xOf(i) - 4, size.height - 13),
-        isAnomaly ? _kRed : _kTextMuted,
+        isAnomaly ? anomalyColor : labelColor,
         8,
         bold: isAnomaly,
       );
@@ -811,13 +959,16 @@ class DetallePrediccionesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     if (predicciones.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Center(
           child: Text(
             'Sin predicciones registradas',
-            style: TextStyle(color: _kTextMuted, fontSize: 13),
+            style: tt.bodySmall?.copyWith(color: cs.outline, fontSize: 13),
           ),
         ),
       );
@@ -831,23 +982,30 @@ class DetallePrediccionesTab extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Historial de predicciones',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: _kTextPrimary,
+                style: tt.bodyMedium?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                  letterSpacing: -0.3,
                 ),
               ),
               GestureDetector(
                 onTap: () {},
-                child: const Text(
-                  'Ver todo',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: _kTextSecondary,
-                    decoration: TextDecoration.underline,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Ver todo',
+                      style: tt.labelMedium?.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: cs.primary,
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, size: 16, color: cs.primary),
+                  ],
                 ),
               ),
             ],
@@ -867,116 +1025,145 @@ class _PrediccionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final sev = _severidadPrediccion(prediccion);
     final isAlta = sev == 'Alta';
-    final cardColor = isAlta ? _kRedLight : _kGreenLight;
-    final textColor = isAlta ? _kRed : _kGreen;
+    final isMedia = sev == 'Media';
+    final accentColor = isAlta
+        ? cs.error
+        : isMedia
+            ? cs.secondary
+            : cs.tertiary;
+    final cardColor = isAlta
+        ? cs.errorContainer
+        : isMedia
+            ? cs.secondaryContainer
+            : cs.tertiaryContainer;
+    final textColor = isAlta
+        ? cs.onErrorContainer
+        : isMedia
+            ? cs.onSecondaryContainer
+            : cs.onTertiaryContainer;
+    final riesgoLabel = isAlta
+        ? 'Alto riesgo'
+        : isMedia
+            ? 'Riesgo moderado'
+            : 'Bajo riesgo';
     final emoji = isAlta ? '🦠' : '✅';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
-      child: Row(
-        children: [
-          // Ícono
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 16)),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  prediccion.enfermedad,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _fechaRelativa(prediccion.fecha),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: _kTextMuted,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Confianza + severidad
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${(prediccion.confianza * 100).round()}%',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: _kTextPrimary,
+      clipBehavior: Clip.hardEdge,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left accent bar
+            Container(width: 4, color: accentColor),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Disease icon
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(emoji, style: const TextStyle(fontSize: 17)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Disease info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            prediccion.enfermedad,
+                            style: tt.bodySmall?.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Text('🕐',
+                                  style: TextStyle(fontSize: 11)),
+                              const SizedBox(width: 4),
+                              Text(
+                                _fechaRelativa(prediccion.fecha),
+                                style: tt.bodySmall?.copyWith(
+                                  fontSize: 11,
+                                  color: cs.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Confidence + riesgo chip
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${(prediccion.confianza * 100).round()}%',
+                          style: tt.bodyMedium?.copyWith(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: accentColor,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            riesgoLabel,
+                            style: tt.labelSmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 3),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  sev,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: textColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ─── Tab Gráficas ─────────────────────────────────────────────────────────────
-
-/// Metadatos por clave de métrica
-class _MetricaMeta {
-  final String label;
-  final String unidad;
-  final Color color;
-  const _MetricaMeta(this.label, this.unidad, this.color);
-}
-
-const _metricasMeta = <String, _MetricaMeta>{
-  'temperatura_corporal':    _MetricaMeta('Temperatura corporal',   '°C',  Color(0xFFE74C3C)),
-  'produccion_leche_litros': _MetricaMeta('Producción de leche',    'L',   Color(0xFF2980B9)),
-  'consumo_alimento_kg':     _MetricaMeta('Consumo de alimento',    'kg',  Color(0xFF27AE60)),
-  'consumo_agua_litros':     _MetricaMeta('Consumo de agua',        'L',   Color(0xFF1ABC9C)),
-  'frecuencia_cardiaca':     _MetricaMeta('Frecuencia cardíaca',    'bpm', Color(0xFFE67E22)),
-  'frecuencia_respiratoria': _MetricaMeta('Frec. respiratoria',     'rpm', Color(0xFF9B59B6)),
-  'condicion_corporal':      _MetricaMeta('Condición corporal',     '',    Color(0xFF8B4A2B)),
-};
 
 class DetalleGraficasTab extends StatelessWidget {
   final Map<String, List<GraficaPunto>> graficas;
@@ -985,28 +1172,34 @@ class DetalleGraficasTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     if (graficas.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('📊', style: TextStyle(fontSize: 36)),
-              SizedBox(height: 12),
+              const Text('📊', style: TextStyle(fontSize: 36)),
+              const SizedBox(height: 12),
               Text(
                 'Aún no hay gráficas disponibles',
-                style: TextStyle(
-                  color: _kTextSecondary,
+                style: tt.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 'Registra más síntomas para ver la evolución.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _kTextMuted, fontSize: 12),
+                style: tt.bodySmall?.copyWith(
+                  color: cs.outline,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -1014,8 +1207,7 @@ class DetalleGraficasTab extends StatelessWidget {
       );
     }
 
-    // Orden preferido de métricas
-    final orden = [
+    const orden = [
       'temperatura_corporal',
       'produccion_leche_litros',
       'consumo_alimento_kg',
@@ -1053,24 +1245,25 @@ class _GraficaCard extends StatelessWidget {
 
   const _GraficaCard({required this.metricaKey, required this.puntos});
 
-  String _formatFecha(DateTime d) =>
-      '${d.day}/${d.month}';
+  String _formatFecha(DateTime d) => '${d.day}/${d.month}';
 
   String _formatValor(double v, String unidad) =>
       unidad.isEmpty ? v.toStringAsFixed(1) : '${v.toStringAsFixed(1)} $unidad';
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     final meta = _metricasMeta[metricaKey] ??
-        _MetricaMeta(metricaKey, '', const Color(0xFF2E7D32));
-    final color = meta.color;
+        _MetricaMeta(metricaKey, '');
+    final color = _metricaColor(metricaKey, cs);
     final ultimo = puntos.last;
     final anterior = puntos.length > 1 ? puntos[puntos.length - 2] : null;
     final tendencia = anterior == null
         ? 0
         : ultimo.valor.compareTo(anterior.valor);
 
-    // Rango Y con margen
     final minVal = puntos.map((p) => p.valor).reduce(math.min);
     final maxVal = puntos.map((p) => p.valor).reduce(math.max);
     final rango = (maxVal - minVal).abs();
@@ -1078,7 +1271,6 @@ class _GraficaCard extends StatelessWidget {
     final yMin = (minVal - margen);
     final yMax = (maxVal + margen);
 
-    // Spots de fl_chart
     final spots = puntos
         .asMap()
         .entries
@@ -1088,14 +1280,13 @@ class _GraficaCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1105,17 +1296,18 @@ class _GraficaCard extends StatelessWidget {
                   children: [
                     Text(
                       meta.label,
-                      style: const TextStyle(
+                      style: tt.bodyMedium?.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _kTextPrimary,
                       ),
                     ),
                     if (meta.unidad.isNotEmpty)
                       Text(
                         meta.unidad,
-                        style: const TextStyle(
-                            fontSize: 11, color: _kTextMuted),
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 11,
+                          color: cs.outline,
+                        ),
                       ),
                   ],
                 ),
@@ -1124,7 +1316,7 @@ class _GraficaCard extends StatelessWidget {
                 children: [
                   Text(
                     _formatValor(ultimo.valor, meta.unidad),
-                    style: TextStyle(
+                    style: tt.bodyMedium?.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: color,
@@ -1136,9 +1328,7 @@ class _GraficaCard extends StatelessWidget {
                       tendencia > 0
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
-                      color: tendencia > 0
-                          ? const Color(0xFFE74C3C)
-                          : const Color(0xFF27AE60),
+                      color: tendencia > 0 ? cs.error : cs.tertiary,
                       size: 16,
                     ),
                 ],
@@ -1146,11 +1336,9 @@ class _GraficaCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Gráfica
           SizedBox(
             height: 120,
             child: puntos.length == 1
-                // Un solo punto: solo mostramos el valor centrado
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1159,14 +1347,18 @@ class _GraficaCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           _formatFecha(ultimo.fecha),
-                          style: const TextStyle(
-                              fontSize: 10, color: _kTextMuted),
+                          style: tt.labelSmall?.copyWith(
+                            fontSize: 10,
+                            color: cs.outline,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Solo un registro',
-                          style: const TextStyle(
-                              fontSize: 11, color: _kTextSecondary),
+                          style: tt.labelSmall?.copyWith(
+                            fontSize: 11,
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
@@ -1181,7 +1373,7 @@ class _GraficaCard extends StatelessWidget {
                         drawVerticalLine: false,
                         horizontalInterval: rango < 1 ? 0.5 : rango / 3,
                         getDrawingHorizontalLine: (_) => FlLine(
-                          color: _kBorder,
+                          color: cs.outlineVariant,
                           strokeWidth: 1,
                           dashArray: [4, 4],
                         ),
@@ -1207,7 +1399,6 @@ class _GraficaCard extends StatelessWidget {
                               if (idx < 0 || idx >= puntos.length) {
                                 return const SizedBox.shrink();
                               }
-                              // Solo primero y último (para no saturar)
                               if (idx != 0 && idx != puntos.length - 1) {
                                 return const SizedBox.shrink();
                               }
@@ -1215,9 +1406,9 @@ class _GraficaCard extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
                                   _formatFecha(puntos[idx].fecha),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 9,
-                                    color: _kTextMuted,
+                                    color: cs.outline,
                                   ),
                                 ),
                               );
@@ -1239,7 +1430,7 @@ class _GraficaCard extends StatelessWidget {
                               radius: idx == spots.length - 1 ? 4 : 2.5,
                               color: color,
                               strokeWidth: 1.5,
-                              strokeColor: Colors.white,
+                              strokeColor: cs.surfaceContainerLowest,
                             ),
                           ),
                           belowBarData: BarAreaData(
@@ -1258,7 +1449,6 @@ class _GraficaCard extends StatelessWidget {
                     ),
                   ),
           ),
-          // Fechas mínima y máxima bajo el chart si hay más de 2 puntos
           if (puntos.length > 2) ...[
             const SizedBox(height: 4),
             Row(
@@ -1266,18 +1456,15 @@ class _GraficaCard extends StatelessWidget {
               children: [
                 Text(
                   _formatFecha(puntos.first.fecha),
-                  style:
-                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                  style: tt.labelSmall?.copyWith(fontSize: 9, color: cs.outline),
                 ),
                 Text(
                   '${puntos.length} registros',
-                  style:
-                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                  style: tt.labelSmall?.copyWith(fontSize: 9, color: cs.outline),
                 ),
                 Text(
                   _formatFecha(puntos.last.fecha),
-                  style:
-                      const TextStyle(fontSize: 9, color: _kTextMuted),
+                  style: tt.labelSmall?.copyWith(fontSize: 9, color: cs.outline),
                 ),
               ],
             ),
@@ -1302,19 +1489,22 @@ class DetalleBottomCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAF7).withOpacity(0.97),
-        border: const Border(top: BorderSide(color: _kBorder)),
+        color: cs.surface.withOpacity(0.97),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: SizedBox(
         width: double.infinity,
         height: 52,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: _kTextPrimary,
-            foregroundColor: Colors.white,
+            backgroundColor: cs.onSurface,
+            foregroundColor: cs.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(13),
             ),
@@ -1322,9 +1512,12 @@ class DetalleBottomCta extends StatelessWidget {
             shadowColor: Colors.black.withOpacity(0.18),
           ),
           icon: const Icon(Icons.medical_services_outlined, size: 16),
-          label: const Text(
+          label: Text(
             'Registrar síntomas',
-            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
+            style: tt.labelLarge?.copyWith(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           onPressed: onRegistrarSintomas,
         ),

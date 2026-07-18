@@ -2,21 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/plan.dart';
 import 'package:ganajec/share/domain/entities/suscripcion_info.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kBg = Color(0xFFFAFAF7);
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kCream = Color(0xFFF5F3EE);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kYellow = Color(0xFFB8860B);
-const _kYellowLight = Color(0xFFFEF9E7);
-const _kYellowBorder = Color(0xFFF7DC6F);
-const _kRed = Color(0xFFC0392B);
-
 // ─── Hero del plan activo ─────────────────────────────────────────────────────
 
 class MiPlanHeroCard extends StatelessWidget {
@@ -26,6 +11,8 @@ class MiPlanHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final p = suscripcion.planActual;
     final diasTexto = p.esGratuito ? '∞' : '${p.historialDias}';
 
@@ -33,7 +20,7 @@ class MiPlanHeroCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
       decoration: BoxDecoration(
-        color: _kTextPrimary,
+        color: cs.onSurface,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(
@@ -47,7 +34,7 @@ class MiPlanHeroCard extends StatelessWidget {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
+                color: cs.surface.withOpacity(0.05),
               ),
             ),
           ),
@@ -59,38 +46,38 @@ class MiPlanHeroCard extends StatelessWidget {
               height: 70,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.04),
+                color: cs.surface.withOpacity(0.04),
               ),
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'PLAN ACTIVO',
-                style: TextStyle(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white54,
+                  color: cs.surface.withOpacity(0.54),
                   letterSpacing: 1.0,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 p.nombre,
-                style: const TextStyle(
+                style: tt.headlineSmall?.copyWith(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: cs.surface,
                   letterSpacing: -0.8,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 p.precioTexto,
-                style: const TextStyle(
+                style: tt.bodySmall?.copyWith(
                   fontSize: 13,
-                  color: Colors.white60,
+                  color: cs.surface.withOpacity(0.6),
                   fontWeight: FontWeight.w300,
                 ),
               ),
@@ -100,9 +87,9 @@ class MiPlanHeroCard extends StatelessWidget {
                 child: Row(
                   children: [
                     _Stat(value: suscripcion.bovinosTexto, label: 'Bovinos'),
-                    const _StatDivider(),
+                    _StatDivider(color: cs.surface.withOpacity(0.12)),
                     _Stat(value: suscripcion.analisisTexto, label: 'Análisis este mes'),
-                    const _StatDivider(),
+                    _StatDivider(color: cs.surface.withOpacity(0.12)),
                     _Stat(value: diasTexto, label: 'Días restantes'),
                   ],
                 ),
@@ -122,15 +109,18 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
-            style: const TextStyle(
+            style: tt.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: cs.surface,
               letterSpacing: -0.5,
             ),
           ),
@@ -138,9 +128,9 @@ class _Stat extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 9.5,
-              color: Colors.white54,
+              color: cs.surface.withOpacity(0.54),
               fontWeight: FontWeight.w300,
             ),
           ),
@@ -151,13 +141,14 @@ class _Stat extends StatelessWidget {
 }
 
 class _StatDivider extends StatelessWidget {
-  const _StatDivider();
+  final Color color;
+  const _StatDivider({required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 1,
-      color: Colors.white12,
+      color: color,
       margin: const EdgeInsets.symmetric(vertical: 4),
     );
   }
@@ -172,23 +163,25 @@ class MiPlanUsageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Uso actual del plan',
-            style: TextStyle(
+            style: tt.bodyMedium?.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: _kTextPrimary,
               letterSpacing: -0.2,
             ),
           ),
@@ -224,25 +217,32 @@ class _UsageRow extends StatelessWidget {
 
   const _UsageRow({required this.label, required this.value, required this.pct});
 
-  Color _barColor() {
-    if (pct >= 0.9) return _kRed;
-    if (pct >= 0.7) return _kYellow;
-    return _kGreen;
+  Color _barColor(ColorScheme cs) {
+    if (pct >= 0.9) return cs.error;
+    if (pct >= 0.7) return cs.secondary;
+    return cs.tertiary;
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label,
-                style: const TextStyle(
-                    fontSize: 12, color: _kTextSecondary, fontWeight: FontWeight.w400)),
+                style: tt.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w400)),
             Text(value,
-                style: const TextStyle(
-                    fontSize: 12, color: _kTextPrimary, fontWeight: FontWeight.w500)),
+                style: tt.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: cs.onSurface,
+                    fontWeight: FontWeight.w500)),
           ],
         ),
         const SizedBox(height: 5),
@@ -250,7 +250,7 @@ class _UsageRow extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
           child: Container(
             height: 6,
-            color: _kBorder,
+            color: cs.outlineVariant,
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: pct),
               duration: const Duration(milliseconds: 900),
@@ -258,7 +258,7 @@ class _UsageRow extends StatelessWidget {
               builder: (_, value, __) => FractionallySizedBox(
                 widthFactor: value,
                 alignment: Alignment.centerLeft,
-                child: Container(color: _barColor()),
+                child: Container(color: _barColor(cs)),
               ),
             ),
           ),
@@ -277,24 +277,26 @@ class MiPlanFeaturesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Text(
               'Funcionalidades incluidas',
-              style: TextStyle(
+              style: tt.bodyMedium?.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: _kTextPrimary,
                 letterSpacing: -0.2,
               ),
             ),
@@ -312,22 +314,24 @@ class MiPlanFeaturesCard extends StatelessWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: f.incluida ? _kGreenLight : _kCream,
+                          color: f.incluida
+                              ? cs.tertiaryContainer
+                              : cs.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(
-                          child:
-                              Text(f.emoji, style: const TextStyle(fontSize: 13)),
+                          child: Text(f.emoji,
+                              style: const TextStyle(fontSize: 13)),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           f.label,
-                          style: TextStyle(
+                          style: tt.bodySmall?.copyWith(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w400,
-                            color: f.incluida ? _kTextPrimary : _kTextMuted,
+                            color: f.incluida ? cs.onSurface : cs.outline,
                           ),
                         ),
                       ),
@@ -339,8 +343,12 @@ class MiPlanFeaturesCard extends StatelessWidget {
                   ),
                 ),
                 if (!isLast)
-                  const Divider(height: 0, thickness: 0.5, indent: 16, endIndent: 16,
-                      color: _kBorder),
+                  Divider(
+                      height: 0,
+                      thickness: 0.5,
+                      indent: 16,
+                      endIndent: 16,
+                      color: cs.outlineVariant),
               ],
             );
           }),
@@ -360,6 +368,8 @@ class MiPlanTipCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final disponibles = suscripcion.bovinosDisponibles;
     if (suscripcion.planActual.bovinosMax == null) return const SizedBox.shrink();
 
@@ -367,9 +377,9 @@ class MiPlanTipCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
       decoration: BoxDecoration(
-        color: _kYellowLight,
+        color: cs.secondaryContainer,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kYellowBorder),
+        border: Border.all(color: cs.secondary.withOpacity(0.4)),
       ),
       child: Row(
         children: [
@@ -381,18 +391,18 @@ class MiPlanTipCard extends StatelessWidget {
               children: [
                 Text(
                   'Tienes $disponibles ${disponibles == 1 ? 'bovino disponible' : 'bovinos disponibles'}',
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF7A5C00),
+                    color: cs.onSecondaryContainer,
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   'Con el Plan Básico (\$149/mes) puedes registrar hato ilimitado y activar alertas push.',
-                  style: TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 11,
-                    color: Color(0xFF9A7A00),
+                    color: cs.onSecondaryContainer.withOpacity(0.8),
                     fontWeight: FontWeight.w300,
                     height: 1.5,
                   ),
@@ -420,17 +430,20 @@ class MiPlanUpgradeMiniCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final isFeatured = plan.popular;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
         decoration: BoxDecoration(
-          color: isFeatured ? _kBg : _kSurface,
+          color: isFeatured ? cs.surface : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isFeatured ? _kTextPrimary : _kBorder,
+            color: isFeatured ? cs.onSurface : cs.outlineVariant,
             width: isFeatured ? 1.5 : 1,
           ),
         ),
@@ -444,27 +457,27 @@ class MiPlanUpgradeMiniCard extends StatelessWidget {
                   children: [
                     Text(
                       plan.nombre,
-                      style: const TextStyle(
+                      style: tt.bodyMedium?.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                     if (plan.popular) ...[
                       const SizedBox(width: 7),
                       Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _kYellowBorder,
+                          color: cs.secondaryContainer,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Más popular',
-                          style: TextStyle(
+                          style: tt.labelSmall?.copyWith(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF7A5C00),
+                            color: cs.onSecondaryContainer,
                           ),
                         ),
                       ),
@@ -476,18 +489,18 @@ class MiPlanUpgradeMiniCard extends StatelessWidget {
                   children: [
                     Text(
                       '\$${plan.precioMensual.toLocaleString()}',
-                      style: const TextStyle(
+                      style: tt.titleSmall?.copyWith(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                         letterSpacing: -0.4,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'MXN / mes',
-                      style: TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 10,
-                        color: _kTextMuted,
+                        color: cs.outline,
                         fontWeight: FontWeight.w300,
                       ),
                     ),
@@ -504,17 +517,17 @@ class MiPlanUpgradeMiniCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
                       children: [
-                        const Text('✓',
+                        Text('✓',
                             style: TextStyle(
-                                color: _kGreen,
+                                color: cs.tertiary,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500)),
                         const SizedBox(width: 6),
                         Text(
                           f.label,
-                          style: const TextStyle(
+                          style: tt.bodySmall?.copyWith(
                             fontSize: 11.5,
-                            color: _kTextSecondary,
+                            color: cs.onSurfaceVariant,
                             fontWeight: FontWeight.w300,
                           ),
                         ),

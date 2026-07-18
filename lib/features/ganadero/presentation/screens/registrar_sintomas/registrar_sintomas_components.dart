@@ -3,19 +3,6 @@ import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 import '../../viewmodels/registrar_sintomas_viewmodel.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kCream = Color(0xFFF5F3EE);
-const _kInputBg = Color(0xFFFDFCFA);
-
 // ─── Mini card del animal seleccionado ───────────────────────────────────────
 
 class SintomasAnimalCard extends StatelessWidget {
@@ -25,13 +12,16 @@ class SintomasAnimalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
@@ -39,7 +29,7 @@ class SintomasAnimalCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: _kRedLight,
+              color: cs.primaryContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -51,11 +41,11 @@ class SintomasAnimalCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Bovino seleccionado',
-                  style: TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 10,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.6,
                   ),
@@ -63,25 +53,24 @@ class SintomasAnimalCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   animal.nombre,
-                  style: const TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
                   ),
                 ),
                 Text(
                   '${animal.raza} · ${animal.idExterno}',
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.keyboard_arrow_down_rounded,
-              color: _kTextMuted, size: 18),
+          Icon(Icons.keyboard_arrow_down_rounded,
+              color: cs.outline, size: 18),
         ],
       ),
     );
@@ -96,12 +85,13 @@ class SintomasSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
     return Text(
       title,
-      style: const TextStyle(
+      style: tt.bodyMedium?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: _kTextPrimary,
         letterSpacing: -0.2,
       ),
     );
@@ -124,16 +114,19 @@ class SintomaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? _kTextPrimary : _kInputBg,
+          color: selected ? cs.onSurface : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? _kTextPrimary : _kBorder,
+            color: selected ? cs.onSurface : cs.outlineVariant,
             width: 1.5,
           ),
         ),
@@ -144,10 +137,10 @@ class SintomaChip extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               item.label,
-              style: TextStyle(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: selected ? Colors.white : _kTextSecondary,
+                color: selected ? cs.surface : cs.onSurfaceVariant,
               ),
             ),
           ],
@@ -171,6 +164,9 @@ class SintomasChipGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -190,9 +186,9 @@ class SintomasChipGrid extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           '${seleccionados.length} síntoma${seleccionados.length == 1 ? '' : 's'} seleccionado${seleccionados.length == 1 ? '' : 's'}',
-          style: const TextStyle(
+          style: tt.bodySmall?.copyWith(
             fontSize: 11,
-            color: _kTextMuted,
+            color: cs.outline,
             fontWeight: FontWeight.w300,
           ),
         ),
@@ -221,21 +217,24 @@ class ContadorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label.toUpperCase(),
-            style: const TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 10,
-              color: _kTextMuted,
+              color: cs.outline,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.6,
             ),
@@ -244,35 +243,28 @@ class ContadorCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _CounterBtn(
-                icon: Icons.remove_rounded,
-                onTap: onDecrement,
-              ),
+              _CounterBtn(icon: Icons.remove_rounded, onTap: onDecrement),
               Column(
                 children: [
                   Text(
                     value.toStringAsFixed(0),
-                    style: const TextStyle(
+                    style: tt.titleMedium?.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: _kTextPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
                   Text(
                     unit,
-                    style: const TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 10,
-                      color: _kTextMuted,
+                      color: cs.outline,
                       fontWeight: FontWeight.w300,
                     ),
                   ),
                 ],
               ),
-              _CounterBtn(
-                icon: Icons.add_rounded,
-                onTap: onIncrement,
-              ),
+              _CounterBtn(icon: Icons.add_rounded, onTap: onIncrement),
             ],
           ),
         ],
@@ -289,17 +281,19 @@ class _CounterBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 30,
         height: 30,
         decoration: BoxDecoration(
-          color: _kCream,
+          color: cs.surfaceContainerLow,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Icon(icon, size: 16, color: _kTextPrimary),
+        child: Icon(icon, size: 16, color: cs.onSurface),
       ),
     );
   }
@@ -321,12 +315,15 @@ class TemperaturaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,11 +335,11 @@ class TemperaturaCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'TEMPERATURA CORPORAL',
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 10,
-                      color: _kTextMuted,
+                      color: cs.outline,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.6,
                     ),
@@ -354,19 +351,18 @@ class TemperaturaCard extends StatelessWidget {
                     children: [
                       Text(
                         temperatura.toStringAsFixed(1),
-                        style: const TextStyle(
+                        style: tt.titleMedium?.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          color: _kTextPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Text(
+                      Text(
                         '°C',
-                        style: TextStyle(
+                        style: tt.bodySmall?.copyWith(
                           fontSize: 11,
-                          color: _kTextMuted,
+                          color: cs.outline,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
@@ -375,17 +371,18 @@ class TemperaturaCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                 decoration: BoxDecoration(
-                  color: badge.bg,
+                  color: badge.bg(cs),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   badge.label,
-                  style: TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
-                    color: badge.color,
+                    color: badge.color(cs),
                   ),
                 ),
               ),
@@ -395,12 +392,12 @@ class TemperaturaCard extends StatelessWidget {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 4,
-              activeTrackColor: _kTextPrimary,
-              inactiveTrackColor: _kBorder,
-              thumbColor: _kTextPrimary,
+              activeTrackColor: cs.onSurface,
+              inactiveTrackColor: cs.outlineVariant,
+              thumbColor: cs.onSurface,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-              overlayColor: Color(0x1A1A1A1A),
+              overlayColor: cs.onSurface.withOpacity(0.1),
             ),
             child: Slider(
               value: temperatura,
@@ -412,13 +409,16 @@ class TemperaturaCard extends StatelessWidget {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text('35°C Baja',
-                  style: TextStyle(fontSize: 9, color: _kTextMuted)),
+                  style: tt.labelSmall?.copyWith(
+                      fontSize: 9, color: cs.outline)),
               Text('38–39°C Normal',
-                  style: TextStyle(fontSize: 9, color: _kTextMuted)),
+                  style: tt.labelSmall?.copyWith(
+                      fontSize: 9, color: cs.outline)),
               Text('42°C Alta',
-                  style: TextStyle(fontSize: 9, color: _kTextMuted)),
+                  style: tt.labelSmall?.copyWith(
+                      fontSize: 9, color: cs.outline)),
             ],
           ),
         ],
@@ -436,13 +436,16 @@ class SeveridadPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: severidad.bgColor,
+        color: severidad.bgColor(cs),
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: severidad.borderColor),
+        border: Border.all(color: severidad.borderColor(cs)),
       ),
       child: Row(
         children: [
@@ -457,10 +460,9 @@ class SeveridadPreview extends StatelessWidget {
                   child: Text(
                     severidad.titulo,
                     key: ValueKey(severidad),
-                    style: const TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
-                      color: _kTextPrimary,
                     ),
                   ),
                 ),
@@ -470,9 +472,9 @@ class SeveridadPreview extends StatelessWidget {
                   child: Text(
                     severidad.descripcion,
                     key: ValueKey(severidad.descripcion),
-                    style: const TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: _kTextSecondary,
+                      color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w300,
                       height: 1.4,
                     ),
@@ -512,23 +514,26 @@ class ResultadoAnalisisSheet extends StatelessWidget {
     return 'Continúa con la observación normal del animal.';
   }
 
-  Color get _accentColor {
+  Color _accentColor(ColorScheme cs) {
     final conf = resultado.confianza;
     if (conf >= 0.8 && !resultado.enfermedad.toLowerCase().contains('sin')) {
-      return _kRed;
+      return cs.error;
     }
-    if (conf >= 0.65) return const Color(0xFFB8860B);
-    return _kGreen;
+    if (conf >= 0.65) return cs.secondary;
+    return cs.tertiary;
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final esSano = resultado.enfermedad.toLowerCase().contains('sin');
+
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 36),
-      decoration: const BoxDecoration(
-        color: _kSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -539,7 +544,7 @@ class ResultadoAnalisisSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder,
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -556,21 +561,21 @@ class ResultadoAnalisisSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Resultado del análisis',
-                      style: TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 11,
-                        color: _kTextMuted,
+                        color: cs.outline,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       resultado.enfermedad,
-                      style: TextStyle(
+                      style: tt.titleMedium?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: _accentColor,
+                        color: _accentColor(cs),
                         letterSpacing: -0.4,
                       ),
                     ),
@@ -580,23 +585,21 @@ class ResultadoAnalisisSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // Confianza
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F3EE),
+              color: cs.surfaceContainerLow,
               borderRadius: BorderRadius.circular(11),
             ),
             child: Row(
               children: [
-                const Icon(Icons.analytics_outlined,
-                    size: 15, color: _kTextMuted),
+                Icon(Icons.analytics_outlined, size: 15, color: cs.outline),
                 const SizedBox(width: 8),
                 Text(
                   'Confianza del modelo: ${(resultado.confianza * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -604,12 +607,11 @@ class ResultadoAnalisisSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          // Recomendación
           Text(
-            '💡 ${ _recomendacion}',
-            style: const TextStyle(
+            '💡 $_recomendacion',
+            style: tt.bodySmall?.copyWith(
               fontSize: 13,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w300,
               height: 1.5,
             ),
@@ -620,18 +622,20 @@ class ResultadoAnalisisSheet extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kTextPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: cs.onSurface,
+                foregroundColor: cs.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
                 elevation: 0,
               ),
               onPressed: onListo,
-              child: const Text(
+              child: Text(
                 'Listo',
-                style: TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.w500),
+                style: tt.labelLarge?.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),

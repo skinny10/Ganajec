@@ -2,20 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/share/domain/entities/prediccion.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kCream = Color(0xFFF5F3EE);
-const _kYellow = Color(0xFFB8860B);
-const _kYellowLight = Color(0xFFFEF9E7);
-
 // ─── Helpers de datos ─────────────────────────────────────────────────────────
 
 class AlternativaDiag {
@@ -117,25 +103,31 @@ String _tiempoRelativo(DateTime fecha) {
   return 'hace ${diff.inHours} h';
 }
 
-// ─── Paleta por severidad ─────────────────────────────────────────────────────
+// ─── Helpers de color por severidad (reciben ColorScheme) ────────────────────
 
-Color _heroBg(String sev) => sev == 'alta'
-    ? _kRedLight
+Color _heroBg(String sev, ColorScheme cs) => sev == 'alta'
+    ? cs.errorContainer
     : sev == 'moderada'
-        ? _kYellowLight
-        : _kGreenLight;
+        ? cs.secondaryContainer
+        : cs.tertiaryContainer;
 
-Color _heroBorder(String sev) => sev == 'alta'
-    ? const Color(0xFFF5C6C2)
+Color _heroBorder(String sev, ColorScheme cs) => sev == 'alta'
+    ? cs.error.withOpacity(0.3)
     : sev == 'moderada'
-        ? const Color(0xFFF7DC6F)
-        : const Color(0xFFA8D5BC);
+        ? cs.secondary.withOpacity(0.3)
+        : cs.tertiary.withOpacity(0.3);
 
-Color _heroAccent(String sev) => sev == 'alta'
-    ? _kRed
+Color _heroAccent(String sev, ColorScheme cs) => sev == 'alta'
+    ? cs.error
     : sev == 'moderada'
-        ? _kYellow
-        : _kGreen;
+        ? cs.secondary
+        : cs.tertiary;
+
+Color _heroTextColor(String sev, ColorScheme cs) => sev == 'alta'
+    ? cs.onErrorContainer
+    : sev == 'moderada'
+        ? cs.onSecondaryContainer
+        : cs.onTertiaryContainer;
 
 // ─── Hero del resultado ───────────────────────────────────────────────────────
 
@@ -173,9 +165,11 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final p = widget.prediccion;
     final sev = severidadLabel(p);
-    final accent = _heroAccent(sev);
+    final accent = _heroAccent(sev, cs);
     final sevTexto = sev == 'alta'
         ? 'Severidad alta'
         : sev == 'moderada'
@@ -186,14 +180,13 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
       decoration: BoxDecoration(
-        color: _heroBg(sev),
+        color: _heroBg(sev, cs),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _heroBorder(sev)),
+        border: Border.all(color: _heroBorder(sev, cs)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top row: badge + hora
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -213,7 +206,7 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
                   const SizedBox(width: 6),
                   Text(
                     sevTexto,
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: accent,
@@ -223,7 +216,7 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
               ),
               Text(
                 _tiempoRelativo(p.fecha),
-                style: TextStyle(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w300,
                   color: accent,
@@ -232,13 +225,12 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
             ],
           ),
           const SizedBox(height: 14),
-          // Nombre de enfermedad
           Text(
             p.enfermedad,
-            style: const TextStyle(
+            style: tt.headlineSmall?.copyWith(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               letterSpacing: -1,
               height: 1.1,
             ),
@@ -246,21 +238,20 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
           const SizedBox(height: 6),
           Text(
             subtituloDe(p.enfermedad),
-            style: const TextStyle(
+            style: tt.bodySmall?.copyWith(
               fontSize: 13,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w300,
               height: 1.5,
             ),
           ),
           const SizedBox(height: 16),
-          // Barra de confianza
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Confianza del modelo',
-                style: TextStyle(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 11,
                   fontWeight: FontWeight.w400,
                   color: accent,
@@ -268,7 +259,7 @@ class _ResultadoHeroCardState extends State<ResultadoHeroCard>
               ),
               Text(
                 '${(p.confianza * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
+                style: tt.bodyLarge?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: accent,
@@ -319,13 +310,16 @@ class ResultadoAnimalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
@@ -333,7 +327,7 @@ class ResultadoAnimalRow extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: _kRedLight,
+              color: cs.errorContainer,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Center(
@@ -347,18 +341,18 @@ class ResultadoAnimalRow extends StatelessWidget {
               children: [
                 Text(
                   '${animal.nombre} — ${animal.raza}',
-                  style: const TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${animal.idExterno} · Temp: ${temperatura.toStringAsFixed(1)}°C · Leche: ${litrosLeche.toStringAsFixed(0)} L',
-                  style: const TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 11,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -367,9 +361,9 @@ class ResultadoAnimalRow extends StatelessWidget {
           ),
           Text(
             _tiempoRelativo(prediccion.fecha),
-            style: const TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 10.5,
-              color: _kTextMuted,
+              color: cs.outline,
               fontWeight: FontWeight.w300,
             ),
           ),
@@ -393,6 +387,8 @@ class ResultadoSintomasSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,14 +404,14 @@ class ResultadoSintomasSection extends StatelessWidget {
         Row(
           children: [
             _Leyenda(
-              color: _kCream,
-              borderColor: _kBorder,
+              color: cs.surfaceContainerLow,
+              borderColor: cs.outlineVariant,
               label: 'Formulario',
             ),
             const SizedBox(width: 10),
             _Leyenda(
-              color: const Color(0xFFEEEDFE),
-              borderColor: const Color(0xFFC8C5F0),
+              color: cs.secondaryContainer,
+              borderColor: cs.secondary.withOpacity(0.5),
               label: 'Extraído por NLP',
             ),
           ],
@@ -433,13 +429,16 @@ class _SintTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isNLP ? const Color(0xFFEEEDFE) : _kCream,
+        color: isNLP ? cs.secondaryContainer : cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isNLP ? const Color(0xFFC8C5F0) : _kBorder,
+          color: isNLP ? cs.secondary.withOpacity(0.5) : cs.outlineVariant,
         ),
       ),
       child: Row(
@@ -447,21 +446,21 @@ class _SintTag extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 11.5,
               fontWeight: FontWeight.w400,
-              color: isNLP ? const Color(0xFF534AB7) : _kTextSecondary,
+              color: isNLP ? cs.onSecondaryContainer : cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 4),
           Text(
             isNLP ? '· NLP' : '· form',
-            style: TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 9,
               fontWeight: FontWeight.w500,
               color: isNLP
-                  ? const Color(0xFF534AB7).withOpacity(0.7)
-                  : _kTextMuted,
+                  ? cs.onSecondaryContainer.withOpacity(0.7)
+                  : cs.outline,
             ),
           ),
         ],
@@ -483,6 +482,9 @@ class _Leyenda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         Container(
@@ -497,9 +499,9 @@ class _Leyenda extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 10,
-            color: _kTextMuted,
+            color: cs.outline,
           ),
         ),
       ],
@@ -517,6 +519,8 @@ class ResultadoNLPBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (descripcion.trim().isEmpty) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final preview = descripcion.length > 80
         ? '${descripcion.substring(0, 80)}…'
         : descripcion;
@@ -524,9 +528,9 @@ class ResultadoNLPBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEEDFE),
+        color: cs.secondaryContainer,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: const Color(0xFFC8C5F0)),
+        border: Border.all(color: cs.secondary.withOpacity(0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,9 +540,9 @@ class ResultadoNLPBox extends StatelessWidget {
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(
+                style: tt.bodySmall?.copyWith(
                   fontSize: 11.5,
-                  color: Color(0xFF3C3489),
+                  color: cs.onSecondaryContainer,
                   fontWeight: FontWeight.w300,
                   height: 1.6,
                 ),
@@ -546,10 +550,10 @@ class ResultadoNLPBox extends StatelessWidget {
                   const TextSpan(text: 'El módulo NLP procesó: '),
                   TextSpan(
                     text: '"$preview"',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontStyle: FontStyle.italic,
-                      color: Color(0xFF534AB7),
-                      fontWeight: FontWeight.w400,
+                      color: cs.onSecondaryContainer,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const TextSpan(
@@ -575,6 +579,9 @@ class ResultadoAlternativas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (alternativas.isEmpty) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       children: List.generate(alternativas.length, (i) {
         final alt = alternativas[i];
@@ -584,18 +591,18 @@ class ResultadoAlternativas extends StatelessWidget {
               : EdgeInsets.zero,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: _kSurface,
+            color: cs.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: _kBorder),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Row(
             children: [
               Text(
                 '${i + 2}',
-                style: const TextStyle(
+                style: tt.labelMedium?.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: _kTextMuted,
+                  color: cs.outline,
                 ),
               ),
               const SizedBox(width: 12),
@@ -605,32 +612,31 @@ class ResultadoAlternativas extends StatelessWidget {
                   children: [
                     Text(
                       alt.nombre,
-                      style: const TextStyle(
+                      style: tt.bodySmall?.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       alt.desc,
-                      style: const TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 11,
-                        color: _kTextMuted,
+                        color: cs.outline,
                         fontWeight: FontWeight.w300,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    // Mini barra
                     ClipRRect(
                       borderRadius: BorderRadius.circular(2),
                       child: Container(
                         height: 3,
-                        color: _kBorder,
+                        color: cs.outlineVariant,
                         child: FractionallySizedBox(
                           widthFactor: alt.probabilidad,
                           alignment: Alignment.centerLeft,
-                          child: Container(color: _kTextMuted),
+                          child: Container(color: cs.outline),
                         ),
                       ),
                     ),
@@ -640,10 +646,10 @@ class ResultadoAlternativas extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 '${(alt.probabilidad * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(
+                style: tt.bodyMedium?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: _kTextSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ],
@@ -668,20 +674,13 @@ class ResultadoRecomendacion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAlta = severidad == 'alta';
-    final accent = isAlta ? _kRed : severidad == 'moderada' ? _kYellow : _kGreen;
-    final bg = isAlta ? _kRedLight : severidad == 'moderada' ? _kYellowLight : _kGreenLight;
-    final border = isAlta
-        ? const Color(0xFFF5C6C2)
-        : severidad == 'moderada'
-            ? const Color(0xFFF7DC6F)
-            : const Color(0xFFA8D5BC);
-    final textColor = isAlta
-        ? const Color(0xFF7B241C)
-        : severidad == 'moderada'
-            ? const Color(0xFF7D6608)
-            : const Color(0xFF1A4731);
-    final titulo = isAlta
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final accent    = _heroAccent(severidad, cs);
+    final bg        = _heroBg(severidad, cs);
+    final border    = _heroBorder(severidad, cs);
+    final textColor = _heroTextColor(severidad, cs);
+    final titulo = severidad == 'alta'
         ? 'Acción inmediata recomendada'
         : severidad == 'moderada'
             ? 'Monitoreo recomendado'
@@ -700,13 +699,13 @@ class ResultadoRecomendacion extends StatelessWidget {
           Row(
             children: [
               Text(
-                isAlta ? '🚨' : severidad == 'moderada' ? '⚠️' : '✅',
+                severidad == 'alta' ? '🚨' : severidad == 'moderada' ? '⚠️' : '✅',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(width: 8),
               Text(
                 titulo,
-                style: TextStyle(
+                style: tt.labelMedium?.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: accent,
@@ -731,10 +730,10 @@ class ResultadoRecomendacion extends StatelessWidget {
                   child: Center(
                     child: Text(
                       '${i + 1}',
-                      style: const TextStyle(
+                      style: tt.labelSmall?.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: cs.surface,
                       ),
                     ),
                   ),
@@ -743,7 +742,7 @@ class ResultadoRecomendacion extends StatelessWidget {
                 Expanded(
                   child: Text(
                     pasos[i],
-                    style: TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 12,
                       color: textColor,
                       fontWeight: FontWeight.w300,
@@ -767,12 +766,15 @@ class ResultadoDisclaimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: _kCream,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,20 +783,23 @@ class ResultadoDisclaimer extends StatelessWidget {
           const SizedBox(width: 9),
           Expanded(
             child: RichText(
-              text: const TextSpan(
-                style: TextStyle(
+              text: TextSpan(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 11,
-                  color: _kTextSecondary,
+                  color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w300,
                   height: 1.6,
                 ),
                 children: [
-                  TextSpan(text: 'Este resultado es un '),
+                  const TextSpan(text: 'Este resultado es un '),
                   TextSpan(
                     text: 'soporte predictivo preliminar',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
-                  TextSpan(
+                  const TextSpan(
                     text:
                         ', no un diagnóstico clínico definitivo. Confirma siempre con un médico veterinario certificado antes de iniciar cualquier tratamiento.',
                   ),
@@ -816,14 +821,17 @@ class ResultadoSecTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-        style: const TextStyle(
+        style: tt.titleSmall?.copyWith(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: _kTextPrimary,
+          color: cs.onSurface,
           letterSpacing: -0.2,
         ),
       ),

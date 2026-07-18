@@ -14,10 +14,6 @@ class MiPlanScreen extends StatefulWidget {
 }
 
 class _MiPlanScreenState extends State<MiPlanScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-
   @override
   void initState() {
     super.initState();
@@ -26,39 +22,42 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<MiPlanViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => context.canPop() ? context.pop() : context.go(AppRoutes.perfil),
+          onTap: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.perfil),
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left, color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Mi plan',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -68,40 +67,35 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
                   message: vm.error ?? 'Error al cargar el plan',
                   onRetry: () => context.read<MiPlanViewModel>().cargar(),
                 )
-              : _buildContent(vm),
+              : _buildContent(context, vm),
     );
   }
 
-  Widget _buildContent(MiPlanViewModel vm) {
+  Widget _buildContent(BuildContext context, MiPlanViewModel vm) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final suscripcion = vm.suscripcion!;
+
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 40),
       children: [
-        // Hero negro
         MiPlanHeroCard(suscripcion: suscripcion),
-
-        // Uso actual
         MiPlanUsageCard(suscripcion: suscripcion),
-
-        // Funcionalidades
         MiPlanFeaturesCard(plan: suscripcion.planActual),
-
-        // Tip de upgrade (solo si plan gratuito con límite de bovinos)
         MiPlanTipCard(suscripcion: suscripcion),
 
-        // Sección "Mejorar mi plan"
         if (vm.planesUpgrade.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Mejorar mi plan',
-                  style: TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF1A1A1A),
+                    color: cs.onSurface,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -129,19 +123,25 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: Color(0xFFC0392B), size: 48),
+            Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888880))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: onRetry, child: const Text('Reintentar')),
+            ElevatedButton(
+                onPressed: onRetry, child: const Text('Reintentar')),
           ],
         ),
       ),

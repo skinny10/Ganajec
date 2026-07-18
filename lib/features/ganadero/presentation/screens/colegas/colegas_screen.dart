@@ -11,15 +11,6 @@ class ColegasScreen extends StatefulWidget {
 }
 
 class _ColegasScreenState extends State<ColegasScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-
   @override
   void initState() {
     super.initState();
@@ -29,11 +20,13 @@ class _ColegasScreenState extends State<ColegasScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ColegasViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -41,30 +34,29 @@ class _ColegasScreenState extends State<ColegasScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.chevron_left_rounded,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               size: 20,
             ),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Colegas del rancho',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -75,7 +67,7 @@ class _ColegasScreenState extends State<ColegasScreen> {
                   onRetry: () => vm.cargar(),
                 )
               : vm.colegas.isEmpty
-                  ? _EmptyState()
+                  ? const _EmptyState()
                   : RefreshIndicator(
                       onRefresh: () => vm.cargar(),
                       child: ListView.separated(
@@ -95,40 +87,35 @@ class _ColegaCard extends StatelessWidget {
   final ColegaItem colega;
   const _ColegaCard({required this.colega});
 
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
-          // Avatar con iniciales
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: _kGreenLight,
+              color: cs.tertiaryContainer,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFC8E6C9)),
+              border: Border.all(color: cs.tertiary.withOpacity(0.25)),
             ),
             child: Center(
               child: Text(
                 colega.iniciales,
-                style: const TextStyle(
+                style: tt.titleSmall?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: _kGreen,
+                  color: cs.tertiary,
                 ),
               ),
             ),
@@ -140,18 +127,17 @@ class _ColegaCard extends StatelessWidget {
               children: [
                 Text(
                   colega.nombre,
-                  style: const TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: _kTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   'Ganadero',
-                  style: TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -165,10 +151,13 @@ class _ColegaCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  static const _kTextSecondary = Color(0xFF888880);
+  const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -177,19 +166,21 @@ class _EmptyState extends StatelessWidget {
           children: [
             const Text('👥', style: TextStyle(fontSize: 40)),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Sin colegas aún',
-              style: TextStyle(
+              style: tt.titleSmall?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Aún no hay otros ganaderos en tu rancho.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: _kTextSecondary),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -206,6 +197,9 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -217,9 +211,9 @@ class _ErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: tt.bodySmall?.copyWith(
                 fontSize: 13,
-                color: Color(0xFF888880),
+                color: cs.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
