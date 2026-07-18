@@ -18,6 +18,8 @@ class ApiConstants {
   /// POST /auth/change-password  { password_actual, nueva_password }
   static const String cambiarContrasena = '/auth/change-password';
   static const String verificarEmail = '/auth/verificar-email';
+  static const String solicitarRecuperacion = '/auth/solicitar-recuperacion';
+  static const String restablecerPassword = '/auth/restablecer-password';
 
   // ── Ganadero — perfil ────────────────────────────────────────────────────────
   /// GET /ganadero/{ganadero_id}

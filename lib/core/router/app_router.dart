@@ -5,6 +5,8 @@ import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/verificar_email/verificar_email_screen.dart';
+import 'package:ganajec/features/auth/presentation/screens/recuperar_contrasena/solicitar_codigo_screen.dart';
+import 'package:ganajec/features/auth/presentation/screens/recuperar_contrasena/nueva_contrasena_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/home/home_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/registro_bovino/registro_bovino_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/detalle_bovino/detalle_bovino_screen.dart';
@@ -92,6 +94,8 @@ class AppRoutes {
   static const String veterinarios = '/veterinarios';
   static const String todosBovinos = '/todos-bovinos';
   static const String verificarEmail = '/verificar-email';
+  static const String solicitarCodigo = '/solicitar-codigo';
+  static const String nuevaContrasena = '/nueva-contrasena';
 }
 
 class AppRouter {
@@ -120,6 +124,19 @@ class AppRouter {
           return VerificarEmailScreen(
             email: args['email']!,
             nombre: args['nombre']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.solicitarCodigo,
+        builder: (context, state) => const SolicitarCodigoScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.nuevaContrasena,
+        builder: (context, state) {
+          final args = state.extra as Map<String, String>;
+          return NuevaContrasenaScreen(
+            email: args['email']!,
           );
         },
       ),

@@ -11,6 +11,7 @@ class LoginFormFields extends StatelessWidget {
   final VoidCallback onTogglePassword;
   final bool rememberMe;
   final ValueChanged<bool?> onRememberMe;
+  final VoidCallback onForgotPassword;
 
   const LoginFormFields({
     super.key,
@@ -20,6 +21,7 @@ class LoginFormFields extends StatelessWidget {
     required this.onTogglePassword,
     required this.rememberMe,
     required this.onRememberMe,
+    required this.onForgotPassword,
   });
 
   @override
@@ -61,7 +63,7 @@ class LoginFormFields extends StatelessWidget {
             const Text('Recuérdame', style: TextStyle(fontSize: 13)),
             const Spacer(),
             TextButton(
-              onPressed: () {},
+              onPressed: onForgotPassword,
               child: const Text('¿Olvidaste tu contraseña?',
                   style: TextStyle(fontSize: 13)),
             ),

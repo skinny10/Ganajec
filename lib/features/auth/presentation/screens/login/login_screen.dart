@@ -188,6 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 rememberMe: _rememberMe,
                                 onRememberMe: (v) => setState(
                                     () => _rememberMe = v ?? false),
+                                onForgotPassword: () => context.push(AppRoutes.solicitarCodigo),
                               ),
                               const SizedBox(height: 8),
                               LoginActions(
