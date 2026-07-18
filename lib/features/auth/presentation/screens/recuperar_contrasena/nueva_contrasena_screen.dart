@@ -45,7 +45,7 @@ class _NuevaContrasenaScreenState extends State<NuevaContrasenaScreen> {
         ApiConstants.baseUrl + ApiConstants.restablecerPassword,
         data: {
           'email': widget.email,
-          'codigo': _codeController.text,
+          'codigo': _codeController.text.trim(),
           'nueva_password': _passwordController.text,
         },
       );
