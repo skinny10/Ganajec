@@ -2,22 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/historial_item.dart';
 import '../../viewmodels/historial_viewmodel.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kBg = Color(0xFFFAFAF7);
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kCream = Color(0xFFF5F3EE);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kYellow = Color(0xFFB8860B);
-const _kYellowLight = Color(0xFFFEF9E7);
-const _kAmber = Color(0xFFD4A017);
-
 // ─── Barra de búsqueda + chips ───────────────────────────────────────────────
 
 class HistorialFilterBar extends StatefulWidget {
@@ -40,6 +24,8 @@ class _HistorialFilterBarState extends State<HistorialFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = widget.vm;
 
     return Column(
@@ -51,33 +37,32 @@ class _HistorialFilterBarState extends State<HistorialFilterBar> {
           child: TextField(
             controller: _ctrl,
             onChanged: vm.setBusqueda,
-            style: const TextStyle(fontSize: 13.5, color: _kTextPrimary),
+            style: tt.bodyMedium?.copyWith(fontSize: 13.5, color: cs.onSurface),
             decoration: InputDecoration(
               hintText: 'Buscar por animal o enfermedad…',
-              hintStyle: const TextStyle(
-                  color: _kTextMuted, fontWeight: FontWeight.w300),
-              prefixIcon: const Padding(
-                padding: EdgeInsets.only(left: 12, right: 8),
-                child: Icon(Icons.search_rounded, color: _kTextMuted, size: 18),
+              hintStyle: tt.bodyMedium?.copyWith(
+                  color: cs.outline, fontWeight: FontWeight.w300),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 12, right: 8),
+                child: Icon(Icons.search_rounded, color: cs.outline, size: 18),
               ),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               filled: true,
-              fillColor: _kSurface,
+              fillColor: cs.surfaceContainerLowest,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: const BorderSide(color: _kBorder),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: const BorderSide(color: _kBorder),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide:
-                    const BorderSide(color: _kTextPrimary, width: 1.5),
+                borderSide: BorderSide(color: cs.onSurface, width: 1.5),
               ),
             ),
           ),
@@ -137,6 +122,9 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -144,19 +132,19 @@ class _Chip extends StatelessWidget {
         margin: const EdgeInsets.only(right: 7),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: active ? _kTextPrimary : _kSurface,
+          color: active ? cs.onSurface : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: active ? _kTextPrimary : _kBorder,
+            color: active ? cs.onSurface : cs.outlineVariant,
             width: active ? 1.5 : 1,
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: active ? Colors.white : _kTextSecondary,
+            color: active ? cs.surface : cs.onSurfaceVariant,
           ),
         ),
       ),
@@ -180,18 +168,17 @@ class HistorialQuickStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
       child: Row(
         children: [
-          _QStat(value: '$alta', label: 'Severidad alta', color: _kRed),
+          _QStat(value: '$alta', label: 'Severidad alta', color: cs.error),
           const SizedBox(width: 8),
-          _QStat(value: '$total', label: 'Total este mes', color: _kTextPrimary),
+          _QStat(value: '$total', label: 'Total este mes', color: cs.onSurface),
           const SizedBox(width: 8),
-          _QStat(
-              value: '$sinEnfermedad',
-              label: 'Sin enfermedad',
-              color: _kGreen),
+          _QStat(value: '$sinEnfermedad', label: 'Sin enfermedad', color: cs.tertiary),
         ],
       ),
     );
@@ -211,19 +198,22 @@ class _QStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(13),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           children: [
             Text(
               value,
-              style: TextStyle(
+              style: tt.titleMedium?.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -234,9 +224,9 @@ class _QStat extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: tt.labelSmall?.copyWith(
                 fontSize: 9.5,
-                color: _kTextMuted,
+                color: cs.outline,
                 fontWeight: FontWeight.w300,
                 height: 1.3,
               ),
@@ -262,6 +252,9 @@ class HistorialDateGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,10 +262,10 @@ class HistorialDateGroup extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8, left: 2),
           child: Text(
             grupo.titulo.toUpperCase(),
-            style: const TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 10,
               fontWeight: FontWeight.w500,
-              color: _kTextMuted,
+              color: cs.outline,
               letterSpacing: 0.08 * 10,
             ),
           ),
@@ -294,16 +287,32 @@ class HistorialCard extends StatelessWidget {
 
   const HistorialCard({super.key, required this.item, required this.onTap});
 
-  static _SevConfig _configFor(HistorialSeveridad sev) {
+  static _SevConfig _configFor(HistorialSeveridad sev, ColorScheme cs) {
     return switch (sev) {
-      HistorialSeveridad.alta =>
-        const _SevConfig(bar: _kRed, bg: _kRedLight, text: _kRed, label: 'Alta'),
-      HistorialSeveridad.moderada => const _SevConfig(
-          bar: _kAmber, bg: _kYellowLight, text: _kYellow, label: 'Moderada'),
-      HistorialSeveridad.leve =>
-        const _SevConfig(bar: _kGreen, bg: _kGreenLight, text: _kGreen, label: 'Leve'),
-      HistorialSeveridad.sinEnfermedad =>
-        const _SevConfig(bar: _kGreen, bg: _kGreenLight, text: _kGreen, label: 'Sano'),
+      HistorialSeveridad.alta => _SevConfig(
+          bar: cs.error,
+          bg: cs.errorContainer,
+          text: cs.error,
+          label: 'Alta',
+        ),
+      HistorialSeveridad.moderada => _SevConfig(
+          bar: cs.secondary,
+          bg: cs.secondaryContainer,
+          text: cs.secondary,
+          label: 'Moderada',
+        ),
+      HistorialSeveridad.leve => _SevConfig(
+          bar: cs.tertiary,
+          bg: cs.tertiaryContainer,
+          text: cs.tertiary,
+          label: 'Leve',
+        ),
+      HistorialSeveridad.sinEnfermedad => _SevConfig(
+          bar: cs.tertiary,
+          bg: cs.tertiaryContainer,
+          text: cs.tertiary,
+          label: 'Sano',
+        ),
     };
   }
 
@@ -314,14 +323,12 @@ class HistorialCard extends StatelessWidget {
     final d = DateTime(fecha.year, fecha.month, fecha.day);
 
     if (!d.isBefore(hoy) || !d.isBefore(ayer.add(const Duration(days: 1)))) {
-      // Hoy o ayer: mostrar hora
       final h = fecha.hour;
       final m = fecha.minute.toString().padLeft(2, '0');
       final period = h >= 12 ? 'pm' : 'am';
       final h12 = h > 12 ? h - 12 : (h == 0 ? 12 : h);
       return '$h12:$m $period';
     }
-    // Esta semana / meses: mostrar "3 jun"
     const meses = [
       '', 'ene', 'feb', 'mar', 'abr', 'may', 'jun',
       'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
@@ -331,16 +338,18 @@ class HistorialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cfg = _configFor(item.severidad);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final cfg = _configFor(item.severidad, cs);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(14),
@@ -380,18 +389,18 @@ class HistorialCard extends StatelessWidget {
                                 item.enfermedad,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: tt.bodyMedium?.copyWith(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w500,
-                                  color: _kTextPrimary,
+                                  color: cs.onSurface,
                                 ),
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 '🐄 ${item.animalNombre} · ${item.animalIdExterno}',
-                                style: const TextStyle(
+                                style: tt.bodySmall?.copyWith(
                                   fontSize: 11,
-                                  color: _kTextMuted,
+                                  color: cs.outline,
                                   fontWeight: FontWeight.w300,
                                 ),
                               ),
@@ -405,10 +414,10 @@ class HistorialCard extends StatelessWidget {
                           children: [
                             Text(
                               '${item.confianzaPct}%',
-                              style: const TextStyle(
+                              style: tt.titleMedium?.copyWith(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: _kTextPrimary,
+                                color: cs.onSurface,
                                 letterSpacing: -0.3,
                               ),
                             ),
@@ -422,7 +431,7 @@ class HistorialCard extends StatelessWidget {
                               ),
                               child: Text(
                                 cfg.label,
-                                style: TextStyle(
+                                style: tt.labelSmall?.copyWith(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
                                   color: cfg.text,
@@ -432,9 +441,9 @@ class HistorialCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               _horaOFecha(item.fecha),
-                              style: const TextStyle(
+                              style: tt.labelSmall?.copyWith(
                                 fontSize: 10,
-                                color: _kTextMuted,
+                                color: cs.outline,
                                 fontWeight: FontWeight.w300,
                               ),
                             ),
@@ -458,11 +467,12 @@ class _SevConfig {
   final Color bg;
   final Color text;
   final String label;
-  const _SevConfig(
-      {required this.bar,
-      required this.bg,
-      required this.text,
-      required this.label});
+  const _SevConfig({
+    required this.bar,
+    required this.bg,
+    required this.text,
+    required this.label,
+  });
 }
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
@@ -479,28 +489,31 @@ class HistorialEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
       child: Column(
         children: [
           const Text('🔍', style: TextStyle(fontSize: 40)),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Sin resultados',
-            style: TextStyle(
+            style: tt.titleSmall?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               letterSpacing: -0.3,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'No encontramos predicciones que coincidan\ncon tu búsqueda.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: tt.bodySmall?.copyWith(
               fontSize: 12,
-              color: _kTextMuted,
+              color: cs.outline,
               fontWeight: FontWeight.w300,
               height: 1.6,
             ),
@@ -513,14 +526,14 @@ class HistorialEmptyState extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: _kBorder),
+                  border: Border.all(color: cs.outlineVariant),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   'Limpiar filtros',
-                  style: TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 12,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w400,
                   ),
                 ),

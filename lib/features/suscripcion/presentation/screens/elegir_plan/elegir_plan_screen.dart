@@ -15,11 +15,6 @@ class ElegirPlanScreen extends StatefulWidget {
 }
 
 class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   @override
   void initState() {
     super.initState();
@@ -27,16 +22,15 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
   }
 
   Future<void> _abrirStripeSheet() async {
+    final cs = Theme.of(context).colorScheme;
     final vm = context.read<ElegirPlanViewModel>();
     final plan = vm.planSeleccionadoObj;
     if (plan == null || plan.esGratuito) return;
 
     try {
-      // 1. Obtener clientSecret desde tu API
       final clientSecret = await vm.obtenerClientSecret();
       if (clientSecret == null) return;
 
-      // 2. Inicializar PaymentSheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -45,10 +39,8 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
         ),
       );
 
-      // 3. Mostrar PaymentSheet
       await Stripe.instance.presentPaymentSheet();
 
-      // 4. Pago exitoso — confirmar suscripción en tu backend
       final ok = await vm.confirmarSuscripcion();
       if (!context.mounted) return;
 
@@ -56,7 +48,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('¡Suscripción al Plan ${plan.nombre} activada!'),
-            backgroundColor: const Color(0xFF1D7A55),
+            backgroundColor: cs.tertiary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -66,7 +58,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(vm.error ?? 'Error al confirmar la suscripción'),
-            backgroundColor: const Color(0xFFC0392B),
+            backgroundColor: cs.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -78,17 +70,18 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error en el pago: ${e.error.localizedMessage}'),
-            backgroundColor: const Color(0xFFC0392B),
+            backgroundColor: cs.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
       if (!context.mounted) return;
+      final cs2 = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: const Color(0xFFC0392B),
+          backgroundColor: cs2.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -97,49 +90,52 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<ElegirPlanViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => context.canPop() ? context.pop() : context.go(AppRoutes.miPlan),
+          onTap: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.miPlan),
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left, color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Elegir plan',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildContent(vm),
-      bottomNavigationBar: _buildBottomCta(vm),
+          : _buildContent(context, vm),
+      bottomNavigationBar: _buildBottomCta(context, vm),
     );
   }
 
-  Widget _buildContent(ElegirPlanViewModel vm) {
+  Widget _buildContent(BuildContext context, ElegirPlanViewModel vm) {
     final planActualTipo = vm.planActualTipo;
 
     return ListView(
@@ -150,7 +146,8 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
         ),
         ElegirPlanBillingToggle(
           isAnual: vm.esPagoAnual,
-          onToggle: () => context.read<ElegirPlanViewModel>().togglePagoAnual(),
+          onToggle: () =>
+              context.read<ElegirPlanViewModel>().togglePagoAnual(),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -164,8 +161,9 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                 isSelected: isSelected,
                 isActual: isActual,
                 isAnual: vm.esPagoAnual,
-                onTap: () =>
-                    context.read<ElegirPlanViewModel>().seleccionarPlan(plan.tipo),
+                onTap: () => context
+                    .read<ElegirPlanViewModel>()
+                    .seleccionarPlan(plan.tipo),
               );
             }).toList(),
           ),
@@ -176,7 +174,9 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
     );
   }
 
-  Widget _buildBottomCta(ElegirPlanViewModel vm) {
+  Widget _buildBottomCta(BuildContext context, ElegirPlanViewModel vm) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final isGratuito = vm.planSeleccionadoObj?.esGratuito ?? false;
     final isActual = vm.planSeleccionado == vm.planActualTipo;
     final disabled = isActual || vm.isSubscribing;
@@ -184,9 +184,9 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-        decoration: const BoxDecoration(
-          color: Color(0xFFFAFAF7),
-          border: Border(top: BorderSide(color: Color(0xFFE8E5DC))),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          border: Border(top: BorderSide(color: cs.outlineVariant)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -196,22 +196,22 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kTextPrimary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: _kTextPrimary.withOpacity(0.4),
+                  backgroundColor: cs.onSurface,
+                  foregroundColor: cs.surface,
+                  disabledBackgroundColor: cs.onSurface.withOpacity(0.4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
                   elevation: 4,
-                  shadowColor: Colors.black.withOpacity(0.18),
+                  shadowColor: cs.onSurface.withOpacity(0.18),
                 ),
                 onPressed: disabled ? null : _abrirStripeSheet,
                 child: vm.isSubscribing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                            strokeWidth: 2, color: cs.surface),
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -221,7 +221,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                           if (!isGratuito) const SizedBox(width: 8),
                           Text(
                             isActual ? 'Plan actual' : vm.textoPrecioBoton,
-                            style: const TextStyle(
+                            style: tt.labelLarge?.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                             ),
@@ -232,26 +232,26 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
             ),
             const SizedBox(height: 6),
             Text.rich(
-              const TextSpan(
-                style: TextStyle(
+              TextSpan(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 10.5,
-                  color: _kTextMuted,
+                  color: cs.outline,
                   fontWeight: FontWeight.w300,
                 ),
                 children: [
-                  TextSpan(text: 'Al suscribirte aceptas los '),
+                  const TextSpan(text: 'Al suscribirte aceptas los '),
                   TextSpan(
                     text: 'Términos de uso',
                     style: TextStyle(
-                      color: Color(0xFF888880),
+                      color: cs.onSurfaceVariant,
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  TextSpan(text: ' y la '),
+                  const TextSpan(text: ' y la '),
                   TextSpan(
                     text: 'Política de privacidad',
                     style: TextStyle(
-                      color: Color(0xFF888880),
+                      color: cs.onSurfaceVariant,
                       decoration: TextDecoration.underline,
                     ),
                   ),

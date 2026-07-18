@@ -11,14 +11,6 @@ class EditarRanchoScreen extends StatefulWidget {
 }
 
 class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-  static const _kGreen = Color(0xFF1D7A55);
-  static const _kRed = Color(0xFFC0392B);
-
   @override
   void initState() {
     super.initState();
@@ -34,12 +26,13 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
   void _onVmChange() {
     final vm = context.read<EditarRanchoViewModel>();
     if (vm.isSuccess) {
+      final cs = Theme.of(context).colorScheme;
       context.pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Rancho actualizado'),
+        SnackBar(
+          content: const Text('Rancho actualizado'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF1D7A55),
+          backgroundColor: cs.tertiary,
         ),
       );
     }
@@ -47,12 +40,14 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final vm = context.watch<EditarRanchoViewModel>();
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -60,27 +55,26 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Editar rancho',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: SingleChildScrollView(
@@ -93,18 +87,21 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDEDEC),
+                  color: cs.errorContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: _kRed, size: 16),
+                    Icon(Icons.error_outline, color: cs.error, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(vm.error!,
-                          style: const TextStyle(
-                              color: _kRed, fontSize: 13)),
+                      child: Text(
+                        vm.error!,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onErrorContainer,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -139,8 +136,8 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kTextPrimary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: cs.onSurface,
+                  foregroundColor: cs.surface,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
@@ -151,18 +148,20 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
                         .read<EditarRanchoViewModel>()
                         .guardar(),
                 child: vm.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: cs.surface,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Guardar cambios',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w500),
+                        style: tt.labelLarge?.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
               ),
             ),
@@ -179,11 +178,6 @@ class _Field extends StatelessWidget {
   final String hint;
   final IconData icon;
 
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted = Color(0xFFAEADA6);
-
   const _Field({
     required this.label,
     required this.ctrl,
@@ -193,44 +187,45 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
+            color: cs.onSurface,
             letterSpacing: 0.2,
           ),
         ),
         const SizedBox(height: 7),
         TextField(
           controller: ctrl,
-          style: const TextStyle(fontSize: 14, color: _kTextPrimary),
+          style: tt.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-                color: _kTextMuted, fontWeight: FontWeight.w300),
-            prefixIcon:
-                Icon(icon, color: _kTextMuted, size: 18),
+            hintStyle: tt.bodyMedium?.copyWith(
+                color: cs.outline, fontWeight: FontWeight.w300),
+            prefixIcon: Icon(icon, color: cs.outline, size: 18),
             filled: true,
-            fillColor: _kSurface,
+            fillColor: cs.surfaceContainerLowest,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _kBorder),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: _kTextPrimary, width: 1.5),
+              borderSide: BorderSide(color: cs.onSurface, width: 1.5),
             ),
           ),
         ),

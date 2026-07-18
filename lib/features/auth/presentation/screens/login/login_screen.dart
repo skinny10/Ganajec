@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               .titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xff4a2c0a),
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
                               ),
                         ),
                         Text(
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: const Color(0xff4a2c0a)),
+                              ?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
                         ),
                       ],
                     ),

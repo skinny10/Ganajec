@@ -14,16 +14,6 @@ class MisGanaderosScreen extends StatefulWidget {
 }
 
 class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-  static const _kRed = Color(0xFFC0392B);
-  static const _kRedLight = Color(0xFFFDEDEC);
-
   @override
   void initState() {
     super.initState();
@@ -33,11 +23,13 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<MisGanaderosViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -45,31 +37,29 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Mis ganaderos',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         actions: [
-          // Crear rancho adicional
           GestureDetector(
             onTap: () async {
               final creado = await mostrarRanchoModal(
                 context,
-                initialTab: 1, // tab "Crear"
+                initialTab: 1,
               );
               if (creado && context.mounted) {
                 context.read<MisGanaderosViewModel>().cargar();
@@ -79,20 +69,19 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
               margin: const EdgeInsets.only(right: 4, top: 8, bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: _kGreenLight,
+                color: cs.tertiaryContainer,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: _kGreen.withOpacity(0.35)),
+                border: Border.all(color: cs.tertiary.withOpacity(0.35)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add, color: _kGreen, size: 14),
-                  SizedBox(width: 4),
+                  Icon(Icons.add, color: cs.tertiary, size: 14),
+                  const SizedBox(width: 4),
                   Text(
                     'Crear rancho',
-                    style: TextStyle(
-                      color: _kGreen,
+                    style: tt.labelSmall?.copyWith(
+                      color: cs.tertiary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -103,28 +92,27 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           ),
           IconButton(
             onPressed: () => context.read<MisGanaderosViewModel>().cargar(),
-            icon: const Icon(Icons.refresh_outlined,
-                color: _kTextSecondary, size: 20),
+            icon: Icon(Icons.refresh_outlined,
+                color: cs.onSurfaceVariant, size: 20),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final agregado = await context.push<bool>(
-              AppRoutes.registrarGanadero);
+          final agregado = await context.push<bool>(AppRoutes.registrarGanadero);
           if (agregado == true && context.mounted) {
             context.read<MisGanaderosViewModel>().cargar();
           }
         },
-        backgroundColor: _kGreen,
-        foregroundColor: Colors.white,
+        backgroundColor: cs.tertiary,
+        foregroundColor: cs.onTertiary,
         icon: const Icon(Icons.person_add_outlined, size: 18),
-        label: const Text('Registrar ganadero',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        label: Text('Registrar ganadero',
+            style: tt.labelMedium?.copyWith(fontSize: 13, fontWeight: FontWeight.w500)),
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -133,7 +121,6 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
               child: ListView(
                 padding: const EdgeInsets.only(top: 16, bottom: 40),
                 children: [
-                  // Error banner
                   if (vm.error != null)
                     _ErrorBanner(
                       message: vm.error!,
@@ -141,7 +128,6 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
                           context.read<MisGanaderosViewModel>().clearError(),
                     ),
 
-                  // Selector de ranchos (visible sólo si hay más de uno)
                   if (vm.todosRanchos.length > 1)
                     _RanchoSelector(
                       ranchos: vm.todosRanchos,
@@ -150,32 +136,25 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
                           context.read<MisGanaderosViewModel>().seleccionarRancho(r),
                     ),
 
-                  // Card del rancho activo con código e invitación
                   if (vm.ranchoActivo != null)
                     _RanchoHeaderCard(rancho: vm.ranchoActivo!),
 
                   const SizedBox(height: 12),
 
-                  // Título lista
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Ganaderos (${vm.ganaderos.length})',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: _kTextSecondary,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'Ganaderos (${vm.ganaderos.length})',
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
 
-                  // Lista de ganaderos
                   if (vm.cargandoGanaderos)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
@@ -197,8 +176,8 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
     );
   }
 
-  Future<void> _confirmarEliminar(
-      BuildContext context, GanaderoItem g) async {
+  Future<void> _confirmarEliminar(BuildContext context, GanaderoItem g) async {
+    final cs = Theme.of(context).colorScheme;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -212,7 +191,7 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: _kRed),
+            style: TextButton.styleFrom(foregroundColor: cs.error),
             child: const Text('Eliminar'),
           ),
         ],
@@ -222,11 +201,12 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
       final exito =
           await context.read<MisGanaderosViewModel>().eliminarGanadero(g.id);
       if (context.mounted) {
+        final cs2 = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
                 exito ? '${g.nombre} eliminado del rancho' : 'Error al eliminar'),
-            backgroundColor: exito ? _kGreen : _kRed,
+            backgroundColor: exito ? cs2.tertiary : cs2.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -234,8 +214,7 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
     }
   }
 
-  Future<void> _mostrarMoverModal(
-      BuildContext context, GanaderoItem g) async {
+  Future<void> _mostrarMoverModal(BuildContext context, GanaderoItem g) async {
     final vm = context.read<MisGanaderosViewModel>();
     final otros = vm.otrosRanchos;
 
@@ -251,12 +230,13 @@ class _MisGanaderosScreenState extends State<MisGanaderosScreen> {
           .read<MisGanaderosViewModel>()
           .moverGanadero(g.id, nuevoRanchoId);
       if (context.mounted) {
+        final cs2 = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(exito
                 ? '${g.nombre} movido al nuevo rancho'
                 : 'Error al mover'),
-            backgroundColor: exito ? _kGreen : _kRed,
+            backgroundColor: exito ? cs2.tertiary : cs2.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -273,15 +253,17 @@ class _RanchoHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F5EF),
+          color: cs.tertiaryContainer,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: const Color(0xFF2E7D32).withOpacity(0.25)),
+          border: Border.all(color: cs.tertiary.withOpacity(0.25)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,16 +278,18 @@ class _RanchoHeaderCard extends StatelessWidget {
                     children: [
                       Text(
                         rancho.nombre,
-                        style: const TextStyle(
+                        style: tt.bodyMedium?.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
+                          color: cs.onSurface,
                         ),
                       ),
                       Text(
                         '${rancho.municipio}, ${rancho.estado}',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF888880)),
+                        style: tt.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -313,29 +297,27 @@ class _RanchoHeaderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            // Botón Ver detalle rancho
             GestureDetector(
               onTap: () => context.push(
                 AppRoutes.ranchoDashboard,
-                extra: rancho, // pasamos el objeto completo, no solo el ID
+                extra: rancho,
               ),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 7),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32),
+                  color: cs.tertiary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.dashboard_outlined,
-                        color: Colors.white, size: 14),
-                    SizedBox(width: 5),
+                        color: cs.onTertiary, size: 14),
+                    const SizedBox(width: 5),
                     Text(
                       'Ver detalle del rancho',
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: tt.labelSmall?.copyWith(
+                        color: cs.onTertiary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -345,13 +327,14 @@ class _RanchoHeaderCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Código de invitación',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF888880),
-                  letterSpacing: 0.5),
+              style: tt.labelSmall?.copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 0.5,
+              ),
             ),
             const SizedBox(height: 6),
             GestureDetector(
@@ -366,29 +349,26 @@ class _RanchoHeaderCard extends StatelessWidget {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: const Color(0xFF2E7D32).withOpacity(0.3)),
+                  border: Border.all(color: cs.tertiary.withOpacity(0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       rancho.codigoInvitacion,
-                      style: const TextStyle(
+                      style: tt.bodyMedium?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 3,
-                        color: Color(0xFF2E7D32),
+                        color: cs.tertiary,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.copy_outlined,
-                        color: Color(0xFF2E7D32), size: 16),
+                    Icon(Icons.copy_outlined, color: cs.tertiary, size: 16),
                   ],
                 ),
               ),
@@ -413,9 +393,11 @@ class _GanaderoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     final initials = () {
-      final parts =
-          ganadero.nombre.trim().split(RegExp(r'\s+'));
+      final parts = ganadero.nombre.trim().split(RegExp(r'\s+'));
       if (parts.length >= 2)
         return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
       return ganadero.nombre
@@ -427,19 +409,19 @@ class _GanaderoTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE8E5DC)),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           leading: CircleAvatar(
-            backgroundColor: const Color(0xFFE8F5EF),
+            backgroundColor: cs.tertiaryContainer,
             child: Text(
               initials,
-              style: const TextStyle(
-                color: Color(0xFF2E7D32),
+              style: tt.labelMedium?.copyWith(
+                color: cs.tertiary,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -447,55 +429,59 @@ class _GanaderoTile extends StatelessWidget {
           ),
           title: Text(
             ganadero.nombre,
-            style: const TextStyle(
+            style: tt.bodyMedium?.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A1A),
+              color: cs.onSurface,
             ),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(ganadero.email,
-                  style: const TextStyle(
-                      fontSize: 12, color: Color(0xFF888880))),
+                  style: tt.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: cs.onSurfaceVariant,
+                  )),
               const SizedBox(height: 2),
               Text(
                 '${ganadero.totalBovinos} bovino${ganadero.totalBovinos != 1 ? 's' : ''}',
-                style: const TextStyle(
-                    fontSize: 11, color: Color(0xFF2E7D32)),
+                style: tt.labelSmall?.copyWith(
+                  fontSize: 11,
+                  color: cs.tertiary,
+                ),
               ),
             ],
           ),
           trailing: PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_outlined,
-                color: Color(0xFF888880), size: 20),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            icon: Icon(Icons.more_vert_outlined,
+                color: cs.onSurfaceVariant, size: 20),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
             onSelected: (v) {
               if (v == 'mover') onMover();
               if (v == 'eliminar') onEliminar();
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'mover',
                 child: Row(children: [
                   Icon(Icons.swap_horiz_outlined,
-                      size: 16, color: Color(0xFF1A1A1A)),
-                  SizedBox(width: 8),
+                      size: 16, color: cs.onSurface),
+                  const SizedBox(width: 8),
                   Text('Mover a otro rancho',
-                      style: TextStyle(fontSize: 13)),
+                      style: tt.bodySmall?.copyWith(fontSize: 13)),
                 ]),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'eliminar',
                 child: Row(children: [
                   Icon(Icons.person_remove_outlined,
-                      size: 16, color: Color(0xFFC0392B)),
-                  SizedBox(width: 8),
+                      size: 16, color: cs.error),
+                  const SizedBox(width: 8),
                   Text('Eliminar del rancho',
-                      style: TextStyle(
-                          fontSize: 13, color: Color(0xFFC0392B))),
+                      style: tt.bodySmall?.copyWith(
+                          fontSize: 13, color: cs.error)),
                 ]),
               ),
             ],
@@ -509,26 +495,32 @@ class _GanaderoTile extends StatelessWidget {
 class _EmptyGanaderos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
           const Text('👨‍🌾', style: TextStyle(fontSize: 40)),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Aún no hay ganaderos en este rancho',
             textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A)),
+            style: tt.bodyMedium?.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Comparte el código de invitación para que tus ganaderos se unan.',
             textAlign: TextAlign.center,
-            style:
-                TextStyle(fontSize: 13, color: Color(0xFF888880)),
+            style: tt.bodySmall?.copyWith(
+              fontSize: 13,
+              color: cs.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -543,25 +535,29 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFDEDEC),
+          color: cs.errorContainer,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(message,
-                  style: const TextStyle(
-                      color: Color(0xFFC0392B), fontSize: 13)),
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onErrorContainer,
+                    fontSize: 13,
+                  )),
             ),
             GestureDetector(
               onTap: onDismiss,
-              child: const Icon(Icons.close,
-                  color: Color(0xFFC0392B), size: 16),
+              child: Icon(Icons.close, color: cs.onErrorContainer, size: 16),
             ),
           ],
         ),
@@ -585,17 +581,20 @@ class _RanchoSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'MIS RANCHOS',
-            style: TextStyle(
+            style: tt.labelSmall?.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF888880),
+              color: cs.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
           ),
@@ -615,13 +614,11 @@ class _RanchoSelector extends StatelessWidget {
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: activo
-                            ? const Color(0xFF2E7D32)
-                            : Colors.white,
+                            ? cs.tertiary
+                            : cs.surfaceContainerLowest,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: activo
-                              ? const Color(0xFF2E7D32)
-                              : const Color(0xFFE8E5DC),
+                          color: activo ? cs.tertiary : cs.outlineVariant,
                         ),
                       ),
                       child: Row(
@@ -629,25 +626,23 @@ class _RanchoSelector extends StatelessWidget {
                         children: [
                           Text(
                             '🏡',
-                            style: TextStyle(
-                              fontSize: activo ? 14 : 13,
-                            ),
+                            style: TextStyle(fontSize: activo ? 14 : 13),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             r.nombre,
-                            style: TextStyle(
+                            style: tt.labelMedium?.copyWith(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: activo
-                                  ? Colors.white
-                                  : const Color(0xFF1A1A1A),
+                                  ? cs.onTertiary
+                                  : cs.onSurface,
                             ),
                           ),
                           if (activo) ...[
                             const SizedBox(width: 4),
-                            const Icon(Icons.check_circle,
-                                color: Colors.white, size: 13),
+                            Icon(Icons.check_circle,
+                                color: cs.onTertiary, size: 13),
                           ],
                         ],
                       ),
@@ -686,12 +681,14 @@ class _MoverModalState extends State<_MoverModal> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final tieneOpciones = widget.otrosRanchos.isNotEmpty;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFAFAF7),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       child: Column(
@@ -703,44 +700,47 @@ class _MoverModalState extends State<_MoverModal> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8E5DC),
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Mover a otro rancho',
-            style: TextStyle(
+            style: tt.titleMedium?.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Selecciona el rancho destino para ${widget.ganadero.nombre}',
-            style:
-                const TextStyle(fontSize: 13, color: Color(0xFF888880)),
+            style: tt.bodySmall?.copyWith(
+              fontSize: 13,
+              color: cs.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
 
-          // Dropdown si hay ranchos disponibles, campo de texto si no
           if (tieneOpciones)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8E5DC)),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<RanchoInfo>(
                   isExpanded: true,
-                  hint: const Text(
+                  hint: Text(
                     'Selecciona un rancho',
-                    style: TextStyle(
-                        fontSize: 14, color: Color(0xFFAEADA6)),
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 14,
+                      color: cs.outline,
+                    ),
                   ),
                   value: _seleccionado,
                   items: widget.otrosRanchos
@@ -748,7 +748,7 @@ class _MoverModalState extends State<_MoverModal> {
                             value: r,
                             child: Text(
                               '${r.nombre} — ${r.municipio}',
-                              style: const TextStyle(fontSize: 14),
+                              style: tt.bodyMedium?.copyWith(fontSize: 14),
                             ),
                           ))
                       .toList(),
@@ -757,27 +757,30 @@ class _MoverModalState extends State<_MoverModal> {
               ),
             )
           else ...[
-            const Text(
+            Text(
               'No tienes otros ranchos. Ingresa el ID manualmente:',
-              style: TextStyle(fontSize: 12, color: Color(0xFF888880)),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 12,
+                color: cs.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8E5DC)),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: TextField(
                 controller: _idCtrl,
-                style: const TextStyle(fontSize: 14),
-                decoration: const InputDecoration(
+                style: tt.bodyMedium?.copyWith(fontSize: 14),
+                decoration: InputDecoration(
                   hintText: 'ID del rancho destino',
                   prefixIcon: Icon(Icons.home_outlined,
-                      color: Color(0xFF888880), size: 18),
+                      color: cs.onSurfaceVariant, size: 18),
                   border: InputBorder.none,
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
             ),
@@ -792,10 +795,11 @@ class _MoverModalState extends State<_MoverModal> {
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                    side: const BorderSide(color: Color(0xFFE8E5DC)),
+                    side: BorderSide(color: cs.outlineVariant),
                   ),
-                  child: const Text('Cancelar',
-                      style: TextStyle(color: Color(0xFF888880))),
+                  child: Text('Cancelar',
+                      style: tt.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -808,14 +812,15 @@ class _MoverModalState extends State<_MoverModal> {
                     if (id.isNotEmpty) Navigator.pop(context, id);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
-                    foregroundColor: Colors.white,
+                    backgroundColor: cs.tertiary,
+                    foregroundColor: cs.onTertiary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
                   ),
-                  child: const Text('Mover',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: Text('Mover',
+                      style: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

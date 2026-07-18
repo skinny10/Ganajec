@@ -12,15 +12,6 @@ class VeterinariosScreen extends StatefulWidget {
 }
 
 class _VeterinariosScreenState extends State<VeterinariosScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-  static const _kRed = Color(0xFFC0392B);
-
   @override
   void initState() {
     super.initState();
@@ -30,11 +21,13 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<VeterinarioViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -42,43 +35,42 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Veterinarios',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         actions: [
           IconButton(
             onPressed: () => context.read<VeterinarioViewModel>().cargar(),
-            icon: const Icon(Icons.refresh_outlined,
-                color: _kTextSecondary, size: 20),
+            icon: Icon(Icons.refresh_outlined,
+                color: cs.onSurfaceVariant, size: 20),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _mostrarFormulario(context, null),
-        backgroundColor: _kGreen,
-        foregroundColor: Colors.white,
+        backgroundColor: cs.tertiary,
+        foregroundColor: cs.onTertiary,
         icon: const Icon(Icons.add, size: 18),
-        label: const Text('Agregar veterinario',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        label: Text('Agregar veterinario',
+            style: tt.labelMedium?.copyWith(fontSize: 13, fontWeight: FontWeight.w500)),
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -148,6 +140,7 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
 
   Future<void> _confirmarEliminar(
       BuildContext context, VeterinarioInfo vet) async {
+    final cs = Theme.of(context).colorScheme;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -162,7 +155,7 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: _kRed),
+            style: TextButton.styleFrom(foregroundColor: cs.error),
             child: const Text('Eliminar'),
           ),
         ],
@@ -172,10 +165,11 @@ class _VeterinariosScreenState extends State<VeterinariosScreen> {
       final err =
           await context.read<VeterinarioViewModel>().eliminar(vet.id);
       if (context.mounted) {
+        final cs2 = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(err != null ? err : '${vet.nombre} eliminado'),
-            backgroundColor: err != null ? _kRed : _kGreen,
+            backgroundColor: err != null ? cs2.error : cs2.tertiary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -191,9 +185,6 @@ class _VetTile extends StatelessWidget {
   final VoidCallback onEditar;
   final VoidCallback onEliminar;
 
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kRed = Color(0xFFC0392B);
-
   const _VetTile({
     required this.vet,
     required this.onEditar,
@@ -202,13 +193,16 @@ class _VetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE8E5DC)),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -221,11 +215,11 @@ class _VetTile extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5EF),
+                      color: cs.tertiaryContainer,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.medical_services_outlined,
-                        color: _kGreen, size: 20),
+                    child: Icon(Icons.medical_services_outlined,
+                        color: cs.tertiary, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -234,24 +228,26 @@ class _VetTile extends StatelessWidget {
                       children: [
                         Text(
                           vet.nombre,
-                          style: const TextStyle(
+                          style: tt.bodyMedium?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
+                            color: cs.onSurface,
                           ),
                         ),
                         if (vet.lugar.isNotEmpty)
                           Text(
                             vet.lugar,
-                            style: const TextStyle(
-                                fontSize: 12, color: Color(0xFF888880)),
+                            style: tt.bodySmall?.copyWith(
+                              fontSize: 12,
+                              color: cs.onSurfaceVariant,
+                            ),
                           ),
                       ],
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert_outlined,
-                        color: Color(0xFF888880), size: 20),
+                    icon: Icon(Icons.more_vert_outlined,
+                        color: cs.onSurfaceVariant, size: 20),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     onSelected: (v) {
@@ -259,25 +255,25 @@ class _VetTile extends StatelessWidget {
                       if (v == 'eliminar') onEliminar();
                     },
                     itemBuilder: (_) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'editar',
                         child: Row(children: [
                           Icon(Icons.edit_outlined,
-                              size: 16, color: Color(0xFF1A1A1A)),
-                          SizedBox(width: 8),
+                              size: 16, color: cs.onSurface),
+                          const SizedBox(width: 8),
                           Text('Editar',
-                              style: TextStyle(fontSize: 13)),
+                              style: tt.bodySmall?.copyWith(fontSize: 13)),
                         ]),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'eliminar',
                         child: Row(children: [
                           Icon(Icons.delete_outline,
-                              size: 16, color: _kRed),
-                          SizedBox(width: 8),
+                              size: 16, color: cs.error),
+                          const SizedBox(width: 8),
                           Text('Eliminar',
-                              style: TextStyle(
-                                  fontSize: 13, color: _kRed)),
+                              style: tt.bodySmall?.copyWith(
+                                  fontSize: 13, color: cs.error)),
                         ]),
                       ),
                     ],
@@ -285,7 +281,6 @@ class _VetTile extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Teléfono
               _InfoChip(
                 icon: Icons.phone_outlined,
                 text: vet.telefono,
@@ -306,14 +301,16 @@ class _VetTile extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFAFAF7),
+                    color: cs.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE8E5DC)),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
                   child: Text(
                     vet.notas!,
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF888880)),
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -327,10 +324,10 @@ class _VetTile extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE8F5EF),
+                              color: cs.tertiaryContainer,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: const Color(0xFFA5D6A7)),
+                                  color: cs.tertiary.withOpacity(0.35)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -340,10 +337,10 @@ class _VetTile extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   r.nombre,
-                                  style: const TextStyle(
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF1D7A55),
+                                    color: cs.onTertiaryContainer,
                                   ),
                                 ),
                               ],
@@ -369,24 +366,28 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF888880)),
+          Icon(icon, size: 14, color: cs.onSurfaceVariant),
           const SizedBox(width: 5),
           Flexible(
             child: Text(
               text,
-              style: const TextStyle(
-                  fontSize: 13, color: Color(0xFF555550)),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           if (onTap != null) ...[
             const SizedBox(width: 4),
-            const Icon(Icons.copy_outlined,
-                size: 12, color: Color(0xFF2E7D32)),
+            Icon(Icons.copy_outlined, size: 12, color: cs.tertiary),
           ],
         ],
       ),
@@ -402,6 +403,9 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -412,26 +416,29 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8F5EF),
+                color: cs.tertiaryContainer,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.medical_services_outlined,
-                  color: Color(0xFF2E7D32), size: 36),
+              child: Icon(Icons.medical_services_outlined,
+                  color: cs.tertiary, size: 36),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Sin veterinarios registrados',
-              style: TextStyle(
+              style: tt.bodyMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Agrega el veterinario de tu rancho\npara tener sus datos a la mano.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF888880)),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -443,7 +450,7 @@ class _EmptyState extends StatelessWidget {
 // ── Formulario (modal bottom sheet) ──────────────────────────────────────────
 
 class _VetFormModal extends StatefulWidget {
-  final VeterinarioInfo? vet; // null = crear nuevo
+  final VeterinarioInfo? vet;
 
   const _VetFormModal({this.vet});
 
@@ -452,10 +459,6 @@ class _VetFormModal extends StatefulWidget {
 }
 
 class _VetFormModalState extends State<_VetFormModal> {
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kRed = Color(0xFFC0392B);
-
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombre;
   late final TextEditingController _telefono;
@@ -470,11 +473,11 @@ class _VetFormModalState extends State<_VetFormModal> {
   void initState() {
     super.initState();
     final v = widget.vet;
-    _nombre = TextEditingController(text: v?.nombre ?? '');
+    _nombre   = TextEditingController(text: v?.nombre   ?? '');
     _telefono = TextEditingController(text: v?.telefono ?? '');
-    _ubicacion = TextEditingController(text: v?.ubicacion ?? '');
-    _lugar = TextEditingController(text: v?.lugar ?? '');
-    _notas = TextEditingController(text: v?.notas ?? '');
+    _ubicacion= TextEditingController(text: v?.ubicacion?? '');
+    _lugar    = TextEditingController(text: v?.lugar    ?? '');
+    _notas    = TextEditingController(text: v?.notas    ?? '');
   }
 
   @override
@@ -489,12 +492,13 @@ class _VetFormModalState extends State<_VetFormModal> {
 
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
+    final cs = Theme.of(context).colorScheme;
     if (!_esEdicion && _ranchoIdSeleccionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecciona un rancho para el veterinario'),
+        SnackBar(
+          content: const Text('Selecciona un rancho para el veterinario'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFFC0392B),
+          backgroundColor: cs.error,
         ),
       );
       return;
@@ -505,29 +509,30 @@ class _VetFormModalState extends State<_VetFormModal> {
     if (_esEdicion) {
       err = await vm.editar(
         widget.vet!.id,
-        nombre: _nombre.text.trim(),
-        telefono: _telefono.text.trim(),
+        nombre:    _nombre.text.trim(),
+        telefono:  _telefono.text.trim(),
         ubicacion: _ubicacion.text.trim(),
-        lugar: _lugar.text.trim(),
-        notas: _notas.text.trim().isEmpty ? null : _notas.text.trim(),
+        lugar:     _lugar.text.trim(),
+        notas:     _notas.text.trim().isEmpty ? null : _notas.text.trim(),
       );
     } else {
       err = await vm.crear(
-        nombre: _nombre.text.trim(),
-        telefono: _telefono.text.trim(),
+        nombre:    _nombre.text.trim(),
+        telefono:  _telefono.text.trim(),
         ubicacion: _ubicacion.text.trim(),
-        lugar: _lugar.text.trim(),
-        notas: _notas.text.trim().isEmpty ? null : _notas.text.trim(),
-        ranchoId: _ranchoIdSeleccionado,
+        lugar:     _lugar.text.trim(),
+        notas:     _notas.text.trim().isEmpty ? null : _notas.text.trim(),
+        ranchoId:  _ranchoIdSeleccionado,
       );
     }
 
     if (!mounted) return;
     if (err != null) {
+      final cs2 = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(err),
-          backgroundColor: _kRed,
+          backgroundColor: cs2.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -538,15 +543,17 @@ class _VetFormModalState extends State<_VetFormModal> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<VeterinarioViewModel>();
+    final vm  = context.watch<VeterinarioViewModel>();
+    final cs  = Theme.of(context).colorScheme;
+    final tt  = Theme.of(context).textTheme;
     final insets = MediaQuery.of(context).viewInsets;
 
     return Padding(
       padding: EdgeInsets.only(bottom: insets.bottom),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFAFAF7),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         child: Form(
@@ -556,13 +563,12 @@ class _VetFormModalState extends State<_VetFormModal> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Handle
                 Center(
                   child: Container(
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: _kBorder,
+                      color: cs.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -570,10 +576,10 @@ class _VetFormModalState extends State<_VetFormModal> {
                 const SizedBox(height: 20),
                 Text(
                   _esEdicion ? 'Editar veterinario' : 'Agregar veterinario',
-                  style: const TextStyle(
+                  style: tt.titleMedium?.copyWith(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A1A),
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -632,11 +638,12 @@ class _VetFormModalState extends State<_VetFormModal> {
                         style: OutlinedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
-                          side: const BorderSide(color: _kBorder),
+                          side: BorderSide(color: cs.outlineVariant),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text('Cancelar',
-                            style: TextStyle(color: Color(0xFF888880))),
+                        child: Text('Cancelar',
+                            style: tt.labelMedium?.copyWith(
+                                color: cs.onSurfaceVariant)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -644,23 +651,23 @@ class _VetFormModalState extends State<_VetFormModal> {
                       child: ElevatedButton(
                         onPressed: vm.guardando ? null : _guardar,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _kGreen,
-                          foregroundColor: Colors.white,
+                          backgroundColor: cs.tertiary,
+                          foregroundColor: cs.onTertiary,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: vm.guardando
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2),
+                                    color: cs.onTertiary, strokeWidth: 2),
                               )
                             : Text(
                                 _esEdicion ? 'Guardar' : 'Agregar',
-                                style: const TextStyle(
+                                style: tt.labelMedium?.copyWith(
                                     fontWeight: FontWeight.w600),
                               ),
                       ),
@@ -688,20 +695,18 @@ class _AsociarVetModal extends StatefulWidget {
 }
 
 class _AsociarVetModalState extends State<_AsociarVetModal> {
-  static const _kGreen = Color(0xFF2E7D32);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kRed = Color(0xFFC0392B);
-
   VeterinarioInfo? _seleccionado;
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<VeterinarioViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFAFAF7),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
       child: Column(
@@ -713,25 +718,29 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                  color: _kBorder, borderRadius: BorderRadius.circular(2)),
+                  color: cs.outlineVariant,
+                  borderRadius: BorderRadius.circular(2)),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Asociar veterinario existente',
-            style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A)),
+            style: tt.titleMedium?.copyWith(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Los marcados como "Ya en este rancho" no pueden seleccionarse.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF888880)),
+            style: tt.bodySmall?.copyWith(
+              fontSize: 13,
+              color: cs.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
 
-          // Lista de todos los vets del dueño
           ...widget.todos.map((v) {
             final yaAsociado = widget.idsActuales.contains(v.id);
             final sel = _seleccionado?.id == v.id;
@@ -745,17 +754,17 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                     horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: yaAsociado
-                      ? const Color(0xFFF5F5F5)
+                      ? cs.surfaceContainerLow
                       : sel
-                          ? const Color(0xFFE8F5EF)
-                          : Colors.white,
+                          ? cs.tertiaryContainer
+                          : cs.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: yaAsociado
-                        ? const Color(0xFFE0E0E0)
+                        ? cs.outlineVariant
                         : sel
-                            ? _kGreen
-                            : _kBorder,
+                            ? cs.tertiary
+                            : cs.outlineVariant,
                     width: sel ? 1.5 : 1,
                   ),
                 ),
@@ -763,10 +772,10 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                   children: [
                     Icon(Icons.medical_services_outlined,
                         color: yaAsociado
-                            ? const Color(0xFFBBBBB8)
+                            ? cs.outline
                             : sel
-                                ? _kGreen
-                                : const Color(0xFF888880),
+                                ? cs.tertiary
+                                : cs.onSurfaceVariant,
                         size: 18),
                     const SizedBox(width: 10),
                     Expanded(
@@ -774,20 +783,20 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(v.nombre,
-                              style: TextStyle(
+                              style: tt.bodyMedium?.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: yaAsociado
-                                      ? const Color(0xFFBBBBB8)
+                                      ? cs.outline
                                       : sel
-                                          ? _kGreen
-                                          : const Color(0xFF1A1A1A))),
+                                          ? cs.tertiary
+                                          : cs.onSurface)),
                           Text(v.telefono,
-                              style: TextStyle(
+                              style: tt.bodySmall?.copyWith(
                                   fontSize: 12,
                                   color: yaAsociado
-                                      ? const Color(0xFFCCCCC8)
-                                      : const Color(0xFF888880))),
+                                      ? cs.outline
+                                      : cs.onSurfaceVariant)),
                         ],
                       ),
                     ),
@@ -796,20 +805,19 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8F5EF),
+                          color: cs.tertiaryContainer,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Ya en este rancho',
-                          style: TextStyle(
+                          style: tt.labelSmall?.copyWith(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: _kGreen),
+                              color: cs.tertiary),
                         ),
                       )
                     else if (sel)
-                      const Icon(Icons.check_circle,
-                          color: _kGreen, size: 18),
+                      Icon(Icons.check_circle, color: cs.tertiary, size: 18),
                   ],
                 ),
               ),
@@ -825,11 +833,12 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                    side: const BorderSide(color: _kBorder),
+                    side: BorderSide(color: cs.outlineVariant),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Cancelar',
-                      style: TextStyle(color: Color(0xFF888880))),
+                  child: Text('Cancelar',
+                      style: tt.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -843,10 +852,11 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                               .asociarExistente(_seleccionado!.id);
                           if (!mounted) return;
                           if (err != null) {
+                            final cs2 = Theme.of(context).colorScheme;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(err),
-                                backgroundColor: _kRed,
+                                backgroundColor: cs2.error,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -855,22 +865,23 @@ class _AsociarVetModalState extends State<_AsociarVetModal> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGreen,
-                    foregroundColor: Colors.white,
+                    backgroundColor: cs.tertiary,
+                    foregroundColor: cs.onTertiary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: vm.guardando
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
+                              color: cs.onTertiary, strokeWidth: 2),
                         )
-                      : const Text('Asociar',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      : Text('Asociar',
+                          style: tt.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600)),
                 ),
               ),
             ],
@@ -896,48 +907,56 @@ class _DropdownRanchoVet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Rancho *',
-          style: TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF555550),
+            color: cs.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 5),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cs.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE8E5DC)),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: ranchos.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Text(
                     'No hay ranchos disponibles',
-                    style: TextStyle(fontSize: 13, color: Color(0xFFB0AEA8)),
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 13,
+                      color: cs.outline,
+                    ),
                   ),
                 )
               : DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: seleccionadoId,
-                    hint: const Text(
+                    hint: Text(
                       'Selecciona un rancho',
-                      style:
-                          TextStyle(fontSize: 13, color: Color(0xFFB0AEA8)),
+                      style: tt.bodySmall?.copyWith(
+                        fontSize: 13,
+                        color: cs.outline,
+                      ),
                     ),
                     items: ranchos
                         .map((r) => DropdownMenuItem(
                               value: r.id,
                               child: Text(
                                 r.nombre,
-                                style: const TextStyle(fontSize: 14),
+                                style: tt.bodyMedium?.copyWith(fontSize: 14),
                               ),
                             ))
                         .toList(),
@@ -969,34 +988,42 @@ class _Campo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF555550),
+            color: cs.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 5),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cs.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE8E5DC)),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
             maxLines: maxLines,
             validator: validator,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+            style: tt.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: cs.onSurface,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(
-                  color: Color(0xFFB0AEA8), fontSize: 13),
+              hintStyle: tt.bodySmall?.copyWith(
+                color: cs.outline,
+                fontSize: 13,
+              ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14, vertical: 12),

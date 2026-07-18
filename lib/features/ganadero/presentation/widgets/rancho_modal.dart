@@ -27,31 +27,23 @@ class _RanchoModalSheet extends StatefulWidget {
 }
 
 class _RanchoModalSheetState extends State<_RanchoModalSheet> {
-  // 0 = Unirse, 1 = Crear
   late int _tab = widget.initialTab;
-
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreen = Color(0xFF2E7D32);
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<RanchoModalViewModel>();
+    final vm     = context.watch<RanchoModalViewModel>();
+    final cs     = Theme.of(context).colorScheme;
+    final tt     = Theme.of(context).textTheme;
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     final esDueno = TokenStorage.role == 'dueno';
 
-    // Si ya creó el rancho y obtuvo código → vista de éxito
     if (vm.isSuccess && _tab == 1 && vm.codigoGenerado != null) {
-      return _sheet(
-        bottom: bottom,
-        child: _CodigoGeneradoView(codigo: vm.codigoGenerado!),
-      );
+      return _sheet(cs: cs, bottom: bottom,
+          child: _CodigoGeneradoView(codigo: vm.codigoGenerado!));
     }
 
     return _sheet(
+      cs: cs,
       bottom: bottom,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -60,22 +52,21 @@ class _RanchoModalSheetState extends State<_RanchoModalSheet> {
           // Handle
           Center(
             child: Container(
-              width: 36,
-              height: 4,
+              width: 36, height: 4,
               decoration: BoxDecoration(
-                color: _kBorder,
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
 
-          const Text(
+          Text(
             '🏡  Sin rancho asignado',
-            style: TextStyle(
+            style: tt.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               letterSpacing: -0.4,
             ),
           ),
@@ -84,12 +75,13 @@ class _RanchoModalSheetState extends State<_RanchoModalSheet> {
             esDueno
                 ? 'Únete a un rancho con un código, o crea el tuyo propio.'
                 : 'Ingresa el código de invitación que te dio el dueño del rancho.',
-            style: const TextStyle(fontSize: 13, color: _kTextSecondary),
+            style: tt.bodySmall?.copyWith(
+              fontSize: 13,
+              color: cs.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 20),
 
-          // Segmented control manual (evita TabBarView sin altura acotada)
-          // Solo dueños pueden crear ranchos
           if (esDueno)
             Row(
               children: [
@@ -108,23 +100,25 @@ class _RanchoModalSheetState extends State<_RanchoModalSheet> {
             ),
           const SizedBox(height: 18),
 
-          // Error
           if (vm.error != null) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFDEDEC),
+                color: cs.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(vm.error!,
-                  style: const TextStyle(
-                      color: Color(0xFFC0392B), fontSize: 13)),
+              child: Text(
+                vm.error!,
+                style: tt.bodySmall?.copyWith(
+                  color: cs.onErrorContainer,
+                  fontSize: 13,
+                ),
+              ),
             ),
             const SizedBox(height: 12),
           ],
 
-          // Contenido: ganaderos siempre ven solo "Unirse"
           if (!esDueno || _tab == 0)
             _TabUnirse(vm: vm)
           else
@@ -134,11 +128,11 @@ class _RanchoModalSheetState extends State<_RanchoModalSheet> {
     );
   }
 
-  Widget _sheet({required Widget child, required double bottom}) =>
+  Widget _sheet({required Widget child, required double bottom, required ColorScheme cs}) =>
       Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFAFAF7),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: EdgeInsets.fromLTRB(24, 16, 24, 24 + bottom),
         child: SafeArea(top: false, child: child),
@@ -151,32 +145,31 @@ class _TabChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _TabChip(
-      {required this.label, required this.selected, required this.onTap});
+  const _TabChip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2E7D32) : const Color(0xFFFFFFFF),
+          color: selected ? cs.tertiary : cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected
-                ? const Color(0xFF2E7D32)
-                : const Color(0xFFE8E5DC),
+            color: selected ? cs.tertiary : cs.outlineVariant,
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: tt.labelSmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : const Color(0xFF888880),
+            color: selected ? cs.onTertiary : cs.onSurfaceVariant,
           ),
         ),
       ),
@@ -192,24 +185,27 @@ class _TabUnirse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _field(
+        _ModalField(
           controller: vm.codigoCtrl,
           hint: 'XXXXXXXX',
           icon: Icons.key_outlined,
-          extra: TextInputType.text,
+          keyboardType: TextInputType.text,
           caps: TextCapitalization.characters,
-          style: const TextStyle(
+          textStyle: tt.bodyMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             letterSpacing: 2,
-            color: Color(0xFF1A1A1A),
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 14),
-        _btn(
+        _ModalBtn(
           label: 'Unirme al rancho',
           isLoading: vm.isLoading,
           onTap: () async {
@@ -236,22 +232,13 @@ class _TabCrear extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _field(
-            controller: vm.nombreRanchoCtrl,
-            hint: 'Nombre del rancho',
-            icon: Icons.home_outlined),
+        _ModalField(controller: vm.nombreRanchoCtrl, hint: 'Nombre del rancho', icon: Icons.home_outlined),
         const SizedBox(height: 8),
-        _field(
-            controller: vm.municipioCtrl,
-            hint: 'Municipio',
-            icon: Icons.location_city_outlined),
+        _ModalField(controller: vm.municipioCtrl, hint: 'Municipio', icon: Icons.location_city_outlined),
         const SizedBox(height: 8),
-        _field(
-            controller: vm.estadoCtrl,
-            hint: 'Estado',
-            icon: Icons.map_outlined),
+        _ModalField(controller: vm.estadoCtrl, hint: 'Estado', icon: Icons.map_outlined),
         const SizedBox(height: 14),
-        _btn(
+        _ModalBtn(
           label: 'Crear mi rancho',
           isLoading: vm.isLoading,
           onTap: () => vm.crearRancho(),
@@ -262,67 +249,94 @@ class _TabCrear extends StatelessWidget {
   }
 }
 
-// ── Helpers compartidos ───────────────────────────────────────────────────────
+// ── Widgets helpers ───────────────────────────────────────────────────────────
 
-Widget _field({
-  required TextEditingController controller,
-  required String hint,
-  required IconData icon,
-  TextInputType? extra,
-  TextCapitalization caps = TextCapitalization.none,
-  TextStyle? style,
-}) =>
-    Container(
+class _ModalField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextInputType? keyboardType;
+  final TextCapitalization caps;
+  final TextStyle? textStyle;
+
+  const _ModalField({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.keyboardType,
+    this.caps = TextCapitalization.none,
+    this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8E5DC)),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: TextField(
         controller: controller,
-        keyboardType: extra,
+        keyboardType: keyboardType,
         textCapitalization: caps,
-        style: style ??
-            const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+        style: textStyle ?? tt.bodyMedium?.copyWith(
+          fontSize: 14,
+          color: cs.onSurface,
+        ),
         decoration: InputDecoration(
-          prefixIcon:
-              Icon(icon, color: const Color(0xFF888880), size: 18),
+          prefixIcon: Icon(icon, color: cs.onSurfaceVariant, size: 18),
           hintText: hint,
-          hintStyle: const TextStyle(color: Color(0xFFAEADA6)),
+          hintStyle: tt.bodySmall?.copyWith(color: cs.outline),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
+  }
+}
 
-Widget _btn({
-  required String label,
-  required bool isLoading,
-  required VoidCallback onTap,
-}) =>
-    SizedBox(
+class _ModalBtn extends StatelessWidget {
+  final String label;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _ModalBtn({
+    required this.label,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E7D32),
-          foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: cs.tertiary,
+          foregroundColor: cs.onTertiary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2))
+            ? SizedBox(
+                width: 18, height: 18,
+                child: CircularProgressIndicator(color: cs.onTertiary, strokeWidth: 2),
+              )
             : Text(label,
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+                style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
       ),
     );
+  }
+}
 
 // ── Vista código generado ─────────────────────────────────────────────────────
 
@@ -332,24 +346,31 @@ class _CodigoGeneradoView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 8),
         const Text('🎉', style: TextStyle(fontSize: 40)),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           '¡Rancho creado!',
-          style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A)),
+          style: tt.titleLarge?.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          ),
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Comparte este código para que tus ganaderos se unan',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 13, color: Color(0xFF888880)),
+          style: tt.bodySmall?.copyWith(
+            fontSize: 13,
+            color: cs.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 20),
         GestureDetector(
@@ -363,29 +384,26 @@ class _CodigoGeneradoView extends StatelessWidget {
             );
           },
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8F5EF),
+              color: cs.tertiaryContainer,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: const Color(0xFF2E7D32).withOpacity(0.3)),
+              border: Border.all(color: cs.tertiary.withOpacity(0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   codigo,
-                  style: const TextStyle(
+                  style: tt.bodyLarge?.copyWith(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 4,
-                    color: Color(0xFF2E7D32),
+                    color: cs.tertiary,
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Icon(Icons.copy_outlined,
-                    color: Color(0xFF2E7D32), size: 18),
+                Icon(Icons.copy_outlined, color: cs.tertiary, size: 18),
               ],
             ),
           ),
@@ -397,14 +415,13 @@ class _CodigoGeneradoView extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E7D32),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              backgroundColor: cs.tertiary,
+              foregroundColor: cs.onTertiary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            child: const Text('Continuar',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            child: Text('Continuar',
+                style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
           ),
         ),
         const SizedBox(height: 4),

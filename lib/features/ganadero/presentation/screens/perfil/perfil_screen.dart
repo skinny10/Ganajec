@@ -19,32 +19,20 @@ class PerfilScreen extends StatefulWidget {
 }
 
 class _PerfilScreenState extends State<PerfilScreen> {
-  static const _kBg = Color(0xFFFAFAF7);
-  static const _kBorder = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextSecondary = Color(0xFF888880);
-  static const _kSurface = Color(0xFFFFFFFF);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-  static const _kRedLight = Color(0xFFFDEDEC);
-  static const _kCream = Color(0xFFF5F3EE);
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() async {
       await context.read<PerfilViewModel>().cargarPerfil();
-      // Modal automático si el ganadero no tiene rancho
       if (mounted && !context.read<PerfilViewModel>().tieneRancho) {
         final joined = await mostrarRanchoModal(context);
         if (joined && mounted) {
-          // Recarga el perfil para mostrar el rancho nuevo
           context.read<PerfilViewModel>().cargarPerfil();
         }
       }
     });
   }
 
-  /// Bottom sheet read-only para ganadero: muestra teléfono del vet.
   Future<void> _mostrarVetGanadero(BuildContext context) async {
     List<VeterinarioInfo> vets = [];
     String? errorMsg;
@@ -91,10 +79,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
               if (ok) {
                 context.go(AppRoutes.login);
               } else {
+                final cs = Theme.of(context).colorScheme;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(vm.error ?? 'Error al cerrar sesión'),
-                    backgroundColor: const Color(0xFFC0392B),
+                    backgroundColor: cs.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -111,55 +100,54 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<PerfilViewModel>();
     final notif = vm.notificaciones;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => context.canPop() ? context.pop() : context.go(AppRoutes.home),
+          onTap: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.home),
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(
-              Icons.chevron_left_rounded,
-              color: _kTextPrimary,
-              size: 20,
-            ),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Mi perfil',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         actions: [
           GestureDetector(
             onTap: () => context.push(AppRoutes.editarPerfil).then((_) {
-              // Recarga perfil tras editar (el nombre puede haber cambiado)
               if (mounted) context.read<PerfilViewModel>().cargarPerfil();
             }),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 18, 0),
               child: Text(
                 'Editar',
-                style: TextStyle(
+                style: tt.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: _kTextSecondary,
+                  color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w400,
                   decoration: TextDecoration.underline,
-                  decorationColor: _kBorder,
+                  decorationColor: cs.outlineVariant,
                 ),
               ),
             ),
@@ -167,7 +155,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -175,7 +163,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
           : ListView(
               padding: const EdgeInsets.only(top: 20, bottom: 40),
               children: [
-                // ── Hero ─────────────────────────────────────────────────────
                 PerfilHeroCard(
                   iniciales: vm.iniciales,
                   nombre: vm.usuario.name,
@@ -188,7 +175,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   }),
                 ),
 
-                // ── Rancho ───────────────────────────────────────────────────
                 PerfilRanchoCard(
                   nombre: vm.rancho.nombre,
                   municipio: vm.rancho.municipio,
@@ -204,7 +190,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                           }
                         }
                       : null,
-                  // Dueño → mis ganaderos | Ganadero → colegas del rancho
                   onMisGanaderos: (vm.tieneRancho && vm.usuario.role == 'dueno')
                       ? () => context.push(AppRoutes.misGanaderos)
                       : null,
@@ -213,25 +198,25 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       : null,
                 ),
 
-                // ── Cuenta ───────────────────────────────────────────────────
+                // ── Cuenta ────────────────────────────────────────────────────
                 PerfilSection(
                   label: 'Cuenta',
                   children: [
                     PerfilSettingRow(
-                      icon: const SettingIcon(emoji: '👤', bg: Color(0xFFF5F3EE)),
+                      icon: SettingIcon(emoji: '👤', bg: cs.surfaceContainerLow),
                       name: 'Nombre completo',
                       desc: vm.usuario.name,
                       showChevron: false,
                     ),
                     PerfilSettingRow(
-                      icon: const SettingIcon(emoji: '✉️', bg: Color(0xFFF5F3EE)),
+                      icon: SettingIcon(emoji: '✉️', bg: cs.surfaceContainerLow),
                       name: 'Correo electrónico',
                       desc: vm.usuario.email,
                       showChevron: false,
                     ),
                     _LastRow(
                       child: PerfilSettingRow(
-                        icon: const SettingIcon(emoji: '🔑', bg: Color(0xFFF5F3EE)),
+                        icon: SettingIcon(emoji: '🔑', bg: cs.surfaceContainerLow),
                         name: 'Cambiar contraseña',
                         desc: 'Toca para actualizar tu contraseña',
                         onTap: () => context.push(AppRoutes.cambiarContrasena),
@@ -245,7 +230,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   label: 'Mi rancho',
                   children: [
                     PerfilSettingRow(
-                      icon: const SettingIcon(emoji: '🏡', bg: Color(0xFFFEF9E7)),
+                      icon: SettingIcon(emoji: '🏡', bg: cs.primaryContainer),
                       name: 'Nombre del rancho',
                       desc: vm.rancho.nombre,
                       showChevron: vm.usuario.role == 'dueno',
@@ -271,7 +256,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     ),
                     _LastRow(
                       child: PerfilSettingRow(
-                        icon: const SettingIcon(emoji: '📍', bg: Color(0xFFFEF9E7)),
+                        icon: SettingIcon(emoji: '📍', bg: cs.primaryContainer),
                         name: 'Municipio y estado',
                         desc: '${vm.rancho.municipio}, ${vm.rancho.estado}',
                         showChevron: vm.usuario.role == 'dueno',
@@ -305,8 +290,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   children: [
                     _LastRow(
                       child: PerfilSettingRow(
-                        icon: const SettingIcon(
-                            emoji: '🩺', bg: Color(0xFFE8F5EF)),
+                        icon: SettingIcon(emoji: '🩺', bg: cs.tertiaryContainer),
                         name: 'Veterinarios del rancho',
                         desc: vm.usuario.role == 'dueno'
                             ? 'Agregar, editar o eliminar veterinarios'
@@ -327,21 +311,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   label: 'Notificaciones',
                   children: [
                     PerfilToggleRow(
-                      icon: const SettingIcon(emoji: '🔔', bg: Color(0xFFE8F5EF)),
+                      icon: SettingIcon(emoji: '🔔', bg: cs.tertiaryContainer),
                       name: 'Alertas de predicción',
                       desc: 'Cuando se detecta una enfermedad',
                       value: notif.alertasPrediccion,
                       onChanged: (_) => context.read<PerfilViewModel>().toggleAlertasPrediccion(),
                     ),
                     PerfilToggleRow(
-                      icon: const SettingIcon(emoji: '📉', bg: Color(0xFFE8F5EF)),
+                      icon: SettingIcon(emoji: '📉', bg: cs.tertiaryContainer),
                       name: 'Anomalías productivas',
                       desc: 'Caídas detectadas por Isolation Forest',
                       value: notif.anomaliasProductivas,
                       onChanged: (_) => context.read<PerfilViewModel>().toggleAnomaliasProductivas(),
                     ),
                     PerfilToggleRow(
-                      icon: const SettingIcon(emoji: '📊', bg: Color(0xFFF5F3EE)),
+                      icon: SettingIcon(emoji: '📊', bg: cs.surfaceContainerLow),
                       name: 'Resumen semanal',
                       desc: 'Reporte de producción cada lunes',
                       value: notif.resumenSemanal,
@@ -357,7 +341,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   children: [
                     _LastRow(
                       child: PerfilSettingRow(
-                        icon: const SettingIcon(emoji: '💳', bg: Color(0xFFEEF2FF)),
+                        icon: SettingIcon(emoji: '💳', bg: cs.secondaryContainer),
                         name: 'Mi plan',
                         desc: '${vm.plan} · Activo',
                         trailingValue: 'Ver planes',
@@ -373,7 +357,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   children: [
                     _LastRow(
                       child: PerfilSettingRow(
-                        icon: const SettingIcon(emoji: '🚪', bg: Color(0xFFFDEDEC)),
+                        icon: SettingIcon(emoji: '🚪', bg: cs.errorContainer),
                         name: 'Cerrar sesión',
                         desc: '${vm.usuario.name} · ${vm.usuario.email}',
                         isDanger: true,
@@ -383,7 +367,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ],
                 ),
 
-                // ── Versión ───────────────────────────────────────────────────
                 const PerfilVersionText(),
               ],
             ),
@@ -391,7 +374,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 }
 
-/// Elimina el border-bottom del último elemento de la card
 class _LastRow extends StatelessWidget {
   final Widget child;
   const _LastRow({required this.child});
@@ -415,38 +397,40 @@ class _VetGanaderoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFAFAF7),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Handle
           Center(
             child: Container(
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8E5DC),
+                color: cs.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Row(
+          Row(
             children: [
-              Text('🩺', style: TextStyle(fontSize: 20)),
-              SizedBox(width: 8),
+              const Text('🩺', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
               Text(
                 'Veterinario del rancho',
-                style: TextStyle(
+                style: tt.titleMedium?.copyWith(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A),
+                  color: cs.onSurface,
                 ),
               ),
             ],
@@ -456,12 +440,18 @@ class _VetGanaderoSheet extends StatelessWidget {
           if (error != null)
             Text(
               error!,
-              style: const TextStyle(color: Color(0xFF888880), fontSize: 14),
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontSize: 14,
+              ),
             )
           else if (vets.isEmpty)
-            const Text(
+            Text(
               'El dueño del rancho aún no ha registrado un veterinario.',
-              style: TextStyle(color: Color(0xFF888880), fontSize: 14),
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontSize: 14,
+              ),
             )
           else
             ...vets.map((v) => Padding(
@@ -469,50 +459,51 @@ class _VetGanaderoSheet extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cs.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFE8E5DC)),
+                      border: Border.all(color: cs.outlineVariant),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           v.nombre,
-                          style: const TextStyle(
+                          style: tt.bodyMedium?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
+                            color: cs.onSurface,
                           ),
                         ),
                         if (v.lugar.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
                             v.lugar,
-                            style: const TextStyle(
-                                fontSize: 12, color: Color(0xFF888880)),
+                            style: tt.bodySmall?.copyWith(
+                              fontSize: 12,
+                              color: cs.onSurfaceVariant,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 10),
-                        // Teléfono destacado
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE8F5EF),
+                            color: cs.tertiaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.phone_outlined,
-                                  color: Color(0xFF2E7D32), size: 16),
+                              Icon(Icons.phone_outlined,
+                                  color: cs.tertiary, size: 16),
                               const SizedBox(width: 8),
                               Text(
                                 v.telefono,
-                                style: const TextStyle(
+                                style: tt.bodyMedium?.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF2E7D32),
+                                  color: cs.tertiary,
                                   letterSpacing: 1,
                                 ),
                               ),
@@ -523,15 +514,16 @@ class _VetGanaderoSheet extends StatelessWidget {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.location_on_outlined,
-                                  size: 14, color: Color(0xFF888880)),
+                              Icon(Icons.location_on_outlined,
+                                  size: 14, color: cs.onSurfaceVariant),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
                                   v.ubicacion,
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF888880)),
+                                  style: tt.bodySmall?.copyWith(
+                                    fontSize: 12,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ],

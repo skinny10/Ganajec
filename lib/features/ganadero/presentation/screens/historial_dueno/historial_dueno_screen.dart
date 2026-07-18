@@ -12,16 +12,6 @@ class HistorialDuenoScreen extends StatefulWidget {
 }
 
 class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
-  static const _kBg          = Color(0xFFFAFAF7);
-  static const _kBorder      = Color(0xFFE8E5DC);
-  static const _kSurface     = Color(0xFFFFFFFF);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted   = Color(0xFFAEADA6);
-  static const _kCow         = Color(0xFF8B4A2B);
-  static const _kCowLight    = Color(0xFFF5EBE0);
-  static const _kGreen       = Color(0xFF1D7A55);
-  static const _kGreenLight  = Color(0xFFE8F5EF);
-
   final _searchCtrl = TextEditingController();
 
   @override
@@ -40,11 +30,13 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<HistorialDuenoViewModel>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -53,27 +45,26 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _kBorder),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left_rounded,
-                color: _kTextPrimary, size: 20),
+            child: Icon(Icons.chevron_left_rounded,
+                color: cs.onSurface, size: 20),
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Historial de predicciones',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _kTextPrimary,
             letterSpacing: -0.3,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: cs.outlineVariant),
         ),
       ),
       body: vm.isLoading
@@ -83,58 +74,60 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
                   message: vm.error ?? 'Error al cargar',
                   onRetry: () => vm.cargar(),
                 )
-              : _buildContent(vm),
+              : _buildContent(vm, cs, tt),
     );
   }
 
-  Widget _buildContent(HistorialDuenoViewModel vm) {
+  Widget _buildContent(HistorialDuenoViewModel vm, ColorScheme cs, TextTheme tt) {
     return CustomScrollView(
       slivers: [
-        // ── Buscador ────────────────────────────────────────────────────────
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
             child: Column(
               children: [
-                // Búsqueda
                 Container(
                   decoration: BoxDecoration(
-                    color: _kSurface,
+                    color: cs.surfaceContainerLowest,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
                   child: TextField(
                     controller: _searchCtrl,
                     onChanged: vm.setBusqueda,
-                    style: const TextStyle(fontSize: 13, color: _kTextPrimary),
-                    decoration: const InputDecoration(
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 13,
+                      color: cs.onSurface,
+                    ),
+                    decoration: InputDecoration(
                       hintText: 'Buscar bovino, ganadero, rancho…',
-                      hintStyle:
-                          TextStyle(color: _kTextMuted, fontSize: 13),
+                      hintStyle: tt.bodySmall?.copyWith(
+                        color: cs.outline,
+                        fontSize: 13,
+                      ),
                       prefixIcon: Icon(Icons.search,
-                          color: _kTextMuted, size: 18),
+                          color: cs.outline, size: 18),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Quick stats
                 Row(
                   children: [
                     _StatChip(
                       label: '${vm.totalRegistros} registros',
                       icon: Icons.list_alt_outlined,
-                      color: _kCow,
-                      bg: _kCowLight,
+                      color: cs.primary,
+                      bg: cs.primaryContainer,
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
                       label: '${vm.totalAlta} alertas altas',
                       icon: Icons.warning_amber_rounded,
-                      color: const Color(0xFFC0392B),
-                      bg: const Color(0xFFFDEDEC),
+                      color: cs.error,
+                      bg: cs.errorContainer,
                     ),
                   ],
                 ),
@@ -144,7 +137,6 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
           ),
         ),
 
-        // ── Lista jerárquica ─────────────────────────────────────────────────
         if (vm.isEmpty)
           const SliverFillRemaining(child: _EmptyState())
         else
@@ -168,24 +160,21 @@ class _RanchoSection extends StatelessWidget {
   final HistDuenoRancho rancho;
   const _RanchoSection({required this.rancho});
 
-  static const _kCow      = Color(0xFF8B4A2B);
-  static const _kCowLight = Color(0xFFF5EBE0);
-  static const _kBorder   = Color(0xFFE8E5DC);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Cabecera de rancho
         Container(
           margin: const EdgeInsets.only(top: 16, bottom: 8),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _kCowLight,
+            color: cs.primaryContainer,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFE8D5C4)),
+            border: Border.all(color: cs.primary.withOpacity(0.3)),
           ),
           child: Row(
             children: [
@@ -194,24 +183,23 @@ class _RanchoSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   rancho.ranchoNombre,
-                  style: const TextStyle(
+                  style: tt.labelMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _kCow,
+                    color: cs.primary,
                   ),
                 ),
               ),
               Text(
                 '${rancho.totalGanaderos} ganadero${rancho.totalGanaderos == 1 ? '' : 's'}',
-                style: TextStyle(
+                style: tt.labelSmall?.copyWith(
                   fontSize: 11,
-                  color: _kCow.withOpacity(0.7),
+                  color: cs.primary.withOpacity(0.7),
                 ),
               ),
             ],
           ),
         ),
-        // Ganaderos
         ...rancho.ganaderos.map(
           (g) => _GanaderoSection(ganadero: g),
         ),
@@ -233,27 +221,23 @@ class _GanaderoSection extends StatefulWidget {
 class _GanaderoSectionState extends State<_GanaderoSection> {
   bool _expanded = true;
 
-  static const _kGreen      = Color(0xFF1D7A55);
-  static const _kGreenLight = Color(0xFFE8F5EF);
-  static const _kBorder     = Color(0xFFE8E5DC);
-  static const _kTextMuted  = Color(0xFFAEADA6);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Cabecera ganadero
         GestureDetector(
           onTap: () => setState(() => _expanded = !_expanded),
           child: Container(
             margin: const EdgeInsets.only(left: 12, bottom: 6),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: BoxDecoration(
-              color: _kGreenLight,
+              color: cs.tertiaryContainer,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFC8E6C9)),
+              border: Border.all(color: cs.tertiary.withOpacity(0.3)),
             ),
             child: Row(
               children: [
@@ -261,7 +245,7 @@ class _GanaderoSectionState extends State<_GanaderoSection> {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: _kGreen,
+                    color: cs.tertiary,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Center(
@@ -269,10 +253,11 @@ class _GanaderoSectionState extends State<_GanaderoSection> {
                       widget.ganadero.ganaderoNombre.isNotEmpty
                           ? widget.ganadero.ganaderoNombre[0].toUpperCase()
                           : 'G',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700),
+                      style: tt.labelSmall?.copyWith(
+                        color: cs.onTertiary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -280,16 +265,19 @@ class _GanaderoSectionState extends State<_GanaderoSection> {
                 Expanded(
                   child: Text(
                     widget.ganadero.ganaderoNombre,
-                    style: const TextStyle(
+                    style: tt.labelMedium?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: _kGreen,
+                      color: cs.tertiary,
                     ),
                   ),
                 ),
                 Text(
                   '${widget.ganadero.totalBovinos} bovino${widget.ganadero.totalBovinos == 1 ? '' : 's'}',
-                  style: const TextStyle(fontSize: 10, color: _kGreen),
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 10,
+                    color: cs.tertiary,
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Icon(
@@ -297,13 +285,12 @@ class _GanaderoSectionState extends State<_GanaderoSection> {
                       ? Icons.keyboard_arrow_up_rounded
                       : Icons.keyboard_arrow_down_rounded,
                   size: 16,
-                  color: _kGreen,
+                  color: cs.tertiary,
                 ),
               ],
             ),
           ),
         ),
-        // Bovinos
         if (_expanded)
           ...widget.ganadero.bovinos.map(
             (b) => Padding(
@@ -330,29 +317,25 @@ class _BovinoCard extends StatefulWidget {
 class _BovinoCardState extends State<_BovinoCard> {
   bool _expanded = false;
 
-  static const _kSurface    = Color(0xFFFFFFFF);
-  static const _kBorder     = Color(0xFFE8E5DC);
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted   = Color(0xFFAEADA6);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         children: [
-          // Cabecera bovino
           InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
                   const Text('🐄', style: TextStyle(fontSize: 18)),
@@ -363,16 +346,18 @@ class _BovinoCardState extends State<_BovinoCard> {
                       children: [
                         Text(
                           widget.bovino.nombre,
-                          style: const TextStyle(
+                          style: tt.bodySmall?.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: _kTextPrimary,
+                            color: cs.onSurface,
                           ),
                         ),
                         Text(
                           '${widget.bovino.categoria} · ${widget.bovino.totalRegistros} registro${widget.bovino.totalRegistros == 1 ? '' : 's'}',
-                          style: const TextStyle(
-                              fontSize: 11, color: _kTextMuted),
+                          style: tt.labelSmall?.copyWith(
+                            fontSize: 11,
+                            color: cs.outline,
+                          ),
                         ),
                       ],
                     ),
@@ -382,15 +367,14 @@ class _BovinoCardState extends State<_BovinoCard> {
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
                     size: 18,
-                    color: _kTextMuted,
+                    color: cs.outline,
                   ),
                 ],
               ),
             ),
           ),
-          // Registros (expandibles)
           if (_expanded && widget.bovino.registros.isNotEmpty) ...[
-            const Divider(height: 1, color: Color(0xFFE8E5DC)),
+            Divider(height: 1, color: cs.outlineVariant),
             ...widget.bovino.registros.map(
               (r) => _RegistroTile(registro: r),
             ),
@@ -407,20 +391,19 @@ class _RegistroTile extends StatelessWidget {
   final HistDuenoRegistro registro;
   const _RegistroTile({required this.registro});
 
-  static const _kTextPrimary = Color(0xFF1A1A1A);
-  static const _kTextMuted   = Color(0xFFAEADA6);
-
-  Color _severidadColor(String? sev) {
+  Color _severidadColor(String? sev, ColorScheme cs) {
     switch (sev) {
-      case 'alta':     return const Color(0xFFC0392B);
-      case 'media':    return const Color(0xFFE67E22);
-      default:         return const Color(0xFF1D7A55);
+      case 'alta':  return cs.error;
+      case 'media': return cs.secondary;
+      default:      return cs.tertiary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _severidadColor(registro.severidad);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final color = _severidadColor(registro.severidad, cs);
     final fecha = registro.registradoEn;
     final fechaStr =
         '${fecha.day.toString().padLeft(2, '0')}/'
@@ -430,12 +413,10 @@ class _RegistroTile extends StatelessWidget {
         '${fecha.minute.toString().padLeft(2, '0')}';
 
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Indicador de severidad
           Container(
             width: 3,
             height: 40,
@@ -455,7 +436,7 @@ class _RegistroTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           registro.enfermedad!,
-                          style: TextStyle(
+                          style: tt.labelMedium?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: color,
@@ -464,26 +445,31 @@ class _RegistroTile extends StatelessWidget {
                       ),
                       Text(
                         '${registro.confianzaPct}% conf.',
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: color,
-                            fontWeight: FontWeight.w500),
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                 ],
                 Text(
                   registro.textoLibre,
-                  style: const TextStyle(
-                      fontSize: 11, color: _kTextPrimary),
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 11,
+                    color: cs.onSurface,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   fechaStr,
-                  style:
-                      const TextStyle(fontSize: 10, color: _kTextMuted),
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 10,
+                    color: cs.outline,
+                  ),
                 ),
               ],
             ),
@@ -511,6 +497,8 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -524,8 +512,11 @@ class _StatChip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w500, color: color),
+            style: tt.labelSmall?.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: color,
+            ),
           ),
         ],
       ),
@@ -538,26 +529,33 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(40),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📋', style: TextStyle(fontSize: 40)),
-            SizedBox(height: 16),
+            const Text('📋', style: TextStyle(fontSize: 40)),
+            const SizedBox(height: 16),
             Text(
               'Sin historial aún',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A1A)),
+              style: tt.bodyMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               'Aún no hay registros de síntomas en tus ranchos.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF888880)),
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -573,6 +571,9 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -581,13 +582,16 @@ class _ErrorState extends StatelessWidget {
           children: [
             const Text('⚠️', style: TextStyle(fontSize: 36)),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 13, color: Color(0xFF888880))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 16),
-            TextButton(
-                onPressed: onRetry, child: const Text('Reintentar')),
+            TextButton(onPressed: onRetry, child: const Text('Reintentar')),
           ],
         ),
       ),

@@ -1,24 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ganajec/share/domain/entities/alerta.dart';
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const _kBg = Color(0xFFFAFAF7);
-const _kSurface = Color(0xFFFFFFFF);
-const _kBorder = Color(0xFFE8E5DC);
-const _kCream = Color(0xFFF5F3EE);
-const _kTextPrimary = Color(0xFF1A1A1A);
-const _kTextSecondary = Color(0xFF888880);
-const _kTextMuted = Color(0xFFAEADA6);
-const _kRed = Color(0xFFC0392B);
-const _kRedLight = Color(0xFFFDEDEC);
-const _kRedBorder = Color(0xFFF5C6C2);
-const _kYellow = Color(0xFFB8860B);
-const _kYellowLight = Color(0xFFFEF9E7);
-const _kGreen = Color(0xFF1D7A55);
-const _kGreenLight = Color(0xFFE8F5EF);
-const _kPurple = Color(0xFF534AB7);
-const _kPurpleLight = Color(0xFFEEEDFE);
-
 // ─── Config visual por tipo ───────────────────────────────────────────────────
 
 class _TipoConfig {
@@ -35,80 +17,80 @@ class _TipoConfig {
   });
 }
 
-_TipoConfig _configFor(AlertaTipo tipo, AlertaSeveridad sev) {
+_TipoConfig _configFor(AlertaTipo tipo, AlertaSeveridad sev, ColorScheme cs) {
   switch (tipo) {
     case AlertaTipo.prediccion:
       if (sev == AlertaSeveridad.alta) {
-        return const _TipoConfig(
-          iconBg: _kRedLight,
-          labelColor: _kRed,
+        return _TipoConfig(
+          iconBg: cs.errorContainer,
+          labelColor: cs.error,
           emoji: '🦠',
           etiqueta: 'Predicción · Severidad alta',
         );
       }
       if (sev == AlertaSeveridad.moderada) {
-        return const _TipoConfig(
-          iconBg: _kYellowLight,
-          labelColor: _kYellow,
+        return _TipoConfig(
+          iconBg: cs.secondaryContainer,
+          labelColor: cs.secondary,
           emoji: '🦷',
           etiqueta: 'Predicción · Severidad moderada',
         );
       }
-      return const _TipoConfig(
-        iconBg: _kGreenLight,
-        labelColor: _kGreen,
+      return _TipoConfig(
+        iconBg: cs.tertiaryContainer,
+        labelColor: cs.tertiary,
         emoji: '✅',
         etiqueta: 'Predicción · Sin enfermedad',
       );
     case AlertaTipo.isolationForest:
       if (sev == AlertaSeveridad.alta) {
-        return const _TipoConfig(
-          iconBg: _kRedLight,
-          labelColor: _kRed,
+        return _TipoConfig(
+          iconBg: cs.errorContainer,
+          labelColor: cs.error,
           emoji: '📉',
           etiqueta: 'Isolation Forest · Anomalía productiva',
         );
       }
-      return const _TipoConfig(
-        iconBg: _kYellowLight,
-        labelColor: _kYellow,
+      return _TipoConfig(
+        iconBg: cs.secondaryContainer,
+        labelColor: cs.secondary,
         emoji: '📊',
         etiqueta: 'Isolation Forest · Resumen semanal',
       );
     case AlertaTipo.nlp:
-      return const _TipoConfig(
-        iconBg: _kPurpleLight,
-        labelColor: _kPurple,
+      return _TipoConfig(
+        iconBg: cs.secondaryContainer,
+        labelColor: cs.onSecondaryContainer,
         emoji: '🧠',
         etiqueta: 'NLP · Síntoma nuevo detectado',
       );
     case AlertaTipo.sistema:
-      return const _TipoConfig(
-        iconBg: _kCream,
-        labelColor: _kTextMuted,
+      return _TipoConfig(
+        iconBg: cs.surfaceContainerLow,
+        labelColor: cs.outline,
         emoji: '⚙️',
         etiqueta: 'Sistema · Actualización',
       );
     case AlertaTipo.clinica:
       if (sev == AlertaSeveridad.alta) {
-        return const _TipoConfig(
-          iconBg: _kRedLight,
-          labelColor: _kRed,
+        return _TipoConfig(
+          iconBg: cs.errorContainer,
+          labelColor: cs.error,
           emoji: '🩺',
           etiqueta: 'Clínica · Severidad alta',
         );
       }
       if (sev == AlertaSeveridad.moderada) {
-        return const _TipoConfig(
-          iconBg: _kYellowLight,
-          labelColor: _kYellow,
+        return _TipoConfig(
+          iconBg: cs.secondaryContainer,
+          labelColor: cs.secondary,
           emoji: '🩺',
           etiqueta: 'Clínica · Severidad moderada',
         );
       }
-      return const _TipoConfig(
-        iconBg: _kGreenLight,
-        labelColor: _kGreen,
+      return _TipoConfig(
+        iconBg: cs.tertiaryContainer,
+        labelColor: cs.tertiary,
         emoji: '🩺',
         etiqueta: 'Clínica · Sin anomalía',
       );
@@ -123,16 +105,21 @@ class AlertasSummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final hasUnread = unreadCount > 0;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       margin: const EdgeInsets.fromLTRB(18, 14, 18, 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
-        color: hasUnread ? _kRedLight : _kGreenLight,
+        color: hasUnread ? cs.errorContainer : cs.tertiaryContainer,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: hasUnread ? _kRedBorder : const Color(0xFFA8D5BC),
+          color: hasUnread
+              ? cs.error.withOpacity(0.3)
+              : cs.tertiary.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -148,10 +135,10 @@ class AlertasSummaryBar extends StatelessWidget {
               children: [
                 Text(
                   hasUnread ? 'Alertas sin leer' : 'Todo al día',
-                  style: TextStyle(
+                  style: tt.bodyMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: hasUnread ? _kRed : _kGreen,
+                    color: hasUnread ? cs.error : cs.tertiary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -159,12 +146,12 @@ class AlertasSummaryBar extends StatelessWidget {
                   hasUnread
                       ? 'Tienes notificaciones pendientes de revisar'
                       : 'No tienes alertas sin leer',
-                  style: TextStyle(
+                  style: tt.bodySmall?.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w300,
                     color: hasUnread
-                        ? const Color(0xFFA93226)
-                        : const Color(0xFF1A4731),
+                        ? cs.onErrorContainer
+                        : cs.onTertiaryContainer,
                   ),
                 ),
               ],
@@ -174,11 +161,10 @@ class AlertasSummaryBar extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               '$unreadCount',
-              style: const TextStyle(
-                fontFamily: 'serif',
+              style: tt.headlineSmall?.copyWith(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: _kRed,
+                color: cs.error,
                 letterSpacing: -0.5,
               ),
             ),
@@ -197,14 +183,17 @@ class AlertasDateLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 4, left: 2),
       child: Text(
         titulo.toUpperCase(),
-        style: const TextStyle(
+        style: tt.labelSmall?.copyWith(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: _kTextMuted,
+          color: cs.outline,
           letterSpacing: 0.08 * 10,
         ),
       ),
@@ -228,11 +217,15 @@ class AlertaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cfg = _configFor(alerta.tipo, alerta.severidad);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final cfg = _configFor(alerta.tipo, alerta.severidad, cs);
     final isUnread = !alerta.leida;
     final hasAnimal =
         alerta.animalNombre != null && alerta.animalNombre!.isNotEmpty;
     final hasAccion = alerta.accion != AlertaAccion.ninguna;
+    final isAltaPrediccion = alerta.tipo == AlertaTipo.prediccion &&
+        alerta.severidad == AlertaSeveridad.alta;
 
     return GestureDetector(
       onTap: onTap,
@@ -241,14 +234,13 @@ class AlertaCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.fromLTRB(13, 13, 13, 13),
         decoration: BoxDecoration(
-          color: isUnread ? _kSurface : _kBg,
+          color: isUnread ? cs.surfaceContainerLowest : cs.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icono tipo
             Container(
               width: 40,
               height: 40,
@@ -261,15 +253,13 @@ class AlertaCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Cuerpo
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Etiqueta de tipo
                   Text(
                     cfg.etiqueta,
-                    style: TextStyle(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.06 * 9.5,
@@ -277,24 +267,22 @@ class AlertaCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 3),
-                  // Título
                   Text(
                     alerta.titulo,
-                    style: TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 13,
                       fontWeight:
                           isUnread ? FontWeight.w500 : FontWeight.w400,
-                      color: isUnread ? _kTextPrimary : _kTextSecondary,
+                      color: isUnread ? cs.onSurface : cs.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
                   const SizedBox(height: 3),
-                  // Descripción
                   Text(
                     alerta.descripcion,
-                    style: const TextStyle(
+                    style: tt.bodySmall?.copyWith(
                       fontSize: 11.5,
-                      color: _kTextSecondary,
+                      color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w300,
                       height: 1.5,
                     ),
@@ -307,9 +295,9 @@ class AlertaCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${alerta.animalNombre} · ${alerta.animalIdExterno ?? ''}',
-                          style: const TextStyle(
+                          style: tt.labelSmall?.copyWith(
                             fontSize: 10.5,
-                            color: _kTextMuted,
+                            color: cs.outline,
                             fontWeight: FontWeight.w300,
                           ),
                         ),
@@ -319,32 +307,28 @@ class AlertaCard extends StatelessWidget {
                   if (hasAccion) ...[
                     const SizedBox(height: 8),
                     GestureDetector(
-                      onTap: () {
-                        onAccion?.call();
-                      },
+                      onTap: () => onAccion?.call(),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: alerta.tipo == AlertaTipo.prediccion &&
-                                    alerta.severidad == AlertaSeveridad.alta
-                                ? _kRedBorder
-                                : _kBorder,
+                            color: isAltaPrediccion
+                                ? cs.error.withOpacity(0.3)
+                                : cs.outlineVariant,
                           ),
                         ),
                         child: Text(
                           alerta.accion == AlertaAccion.verDetalle
                               ? 'Ver detalle del animal →'
                               : 'Ver resultado →',
-                          style: TextStyle(
+                          style: tt.labelSmall?.copyWith(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w500,
-                            color: alerta.tipo == AlertaTipo.prediccion &&
-                                    alerta.severidad == AlertaSeveridad.alta
-                                ? _kRed
-                                : _kTextPrimary,
+                            color: isAltaPrediccion
+                                ? cs.error
+                                : cs.onSurface,
                           ),
                         ),
                       ),
@@ -354,15 +338,14 @@ class AlertaCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // Columna derecha: hora + dot
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   _formatHora(alerta.fecha),
-                  style: const TextStyle(
+                  style: tt.labelSmall?.copyWith(
                     fontSize: 10,
-                    color: _kTextMuted,
+                    color: cs.outline,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -371,8 +354,8 @@ class AlertaCard extends StatelessWidget {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(
-                      color: _kRed,
+                    decoration: BoxDecoration(
+                      color: cs.error,
                       shape: BoxShape.circle,
                     ),
                   ),

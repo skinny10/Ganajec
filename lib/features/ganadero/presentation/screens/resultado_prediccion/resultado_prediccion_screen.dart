@@ -21,7 +21,6 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
 
   Future<void> _guardar() async {
     setState(() => _guardado = true);
-    // Mock: guardado en historial
     await Future.delayed(const Duration(milliseconds: 1800));
     if (!mounted) return;
     context.go(AppRoutes.home);
@@ -29,6 +28,8 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final p = _a.prediccion;
     final sev = severidadLabel(p);
     final sintomasNLP = sintomasNLPDe(_a.descripcion);
@@ -36,9 +37,9 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
     final pasos = pasosDe(p.enfermedad, _a.animal.nombre);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAF7),
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAF7),
+        backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -52,20 +53,18 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE8E5DC)),
+              border: Border.all(color: cs.outlineVariant),
             ),
-            child: const Icon(Icons.chevron_left,
-                color: Color(0xFF1A1A1A), size: 20),
+            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
           ),
         ),
-        title: const Text(
+        title: Text(
           'Resultado del análisis',
-          style: TextStyle(
+          style: tt.titleMedium?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A1A),
             letterSpacing: -0.3,
           ),
         ),
@@ -103,7 +102,6 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
                   nlp: sintomasNLP,
                 ),
                 const SizedBox(height: 12),
-                // NLP box
                 if (_a.descripcion.trim().isNotEmpty)
                   ResultadoNLPBox(descripcion: _a.descripcion),
               ],
@@ -160,17 +158,17 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cs.surfaceContainerLowest,
                     borderRadius: BorderRadius.circular(13),
-                    border: Border.all(color: const Color(0xFFE8E5DC)),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Ver historial de predicciones',
-                      style: TextStyle(
+                      style: tt.bodyMedium?.copyWith(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF1A1A1A),
+                        color: cs.onSurface,
                       ),
                     ),
                   ),
@@ -186,38 +184,36 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: _guardado
-                        ? const Color(0xFF1D7A55)
-                        : const Color(0xFF1A1A1A),
+                    color: _guardado ? cs.tertiary : cs.onSurface,
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _guardado
-                        ? const Row(
-                            key: ValueKey('guardado'),
+                        ? Row(
+                            key: const ValueKey('guardado'),
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.check,
-                                  color: Colors.white, size: 16),
-                              SizedBox(width: 6),
+                                  color: cs.onTertiary, size: 16),
+                              const SizedBox(width: 6),
                               Text(
                                 'Predicción guardada',
-                                style: TextStyle(
+                                style: tt.bodyMedium?.copyWith(
                                   fontSize: 14.5,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white,
+                                  color: cs.onTertiary,
                                 ),
                               ),
                             ],
                           )
-                        : const Text(
-                            key: ValueKey('idle'),
+                        : Text(
+                            key: const ValueKey('idle'),
                             'Guardar predicción',
-                            style: TextStyle(
+                            style: tt.bodyMedium?.copyWith(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                              color: cs.surface,
                             ),
                           ),
                   ),

@@ -14,20 +14,32 @@ class AnimalListTile extends StatelessWidget {
   });
 
   Color _estadoColor(BuildContext context, String estado) {
-    final colors = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     switch (estado.toLowerCase()) {
       case 'severidad alta':
-        return colors.error;
+        return cs.error;
       case 'observar':
-        return colors.secondary;
+        return cs.secondary;
       default:
-        return colors.tertiary;
+        return cs.tertiary;
+    }
+  }
+
+  String _estadoEmoji(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'severidad alta':
+        return '⚠️ ';
+      case 'observar':
+        return '👁 ';
+      default:
+        return '❤️ ';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final color = _estadoColor(context, estado);
     final tieneContexto = animal.ganaderoNombre.isNotEmpty;
     final edad = DateTime.now().year - animal.fechaNacimiento.year;
@@ -36,69 +48,86 @@ class AnimalListTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.outlineVariant),
+          color: cs.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Row(
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: colors.surfaceContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
+            // Barn watermark
+            Positioned(
+              right: 50,
+              bottom: -10,
               child: Icon(
-                Icons.pets,
-                color: colors.onSurfaceVariant,
-                size: 22,
+                Icons.home_work_outlined,
+                size: 80,
+                color: cs.outlineVariant.withOpacity(0.3),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+              child: Row(
                 children: [
-                  Text(
-                    animal.nombre,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                  // Animal image placeholder
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.pets, color: cs.primary, size: 34),
                   ),
-                  if (tieneContexto) ...[
-                    Text(
-                      '${animal.ganaderoNombre} · ${animal.raza}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          animal.nombre,
+                          style: tt.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: cs.onSurface,
+                            letterSpacing: -0.2,
                           ),
-                    ),
-                  ] else ...[
-                    Text(
-                      '${animal.raza} · $edad año${edad == 1 ? '' : 's'} · ${animal.idExterno}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          tieneContexto
+                              ? '${animal.ganaderoNombre} · ${animal.raza}'
+                              : '${animal.raza} · $edad año${edad == 1 ? '' : 's'} · ${animal.idExterno}',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 12,
                           ),
+                        ),
+                        const SizedBox(height: 7),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${_estadoEmoji(estado)}$estado',
+                            style: tt.labelSmall?.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right,
+                      color: cs.outlineVariant, size: 22),
                 ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                estado,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                    ),
               ),
             ),
           ],

@@ -6,7 +6,7 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData light(BuildContext context) {
-    final textTheme = createTextTheme(context, 'Roboto', 'Montserrat');
+    final textTheme = createTextTheme(context, 'DM Sans', 'Fraunces');
     final material = MaterialTheme(textTheme);
     return material.light().copyWith(
       inputDecorationTheme: _inputTheme(MaterialTheme.lightScheme()),
@@ -15,7 +15,7 @@ class AppTheme {
   }
 
   static ThemeData dark(BuildContext context) {
-    final textTheme = createTextTheme(context, 'Roboto', 'Montserrat');
+    final textTheme = createTextTheme(context, 'DM Sans', 'Fraunces');
     final material = MaterialTheme(textTheme);
     return material.dark().copyWith(
       inputDecorationTheme: _inputTheme(MaterialTheme.darkScheme()),
@@ -50,8 +50,8 @@ class AppTheme {
   static ElevatedButtonThemeData _buttonTheme(ColorScheme colors) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff4a2c0a),
-        foregroundColor: Colors.white,
+        backgroundColor: colors.onPrimaryContainer,
+        foregroundColor: colors.onPrimary,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
