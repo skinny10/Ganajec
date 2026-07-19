@@ -293,7 +293,7 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cs.onSurface,
-                    foregroundColor: cs.surface,
+                    foregroundColor: Colors.white,
                     disabledBackgroundColor: cs.onSurface.withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -314,6 +314,7 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
                             Text(
                               'Verificar código',
                               style: tt.labelLarge?.copyWith(
+                                color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),

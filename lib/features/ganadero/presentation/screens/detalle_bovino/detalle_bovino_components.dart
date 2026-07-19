@@ -169,9 +169,9 @@ class DetalleAnimalHero extends StatelessWidget {
                                 Text(
                                   vm.severidadLabel,
                                   style: tt.labelSmall?.copyWith(
+                                    color: accentColor,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: accentColor,
                                   ),
                                 ),
                               ],
@@ -1504,7 +1504,7 @@ class DetalleBottomCta extends StatelessWidget {
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
             backgroundColor: cs.onSurface,
-            foregroundColor: cs.surface,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(13),
             ),
@@ -1515,6 +1515,7 @@ class DetalleBottomCta extends StatelessWidget {
           label: Text(
             'Registrar síntomas',
             style: tt.labelLarge?.copyWith(
+              color: Colors.white,
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
             ),

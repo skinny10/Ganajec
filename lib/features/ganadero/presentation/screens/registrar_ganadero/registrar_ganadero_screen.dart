@@ -174,7 +174,7 @@ class _RegistrarGanaderoScreenState
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.onSurface,
-                  foregroundColor: cs.surface,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
@@ -196,6 +196,7 @@ class _RegistrarGanaderoScreenState
                     : Text(
                         'Registrar ganadero',
                         style: tt.labelLarge?.copyWith(
+                          color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),

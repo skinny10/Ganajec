@@ -197,7 +197,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.onSurface,
-                  foregroundColor: cs.surface,
+                  foregroundColor: Colors.white,
                   disabledBackgroundColor: cs.onSurface.withOpacity(0.4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
@@ -222,6 +222,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                           Text(
                             isActual ? 'Plan actual' : vm.textoPrecioBoton,
                             style: tt.labelLarge?.copyWith(
+                              color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                             ),

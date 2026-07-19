@@ -506,7 +506,7 @@ class _EditarBovinoScreenState extends State<EditarBovinoScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.onSurface,
-                  foregroundColor: cs.surface,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
@@ -529,6 +529,7 @@ class _EditarBovinoScreenState extends State<EditarBovinoScreen> {
                           Text(
                             'Guardar cambios',
                             style: tt.labelMedium?.copyWith(
+                              color: Colors.white,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),

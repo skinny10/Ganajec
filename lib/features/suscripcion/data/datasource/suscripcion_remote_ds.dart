@@ -20,12 +20,21 @@ class SuscripcionRemoteDataSourceImpl implements SuscripcionRemoteDataSource {
   // ── GET /dueno/{id}/suscripcion ───────────────────────────────────────────
   @override
   Future<SuscripcionInfo> getSuscripcion() async {
+    // Ganaderos no tienen endpoint de suscripción — devolver plan gratuito
+    if (TokenStorage.role != 'dueno') {
+      return SuscripcionInfo(
+        planActual: kPlanes.first,
+        bovinosUsados: 0,
+        analisisUsados: 0,
+      );
+    }
     try {
       final res = await _dio.get(ApiConstants.suscripcionDueno(_uid));
       return SuscripcionModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      // Si el servidor no tiene suscripción aún (404/500), devolvemos gratuito
-      if (e.response?.statusCode == 404 ||
+      // 403 ganadero, 404 sin suscripción, 500 server error → gratuito por defecto
+      if (e.response?.statusCode == 403 ||
+          e.response?.statusCode == 404 ||
           e.response?.statusCode == 500) {
         return SuscripcionInfo(
           planActual: kPlanes.first,

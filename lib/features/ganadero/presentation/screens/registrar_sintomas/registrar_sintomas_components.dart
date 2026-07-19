@@ -623,7 +623,7 @@ class ResultadoAnalisisSheet extends StatelessWidget {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: cs.onSurface,
-                foregroundColor: cs.surface,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
@@ -633,6 +633,7 @@ class ResultadoAnalisisSheet extends StatelessWidget {
               child: Text(
                 'Listo',
                 style: tt.labelLarge?.copyWith(
+                  color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

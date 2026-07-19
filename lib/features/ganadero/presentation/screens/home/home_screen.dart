@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: cs.onSurface,
-                                  foregroundColor: cs.surface,
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -165,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                                 label: Text(
                                   'Registrar bovino',
                                   style: tt.labelLarge?.copyWith(
+                                    color: Colors.white,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -219,21 +220,25 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     return Container(
       height: topPad + 178,
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFFFF),
         image: DecorationImage(
           image: AssetImage('assets/images/cow_pattern.png'),
           fit: BoxFit.cover,
-          alignment: Alignment.center,
         ),
       ),
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          // Greeting content (left side)
+          // Overlay muy suave — no lava las manchas escasas del borde izq.
+          Positioned.fill(
+            child: ColoredBox(color: Color.fromRGBO(255, 255, 255, 0.15)),
+          ),
+          // Greeting content
           Positioned(
             left: 20,
             top: topPad + 20,
-            right: 16,
+            right: 104,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -261,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               ],
             ),
           ),
-          // Bell + avatar (top right)
+          // Bell + avatar
           Positioned(
             top: topPad + 16,
             right: 16,

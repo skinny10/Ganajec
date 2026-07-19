@@ -104,9 +104,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: const Color(0xFFFBF0E6),
       appBar: AppBar(
-        backgroundColor: cs.surface,
+        backgroundColor: const Color(0xFFFBF0E6),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: GestureDetector(
@@ -116,12 +116,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: cs.surfaceContainerLowest,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.outlineVariant),
             ),
-            child: Icon(Icons.chevron_left_rounded,
-                color: cs.onSurface, size: 20),
+            child: const Icon(Icons.chevron_left_rounded,
+                color: Color(0xFF3d2b1f), size: 20),
           ),
         ),
         centerTitle: true,
@@ -129,7 +128,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           'Mi perfil',
           style: tt.titleMedium?.copyWith(
             fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF3d2b1f),
             letterSpacing: -0.3,
           ),
         ),
@@ -138,25 +138,26 @@ class _PerfilScreenState extends State<PerfilScreen> {
             onTap: () => context.push(AppRoutes.editarPerfil).then((_) {
               if (mounted) context.read<PerfilViewModel>().cargarPerfil();
             }),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 18, 0),
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(0, 0, 16, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: const Color(0xFF3d2b1f), width: 1.5),
+              ),
               child: Text(
-                'Editar',
-                style: tt.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w400,
-                  decoration: TextDecoration.underline,
-                  decorationColor: cs.outlineVariant,
+                '✏️ Editar',
+                style: tt.labelSmall?.copyWith(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3d2b1f),
                 ),
               ),
             ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: cs.outlineVariant),
-        ),
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -207,20 +208,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       name: 'Nombre completo',
                       desc: vm.usuario.name,
                       showChevron: false,
+                      accentColor: const Color(0xFF185FA5),
                     ),
                     PerfilSettingRow(
                       icon: SettingIcon(emoji: '✉️', bg: cs.surfaceContainerLow),
                       name: 'Correo electrónico',
                       desc: vm.usuario.email,
                       showChevron: false,
+                      accentColor: const Color(0xFF3B6D11),
                     ),
-                    _LastRow(
-                      child: PerfilSettingRow(
-                        icon: SettingIcon(emoji: '🔑', bg: cs.surfaceContainerLow),
-                        name: 'Cambiar contraseña',
-                        desc: 'Toca para actualizar tu contraseña',
-                        onTap: () => context.push(AppRoutes.cambiarContrasena),
-                      ),
+                    PerfilSettingRow(
+                      icon: SettingIcon(emoji: '🔑', bg: cs.surfaceContainerLow),
+                      name: 'Cambiar contraseña',
+                      desc: 'Toca para actualizar tu contraseña',
+                      accentColor: const Color(0xFFD85A30),
+                      onTap: () => context.push(AppRoutes.cambiarContrasena),
                     ),
                   ],
                 ),
@@ -234,6 +236,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       name: 'Nombre del rancho',
                       desc: vm.rancho.nombre,
                       showChevron: vm.usuario.role == 'dueno',
+                      accentColor: const Color(0xFF5C3820),
                       onTap: vm.usuario.role == 'dueno'
                           ? () {
                               final r = vm.rancho;
@@ -254,32 +257,31 @@ class _PerfilScreenState extends State<PerfilScreen> {
                             }
                           : null,
                     ),
-                    _LastRow(
-                      child: PerfilSettingRow(
-                        icon: SettingIcon(emoji: '📍', bg: cs.primaryContainer),
-                        name: 'Municipio y estado',
-                        desc: '${vm.rancho.municipio}, ${vm.rancho.estado}',
-                        showChevron: vm.usuario.role == 'dueno',
-                        onTap: vm.usuario.role == 'dueno'
-                            ? () {
-                                final r = vm.rancho;
-                                context.push(
-                                  AppRoutes.editarRancho,
-                                  extra: RanchoInfo(
-                                    id: r.id,
-                                    nombre: r.nombre,
-                                    municipio: r.municipio,
-                                    estado: r.estado,
-                                    codigoInvitacion: '',
-                                  ),
-                                ).then((_) {
-                                  if (mounted) {
-                                    context.read<PerfilViewModel>().cargarPerfil();
-                                  }
-                                });
-                              }
-                            : null,
-                      ),
+                    PerfilSettingRow(
+                      icon: SettingIcon(emoji: '📍', bg: cs.primaryContainer),
+                      name: 'Municipio y estado',
+                      desc: '${vm.rancho.municipio}, ${vm.rancho.estado}',
+                      showChevron: vm.usuario.role == 'dueno',
+                      accentColor: const Color(0xFF5C3820),
+                      onTap: vm.usuario.role == 'dueno'
+                          ? () {
+                              final r = vm.rancho;
+                              context.push(
+                                AppRoutes.editarRancho,
+                                extra: RanchoInfo(
+                                  id: r.id,
+                                  nombre: r.nombre,
+                                  municipio: r.municipio,
+                                  estado: r.estado,
+                                  codigoInvitacion: '',
+                                ),
+                              ).then((_) {
+                                if (mounted) {
+                                  context.read<PerfilViewModel>().cargarPerfil();
+                                }
+                              });
+                            }
+                          : null,
                     ),
                   ],
                 ),
@@ -288,20 +290,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 PerfilSection(
                   label: 'Veterinario',
                   children: [
-                    _LastRow(
-                      child: PerfilSettingRow(
-                        icon: SettingIcon(emoji: '🩺', bg: cs.tertiaryContainer),
-                        name: 'Veterinarios del rancho',
-                        desc: vm.usuario.role == 'dueno'
-                            ? 'Agregar, editar o eliminar veterinarios'
-                            : 'Ver teléfono del veterinario',
-                        trailingValue: vm.usuario.role == 'dueno'
-                            ? 'Gestionar'
-                            : 'Ver',
-                        onTap: vm.usuario.role == 'dueno'
-                            ? () => context.push(AppRoutes.veterinarios)
-                            : () => _mostrarVetGanadero(context),
-                      ),
+                    PerfilSettingRow(
+                      icon: SettingIcon(emoji: '🩺', bg: cs.tertiaryContainer),
+                      name: 'Veterinarios del rancho',
+                      desc: vm.usuario.role == 'dueno'
+                          ? 'Agregar, editar o eliminar veterinarios'
+                          : 'Ver teléfono del veterinario',
+                      trailingValue: vm.usuario.role == 'dueno'
+                          ? 'Gestionar'
+                          : 'Ver',
+                      accentColor: const Color(0xFF1A6B5A),
+                      onTap: vm.usuario.role == 'dueno'
+                          ? () => context.push(AppRoutes.veterinarios)
+                          : () => _mostrarVetGanadero(context),
                     ),
                   ],
                 ),
@@ -311,17 +312,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   label: 'Notificaciones',
                   children: [
                     PerfilToggleRow(
-                      icon: SettingIcon(emoji: '🔔', bg: cs.tertiaryContainer),
+                      icon: SettingIcon(emoji: '⚠️', bg: cs.tertiaryContainer),
                       name: 'Alertas de predicción',
                       desc: 'Cuando se detecta una enfermedad',
                       value: notif.alertasPrediccion,
+                      accentColor: const Color(0xFFA32D2D),
                       onChanged: (_) => context.read<PerfilViewModel>().toggleAlertasPrediccion(),
                     ),
                     PerfilToggleRow(
-                      icon: SettingIcon(emoji: '📉', bg: cs.tertiaryContainer),
+                      icon: SettingIcon(emoji: '📈', bg: cs.tertiaryContainer),
                       name: 'Anomalías productivas',
                       desc: 'Caídas detectadas por Isolation Forest',
                       value: notif.anomaliasProductivas,
+                      accentColor: const Color(0xFF3B6D11),
                       onChanged: (_) => context.read<PerfilViewModel>().toggleAnomaliasProductivas(),
                     ),
                     PerfilToggleRow(
@@ -329,40 +332,39 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       name: 'Resumen semanal',
                       desc: 'Reporte de producción cada lunes',
                       value: notif.resumenSemanal,
+                      accentColor: const Color(0xFF854F0B),
                       onChanged: (_) => context.read<PerfilViewModel>().toggleResumenSemanal(),
-                      isLast: true,
                     ),
                   ],
                 ),
 
-                // ── Suscripción ───────────────────────────────────────────────
-                PerfilSection(
-                  label: 'Suscripción',
-                  children: [
-                    _LastRow(
-                      child: PerfilSettingRow(
+                // ── Suscripción (solo dueño) ──────────────────────────────────
+                if (vm.usuario.role == 'dueno')
+                  PerfilSection(
+                    label: 'Suscripción',
+                    children: [
+                      PerfilSettingRow(
                         icon: SettingIcon(emoji: '💳', bg: cs.secondaryContainer),
                         name: 'Mi plan',
                         desc: '${vm.plan} · Activo',
                         trailingValue: 'Ver planes',
+                        accentColor: const Color(0xFF5C3820),
                         onTap: () => context.push(AppRoutes.miPlan),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
                 // ── Sesión ────────────────────────────────────────────────────
                 PerfilSection(
                   label: 'Sesión',
                   children: [
-                    _LastRow(
-                      child: PerfilSettingRow(
-                        icon: SettingIcon(emoji: '🚪', bg: cs.errorContainer),
-                        name: 'Cerrar sesión',
-                        desc: '${vm.usuario.name} · ${vm.usuario.email}',
-                        isDanger: true,
-                        onTap: () => _mostrarLogoutModal(context),
-                      ),
+                    PerfilSettingRow(
+                      icon: SettingIcon(emoji: '🚪', bg: cs.errorContainer),
+                      name: 'Cerrar sesión',
+                      desc: '${vm.usuario.name} · ${vm.usuario.email}',
+                      isDanger: true,
+                      accentColor: cs.error,
+                      onTap: () => _mostrarLogoutModal(context),
                     ),
                   ],
                 ),

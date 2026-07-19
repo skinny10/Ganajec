@@ -20,116 +20,129 @@ class PerfilHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+      padding: const EdgeInsets.all(20),
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outlineVariant),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF8A5230), Color(0xFF5C3820)],
+        ),
+        borderRadius: BorderRadius.circular(18),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          // Avatar
-          Stack(
-            clipBehavior: Clip.none,
+          // Círculos decorativos
+          Positioned(
+            top: -20, right: -20,
+            child: Container(
+              width: 100, height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.06),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30, right: 20,
+            child: Container(
+              width: 70, height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.05),
+              ),
+            ),
+          ),
+          // Contenido
+          Row(
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: cs.primary.withOpacity(0.3),
-                      blurRadius: 14,
-                      offset: const Offset(0, 4),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 58, height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFF3D9BC),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.3), width: 3),
+                    ),
+                    child: Center(
+                      child: Text(
+                        iniciales,
+                        style: tt.titleMedium?.copyWith(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF5C3820),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -2, right: -2,
+                    child: GestureDetector(
+                      onTap: onEditarPerfil,
+                      child: Container(
+                        width: 20, height: 20,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: const Icon(Icons.edit_rounded,
+                            size: 10, color: Color(0xFF5C3820)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nombre,
+                      style: tt.titleMedium?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      style: tt.bodySmall?.copyWith(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.75),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 11, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '🌱 $plan',
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: Center(
-                  child: Text(
-                    iniciales,
-                    style: tt.titleMedium?.copyWith(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onPrimary,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -4,
-                right: -4,
-                child: GestureDetector(
-                  onTap: onEditarPerfil,
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: cs.onSurface,
-                      borderRadius: BorderRadius.circular(7),
-                      border: Border.all(color: cs.surface, width: 2),
-                    ),
-                    child: Icon(
-                      Icons.edit_rounded,
-                      size: 10,
-                      color: cs.surface,
-                    ),
-                  ),
-                ),
               ),
             ],
-          ),
-          const SizedBox(width: 16),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  style: tt.titleMedium?.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  email,
-                  style: tt.bodySmall?.copyWith(
-                    fontSize: 12,
-                    color: cs.outline,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: cs.outlineVariant),
-                  ),
-                  child: Text(
-                    '🐄 $plan',
-                    style: tt.labelSmall?.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
@@ -167,146 +180,200 @@ class PerfilRanchoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(18, 0, 18, 14),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+      padding: const EdgeInsets.all(18),
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: cs.primaryContainer,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.primary.withOpacity(0.2)),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFE8935A), Color(0xFFD85A30)],
+        ),
+        borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
+          Positioned(
+            top: -30, right: -30,
+            child: Container(
+              width: 120, height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -40, right: 30,
+            child: Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.06),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('🏡', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: const Center(
+                        child: Text('🏡', style: TextStyle(fontSize: 20))),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _tieneRancho ? nombre : 'Sin rancho asignado',
+                          style: tt.bodyMedium?.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          _tieneRancho
+                              ? '📍 $municipio, $estado'
+                              : 'Únete o crea un rancho para comenzar',
+                          style: tt.bodySmall?.copyWith(
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 30, height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: const Icon(Icons.chevron_right_rounded,
+                        color: Colors.white, size: 18),
+                  ),
+                ],
+              ),
+
+              if (_tieneRancho) ...[
+                const SizedBox(height: 16),
+                Row(
                   children: [
-                    Text(
-                      _tieneRancho ? nombre : 'Sin rancho asignado',
-                      style: tt.bodyMedium?.copyWith(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
-                        color: cs.onPrimaryContainer,
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '👤 Dueño',
+                              style: tt.labelSmall?.copyWith(
+                                fontSize: 10.5,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              duenoNombre.isNotEmpty ? duenoNombre : '—',
+                              style: tt.bodyMedium?.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _tieneRancho
-                          ? '$municipio, $estado'
-                          : 'Únete o crea un rancho para comenzar',
-                      style: tt.bodySmall?.copyWith(
-                        fontSize: 11,
-                        color: cs.onPrimaryContainer.withOpacity(0.7),
-                        fontWeight: FontWeight.w300,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '🐄 Bovinos',
+                              style: tt.labelSmall?.copyWith(
+                                fontSize: 10.5,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$totalBovinos activo${totalBovinos != 1 ? 's' : ''}',
+                              style: tt.bodyMedium?.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
-          ),
-
-          if (_tieneRancho) ...[
-            const SizedBox(height: 10),
-            Divider(color: cs.primary.withOpacity(0.15), height: 1),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                _InfoChip(
-                  icon: Icons.person_outline,
-                  label: duenoNombre.isNotEmpty
-                      ? 'Dueño del rancho: $duenoNombre'
-                      : 'Dueño del rancho',
-                ),
-                const SizedBox(width: 12),
-                _InfoChip(
-                  icon: Icons.pets_outlined,
-                  label: '$totalBovinos bovinos',
                 ),
               ],
-            ),
-          ],
 
-          if (onUnirseRancho != null ||
-              onMisGanaderos != null ||
-              onVerColegas != null) ...[
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: onUnirseRancho ?? onMisGanaderos ?? onVerColegas,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: cs.primary.withOpacity(0.25)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      onUnirseRancho != null
-                          ? Icons.add_home_outlined
-                          : Icons.people_outlined,
-                      color: cs.onPrimaryContainer,
-                      size: 14,
+              if (onUnirseRancho != null ||
+                  onMisGanaderos != null ||
+                  onVerColegas != null) ...[
+                const SizedBox(height: 14),
+                GestureDetector(
+                  onTap: onUnirseRancho ?? onMisGanaderos ?? onVerColegas,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(11),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      onUnirseRancho != null
-                          ? 'Unirse o crear rancho'
-                          : onVerColegas != null
-                              ? 'Ver colegas del rancho'
-                              : ganaderosBtnLabel,
-                      style: tt.labelSmall?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: cs.onPrimaryContainer,
+                    child: Center(
+                      child: Text(
+                        onUnirseRancho != null
+                            ? '🏡 Unirse o crear rancho'
+                            : onVerColegas != null
+                                ? '👥 Ver colegas del rancho'
+                                : '👥 $ganaderosBtnLabel',
+                        style: tt.labelLarge?.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFD85A30),
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            ],
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _InfoChip({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12, color: cs.onPrimaryContainer),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: tt.labelSmall?.copyWith(
-            fontSize: 11,
-            color: cs.onPrimaryContainer,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -325,33 +392,30 @@ class PerfilSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 2, bottom: 7),
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
               label.toUpperCase(),
-              style: tt.labelSmall?.copyWith(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: cs.outline,
-                letterSpacing: 0.08 * 10,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFa08c7a),
+                letterSpacing: 0.4,
               ),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Column(children: children),
+          Column(
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(height: 6),
+                children[i],
+              ],
+            ],
           ),
         ],
       ),
@@ -359,7 +423,7 @@ class PerfilSection extends StatelessWidget {
   }
 }
 
-// ─── Fila de ajuste con flecha ────────────────────────────────────────────────
+// ─── Fila de ajuste ───────────────────────────────────────────────────────────
 
 class PerfilSettingRow extends StatelessWidget {
   final Widget icon;
@@ -369,6 +433,7 @@ class PerfilSettingRow extends StatelessWidget {
   final bool isDanger;
   final bool showChevron;
   final VoidCallback? onTap;
+  final Color accentColor;
 
   const PerfilSettingRow({
     super.key,
@@ -379,21 +444,22 @@ class PerfilSettingRow extends StatelessWidget {
     this.isDanger = false,
     this.showChevron = true,
     this.onTap,
+    this.accentColor = const Color(0xFF8A5230),
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(13),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
           border: Border(
-            bottom: BorderSide(color: cs.outlineVariant, width: 0.5),
+            left: BorderSide(color: accentColor, width: 3),
           ),
         ),
         child: Row(
@@ -407,9 +473,11 @@ class PerfilSettingRow extends StatelessWidget {
                   Text(
                     name,
                     style: tt.bodyMedium?.copyWith(
-                      fontSize: 13,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w400,
-                      color: isDanger ? cs.error : cs.onSurface,
+                      color: isDanger
+                          ? const Color(0xFFA32D2D)
+                          : const Color(0xFF3d2b1f),
                     ),
                   ),
                   if (desc != null) ...[
@@ -417,9 +485,8 @@ class PerfilSettingRow extends StatelessWidget {
                     Text(
                       desc!,
                       style: tt.bodySmall?.copyWith(
-                        fontSize: 11,
-                        color: cs.outline,
-                        fontWeight: FontWeight.w300,
+                        fontSize: 12,
+                        color: const Color(0xFF8a7a6d),
                       ),
                     ),
                   ],
@@ -431,8 +498,7 @@ class PerfilSettingRow extends StatelessWidget {
                 trailingValue!,
                 style: tt.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: cs.outline,
-                  fontWeight: FontWeight.w300,
+                  color: const Color(0xFF8a7a6d),
                 ),
               ),
             if (showChevron) ...[
@@ -440,7 +506,9 @@ class PerfilSettingRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: isDanger ? cs.error : cs.outline,
+                color: isDanger
+                    ? const Color(0xFFA32D2D)
+                    : const Color(0xFFc9bfb2),
               ),
             ],
           ],
@@ -459,6 +527,7 @@ class PerfilToggleRow extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool isLast;
+  final Color accentColor;
 
   const PerfilToggleRow({
     super.key,
@@ -468,21 +537,21 @@ class PerfilToggleRow extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.isLast = false,
+    this.accentColor = const Color(0xFF8A5230),
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(color: cs.outlineVariant, width: 0.5),
-              ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border(
+          left: BorderSide(color: accentColor, width: 3),
+        ),
       ),
       child: Row(
         children: [
@@ -495,8 +564,9 @@ class PerfilToggleRow extends StatelessWidget {
                 Text(
                   name,
                   style: tt.bodyMedium?.copyWith(
-                    fontSize: 13,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w400,
+                    color: const Color(0xFF3d2b1f),
                   ),
                 ),
                 if (desc != null) ...[
@@ -504,9 +574,8 @@ class PerfilToggleRow extends StatelessWidget {
                   Text(
                     desc!,
                     style: tt.bodySmall?.copyWith(
-                      fontSize: 11,
-                      color: cs.outline,
-                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                      color: const Color(0xFF8a7a6d),
                     ),
                   ),
                 ],
@@ -528,8 +597,6 @@ class _ToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -538,18 +605,19 @@ class _ToggleSwitch extends StatelessWidget {
         height: 22,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(11),
-          color: value ? cs.tertiary : cs.outlineVariant,
+          color: value ? const Color(0xFF639922) : const Color(0xFFd8cfc3),
         ),
         child: Padding(
           padding: const EdgeInsets.all(2),
           child: AnimatedAlign(
             duration: const Duration(milliseconds: 200),
-            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+            alignment:
+                value ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerLowest,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(9),
                 boxShadow: const [
                   BoxShadow(
@@ -571,27 +639,17 @@ class _ToggleSwitch extends StatelessWidget {
 
 class SettingIcon extends StatelessWidget {
   final String emoji;
-  final Color bg;
+  final Color bg; // mantenido por compatibilidad, no se usa visualmente
 
   const SettingIcon({super.key, required this.emoji, required this.bg});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Center(
-        child: Text(emoji, style: const TextStyle(fontSize: 15)),
-      ),
-    );
+    return Text(emoji, style: const TextStyle(fontSize: 17));
   }
 }
 
-// ─── Último separador transparente en la card ─────────────────────────────────
+// ─── Compatibilidad ───────────────────────────────────────────────────────────
 class PerfilRowLast extends StatelessWidget {
   final Widget child;
   const PerfilRowLast({super.key, required this.child});
@@ -607,19 +665,16 @@ class PerfilVersionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
         child: Text(
           'GANAJEC · Versión 1.0.4 · Chiapas, México',
-          style: tt.bodySmall?.copyWith(
-            fontSize: 11,
-            color: cs.outline,
-            fontWeight: FontWeight.w300,
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 11,
+                color: const Color(0xFFa08c7a),
+                fontWeight: FontWeight.w300,
+              ),
         ),
       ),
     );
