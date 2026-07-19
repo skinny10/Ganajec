@@ -74,7 +74,8 @@ class PerfilViewModel extends ChangeNotifier {
       );
 
   int get totalBovinos => _totalBovinos;
-  String get plan => 'Plan Gratuito';
+  String _planNombre = 'Plan Gratuito';
+  String get plan => _planNombre;
 
   /// true si el ganadero ya pertenece a un rancho
   bool get tieneRancho => _ranchoId.isNotEmpty || TokenStorage.ranchoId != null;
@@ -198,6 +199,25 @@ class PerfilViewModel extends ChangeNotifier {
           if (dNombre != null && dNombre.isNotEmpty) _duenoNombre = dNombre;
         } catch (_) {}
       }
+
+      // ── Plan de suscripción ────────────────────────────────────────────────
+      try {
+        final uid = TokenStorage.userId ?? '';
+        final role = TokenStorage.role ?? 'ganadero';
+        if (role == 'dueno') {
+          final suscRes = await _dio.get(ApiConstants.suscripcionDueno(uid));
+          final suscData = suscRes.data as Map<String, dynamic>;
+          String nombre = 'Gratuito';
+          if (suscData['plan'] is Map) {
+            nombre = (suscData['plan']['nombre'] as String?) ?? 'Gratuito';
+          } else if (suscData['plan'] is String) {
+            nombre = suscData['plan'] as String;
+          } else if (suscData['plan_actual'] is String) {
+            nombre = suscData['plan_actual'] as String;
+          }
+          _planNombre = 'Plan $nombre';
+        }
+      } catch (_) {}
 
       _status = PerfilStatus.success;
     } catch (e) {

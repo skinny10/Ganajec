@@ -10,11 +10,18 @@ class SuscripcionModel extends SuscripcionInfo {
   });
 
   factory SuscripcionModel.fromJson(Map<String, dynamic> json) {
-    // La API puede devolver "gratuito", "basico", "pro", "cooperativa"
-    final planStr = (json['plan_actual'] as String? ??
-            json['plan'] as String? ??
-            'gratuito')
-        .toLowerCase();
+    String planStr = 'gratuito';
+
+    // Backend nuevo: plan es un objeto {nombre: "Pro", ...}
+    if (json['plan'] is Map) {
+      planStr = (json['plan']['nombre'] as String? ?? 'gratuito').toLowerCase();
+    }
+    // Backend legacy: plan_actual o plan como string
+    else if (json['plan_actual'] is String) {
+      planStr = (json['plan_actual'] as String).toLowerCase();
+    } else if (json['plan'] is String) {
+      planStr = (json['plan'] as String).toLowerCase();
+    }
 
     final tipo = PlanTipo.values.firstWhere(
       (p) => p.name.toLowerCase() == planStr,
@@ -25,19 +32,17 @@ class SuscripcionModel extends SuscripcionInfo {
       orElse: () => kPlanes.first,
     );
 
-    final renovStr = json['fecha_renovacion'] as String? ??
+    final renovStr = json['fin'] as String? ??
+        json['fecha_renovacion'] as String? ??
         json['renovacion'] as String?;
 
     return SuscripcionModel(
       planActual: planActual,
-      bovinosUsados:
-          (json['bovinos_usados'] as num? ?? 0).toInt(),
-      analisisUsados: (json['analisis_usados'] as num? ??
-              json['analisis_mes_usados'] as num? ??
-              0)
-          .toInt(),
-      renovacion:
-          renovStr != null ? DateTime.tryParse(renovStr) : null,
+      bovinosUsados: (json['bovinos_usados'] as num? ?? 0).toInt(),
+      analisisUsados:
+          (json['analisis_usados'] as num? ?? json['analisis_mes_usados'] as num? ?? 0)
+              .toInt(),
+      renovacion: renovStr != null ? DateTime.tryParse(renovStr) : null,
     );
   }
 }

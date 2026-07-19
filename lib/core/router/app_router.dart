@@ -34,6 +34,7 @@ import 'package:ganajec/features/suscripcion/domain/usecase/get_planes_usecase.d
 import 'package:ganajec/features/suscripcion/domain/usecase/suscribirse_usecase.dart';
 import 'package:ganajec/features/suscripcion/data/repositories/suscripcion_repo_impl.dart';
 import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
+import 'package:ganajec/features/suscripcion/data/datasource/payment_remote_ds.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/editar_perfil/editar_perfil_screen.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_perfil_viewmodel.dart';
 import 'package:ganajec/features/ganadero/presentation/screens/mis_ganaderos/mis_ganaderos_screen.dart';
@@ -245,7 +246,7 @@ class AppRouter {
         path: AppRoutes.miPlan,
         builder: (context, state) {
           final ds = SuscripcionRemoteDataSourceImpl();
-          final repo = SuscripcionRepositoryImpl(ds);
+          final repo = SuscripcionRepositoryImpl(ds, PaymentRemoteDataSourceImpl());
           return ChangeNotifierProvider(
             create: (_) => MiPlanViewModel(
               getSuscripcion: GetSuscripcionUseCase(repo),
@@ -340,16 +341,18 @@ class AppRouter {
           final planInicial = planInicialStr != null
               ? PlanTipo.values.firstWhere(
                   (p) => p.name == planInicialStr,
-                  orElse: () => PlanTipo.basico,
+                  orElse: () => PlanTipo.pro,
                 )
               : null;
           final ds = SuscripcionRemoteDataSourceImpl();
-          final repo = SuscripcionRepositoryImpl(ds);
+          final paymentDs = PaymentRemoteDataSourceImpl();
+          final repo = SuscripcionRepositoryImpl(ds, paymentDs);
           return ChangeNotifierProvider(
             create: (_) => ElegirPlanViewModel(
               getSuscripcion: GetSuscripcionUseCase(repo),
               getPlanes: GetPlanesUseCase(repo),
               suscribirse: SuscribirseUseCase(repo),
+              paymentDs: paymentDs,
               planInicial: planInicial,
             ),
             child: const ElegirPlanScreen(),

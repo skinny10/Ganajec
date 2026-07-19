@@ -25,8 +25,6 @@ class MiPlanViewModel extends ChangeNotifier {
   bool get isLoading => _status == MiPlanStatus.loading;
   SuscripcionInfo? get suscripcion => _suscripcion;
   String? get error => _error;
-
-  // Planes para mostrar en la sección "Mejorar mi plan" (excluye el actual y gratuito)
   List<Plan> get planesUpgrade => _planesUpgrade;
 
   Future<void> cargar() async {
@@ -40,10 +38,12 @@ class MiPlanViewModel extends ChangeNotifier {
       ]);
       _suscripcion = results[0] as SuscripcionInfo;
       final todos = results[1] as List<Plan>;
-      final tipoActual = _suscripcion!.planActual.tipo;
-      _planesUpgrade = todos
-          .where((p) => p.tipo != PlanTipo.gratuito && p.tipo != tipoActual)
-          .toList();
+      final tipoActual = _suscripcion?.planActual.tipo;
+      _planesUpgrade = tipoActual != null
+          ? todos
+              .where((p) => p.tipo != PlanTipo.gratuito && p.tipo != tipoActual)
+              .toList()
+          : [];
       _status = MiPlanStatus.loaded;
     } catch (e) {
       _error = e.toString();

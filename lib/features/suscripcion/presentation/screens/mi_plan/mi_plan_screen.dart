@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
-import 'package:ganajec/share/domain/entities/plan.dart';
-import '../../viewmodels/mi_plan_viewmodel.dart';
-import 'mi_plan_components.dart';
+import 'package:ganajec/features/suscripcion/presentation/viewmodels/mi_plan_viewmodel.dart';
+import 'package:ganajec/features/suscripcion/presentation/widgets/suscripcion_app_bar.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/widgets/mi_plan_hero_card.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/widgets/mi_plan_usage_card.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/widgets/mi_plan_features_card.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/widgets/mi_plan_tip_card.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/mi_plan/widgets/mi_plan_upgrade_mini_card.dart';
 
 class MiPlanScreen extends StatefulWidget {
   const MiPlanScreen({super.key});
@@ -23,42 +27,13 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     final vm = context.watch<MiPlanViewModel>();
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.perfil),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
-          ),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Mi plan',
-          style: tt.titleMedium?.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.3,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: cs.outlineVariant),
-        ),
+      appBar: const SuscripcionAppBar(
+        title: 'Mi plan',
+        fallbackRoute: AppRoutes.perfil,
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -72,9 +47,13 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
   }
 
   Widget _buildContent(BuildContext context, MiPlanViewModel vm) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final suscripcion = vm.suscripcion!;
+    final cs = Theme.of(context).colorScheme;
+    final suscripcion = vm.suscripcion;
+
+    if (suscripcion == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 40),

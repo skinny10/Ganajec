@@ -3,9 +3,12 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
-import 'package:ganajec/share/domain/entities/plan.dart';
 import 'package:ganajec/features/suscripcion/presentation/viewmodels/elegir_plan_viewmodel.dart';
-import 'elegir_plan_components.dart';
+import 'package:ganajec/features/suscripcion/presentation/widgets/suscripcion_app_bar.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/widgets/elegir_plan_promo_header.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/widgets/elegir_plan_billing_toggle.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/widgets/elegir_plan_card.dart';
+import 'package:ganajec/features/suscripcion/presentation/screens/elegir_plan/widgets/elegir_plan_gplay_info.dart';
 
 class ElegirPlanScreen extends StatefulWidget {
   const ElegirPlanScreen({super.key});
@@ -27,10 +30,13 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
     final plan = vm.planSeleccionadoObj;
     if (plan == null || plan.esGratuito) return;
 
-    try {
-      final clientSecret = await vm.obtenerClientSecret();
-      if (clientSecret == null) return;
+    final clientSecret = await vm.obtenerClientSecret();
+    if (clientSecret == null) return;
 
+    debugPrint('[Stripe] clientSecret=$clientSecret');
+
+    try {
+      debugPrint('[Stripe] initPaymentSheet...');
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -38,34 +44,28 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
           style: ThemeMode.light,
         ),
       );
+      debugPrint('[Stripe] initPaymentSheet OK');
+    } catch (e, st) {
+      debugPrint('[Stripe] initPaymentSheet ERROR: $e');
+      debugPrint('[Stripe] stackTrace: $st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al inicializar pago: $e'),
+          backgroundColor: cs.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
+    try {
+      debugPrint('[Stripe] presentPaymentSheet...');
       await Stripe.instance.presentPaymentSheet();
-
-      final ok = await vm.confirmarSuscripcion();
-      if (!context.mounted) return;
-
-      if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('¡Suscripción al Plan ${plan.nombre} activada!'),
-            backgroundColor: cs.tertiary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (context.mounted) context.go(AppRoutes.perfil);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(vm.error ?? 'Error al confirmar la suscripción'),
-            backgroundColor: cs.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        vm.resetStatus();
-      }
+      debugPrint('[Stripe] presentPaymentSheet OK');
     } on StripeException catch (e) {
-      if (!context.mounted) return;
+      debugPrint('[Stripe] presentPaymentSheet StripeException: ${e.error.code} - ${e.error.localizedMessage}');
+      if (!mounted) return;
       if (e.error.code != FailureCode.Canceled) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -75,58 +75,110 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
           ),
         );
       }
-    } catch (e) {
-      if (!context.mounted) return;
-      final cs2 = Theme.of(context).colorScheme;
+      return;
+    } catch (e, st) {
+      debugPrint('[Stripe] presentPaymentSheet ERROR: $e');
+      debugPrint('[Stripe] stackTrace: $st');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: cs2.error,
+          content: Text('Error al mostrar formulario de pago: $e'),
+          backgroundColor: cs.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
+      return;
+    }
+
+    debugPrint('[Stripe] confirmando suscripción...');
+    final ok = await vm.confirmarSuscripcion();
+    debugPrint('[Stripe] confirmarSuscripcion result=$ok');
+    if (!mounted) return;
+
+    if (ok) {
+      final mensaje = vm.respuestaConfirmacion?['mensaje'] as String? ??
+          '¡Suscripción al Plan ${plan.nombre} activada!';
+      final features = plan.features
+          .where((f) => f.incluida)
+          .map((f) => '${f.emoji} ${f.label}')
+          .toList();
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: cs.tertiary, size: 28),
+              const SizedBox(width: 10),
+              const Expanded(child: Text('Pago exitoso')),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(mensaje, style: TextStyle(color: cs.onSurfaceVariant)),
+                const SizedBox(height: 16),
+                Text(
+                  'Funciones desbloqueadas:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...features.map(
+                  (f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check, size: 16, color: cs.tertiary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(f, style: TextStyle(fontSize: 13, color: cs.onSurface)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go(AppRoutes.perfil);
+              },
+              child: const Text('Ir a Mi Plan'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(vm.error ?? 'Error al confirmar la suscripción'),
+          backgroundColor: cs.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      vm.resetStatus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     final vm = context.watch<ElegirPlanViewModel>();
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.miPlan),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Icon(Icons.chevron_left, color: cs.onSurface, size: 20),
-          ),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Elegir plan',
-          style: tt.titleMedium?.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.3,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: cs.outlineVariant),
-        ),
+      appBar: const SuscripcionAppBar(
+        title: 'Elegir plan',
+        fallbackRoute: AppRoutes.miPlan,
       ),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -197,13 +249,13 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.onSurface,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: cs.onSurface.withOpacity(0.4),
+                  foregroundColor: cs.surface,
+                  disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
                   elevation: 4,
-                  shadowColor: cs.onSurface.withOpacity(0.18),
+                  shadowColor: cs.onSurface.withValues(alpha: 0.18),
                 ),
                 onPressed: disabled ? null : _abrirStripeSheet,
                 child: vm.isSubscribing
@@ -222,7 +274,7 @@ class _ElegirPlanScreenState extends State<ElegirPlanScreen> {
                           Text(
                             isActual ? 'Plan actual' : vm.textoPrecioBoton,
                             style: tt.labelLarge?.copyWith(
-                              color: Colors.white,
+                              color: cs.surface,
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                             ),

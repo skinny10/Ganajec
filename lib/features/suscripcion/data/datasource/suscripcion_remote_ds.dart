@@ -9,7 +9,6 @@ import '../models/suscripcion_model.dart';
 abstract class SuscripcionRemoteDataSource {
   Future<SuscripcionInfo> getSuscripcion();
   Future<List<Plan>> getPlanes();
-  Future<bool> suscribirse(PlanTipo tipo, {required bool esAnual});
 }
 
 class SuscripcionRemoteDataSourceImpl implements SuscripcionRemoteDataSource {
@@ -50,16 +49,4 @@ class SuscripcionRemoteDataSourceImpl implements SuscripcionRemoteDataSource {
   @override
   Future<List<Plan>> getPlanes() async => kPlanes;
 
-  // ── POST /dueno/suscripcion ───────────────────────────────────────────────
-  @override
-  Future<bool> suscribirse(PlanTipo tipo, {required bool esAnual}) async {
-    await _dio.post(
-      ApiConstants.suscribirse,
-      data: {
-        'plan': tipo.name,
-        'es_anual': esAnual,
-      },
-    );
-    return true;
-  }
 }

@@ -8,7 +8,7 @@ class ApiConstants {
 
 
 
-  static const String baseUrl = 'http://192.168.1.102:8000/api';
+  static const String baseUrl = 'http://192.168.1.40:8000/api';
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
@@ -148,9 +148,6 @@ class ApiConstants {
   static String suscripcionDueno(String duenoId) =>
       '/dueno/$duenoId/suscripcion';
 
-  /// POST /dueno/suscripcion   { plan, es_anual }
-  static const String suscribirse = '/dueno/suscripcion';
-
   // ── Dueño — vistas globales ───────────────────────────────────────────────────
   /// GET /dueno/bovinos  — todos los bovinos de todos sus ranchos
   static const String bovinosDueno = '/dueno/bovinos';
@@ -167,4 +164,11 @@ class ApiConstants {
 // ── Pagos ────────────────────────────────────────────────────────────────────
 /// POST /payments/create-intent  { amount, currency }
 static const String createPaymentIntent = '/payments/create-intent';
+
+/// GET /payments/planes — catálogo de planes con UUIDs del backend
+static const String planesBackend = '/payments/planes';
+
+/// POST /dueno/{dueno_id}/suscripcion — confirmar suscripción tras pago
+static String confirmarSuscripcion(String duenoId) =>
+    '/dueno/$duenoId/suscripcion';
 }

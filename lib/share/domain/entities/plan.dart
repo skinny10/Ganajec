@@ -1,4 +1,4 @@
-enum PlanTipo { gratuito, basico, pro, cooperativa }
+enum PlanTipo { gratuito, pro }
 
 class PlanFeature {
   final String emoji;
@@ -12,6 +12,7 @@ class Plan {
   final String nombre;
   final String descripcion;
   final int precioMensual;
+  final int precioAnual;
   final int? bovinosMax;      // null = ilimitado
   final int analisisMes;
   final int historialDias;
@@ -23,6 +24,7 @@ class Plan {
     required this.nombre,
     required this.descripcion,
     required this.precioMensual,
+    required this.precioAnual,
     this.bovinosMax,
     required this.analisisMes,
     required this.historialDias,
@@ -32,8 +34,7 @@ class Plan {
 
   bool get esGratuito => tipo == PlanTipo.gratuito;
 
-  int get precioAnual => (precioMensual * 12 * 0.8).round();
-  int get precioAnualMensual => (precioMensual * 0.8).round();
+  int get precioAnualMensual => (precioAnual / 12).round();
 
   String get precioTexto => precioMensual == 0
       ? 'Sin costo · Sin tarjeta requerida'
@@ -43,13 +44,13 @@ class Plan {
       bovinosMax == null ? 'Hato ilimitado' : 'Hasta $bovinosMax bovinos';
 }
 
-// Catálogo global de planes
 const kPlanes = [
   Plan(
     tipo: PlanTipo.gratuito,
     nombre: 'Gratuito',
     descripcion: 'Para empezar sin compromiso',
     precioMensual: 0,
+    precioAnual: 0,
     bovinosMax: 5,
     analisisMes: 20,
     historialDias: 30,
@@ -63,49 +64,23 @@ const kPlanes = [
     ],
   ),
   Plan(
-    tipo: PlanTipo.basico,
-    nombre: 'Básico',
-    descripcion: 'Para ganaderos activos',
-    precioMensual: 149,
-    bovinosMax: null,
-    analisisMes: 999,
-    historialDias: 180,
-    features: [
-      PlanFeature(emoji: '🐄', label: 'Hato ilimitado de bovinos', incluida: true),
-      PlanFeature(emoji: '🔔', label: 'Alertas push automáticas', incluida: true),
-      PlanFeature(emoji: '📊', label: 'Historial de 6 meses', incluida: true),
-      PlanFeature(emoji: '📄', label: 'Reportes PDF / CSV', incluida: false),
-    ],
-  ),
-  Plan(
     tipo: PlanTipo.pro,
     nombre: 'Pro',
     descripcion: 'Para ranchos en crecimiento',
-    precioMensual: 349,
+    precioMensual: 200,
+    precioAnual: 2000,
     bovinosMax: null,
     analisisMes: 999,
     historialDias: 365,
     popular: true,
     features: [
-      PlanFeature(emoji: '✅', label: 'Todo lo del plan Básico', incluida: true),
-      PlanFeature(emoji: '📄', label: 'Reportes PDF y CSV', incluida: true),
-      PlanFeature(emoji: '🧠', label: 'NLP avanzado en texto libre', incluida: true),
+      PlanFeature(emoji: '🐄', label: 'Hato ilimitado de bovinos', incluida: true),
+      PlanFeature(emoji: '🧠', label: 'Predicción de enfermedades', incluida: true),
+      PlanFeature(emoji: '📝', label: 'NLP avanzado en texto libre', incluida: true),
+      PlanFeature(emoji: '📊', label: 'Historial extendido (12 meses)', incluida: true),
+      PlanFeature(emoji: '🔔', label: 'Alertas push automáticas', incluida: true),
+      PlanFeature(emoji: '📄', label: 'Reportes PDF / CSV', incluida: true),
       PlanFeature(emoji: '🩺', label: 'Dashboard veterinario', incluida: true),
-    ],
-  ),
-  Plan(
-    tipo: PlanTipo.cooperativa,
-    nombre: 'Cooperativa',
-    descripcion: 'Para múltiples usuarios',
-    precioMensual: 1200,
-    bovinosMax: null,
-    analisisMes: 999,
-    historialDias: 365,
-    features: [
-      PlanFeature(emoji: '👥', label: 'Hasta 20 usuarios', incluida: true),
-      PlanFeature(emoji: '🗺️', label: 'Mapa de incidencia', incluida: true),
-      PlanFeature(emoji: '👔', label: 'Supervisor regional incluido', incluida: true),
-      PlanFeature(emoji: '🎯', label: 'Soporte prioritario', incluida: true),
     ],
   ),
 ];

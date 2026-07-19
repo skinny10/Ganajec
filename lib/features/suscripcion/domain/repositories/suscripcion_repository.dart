@@ -4,5 +4,10 @@ import 'package:ganajec/share/domain/entities/suscripcion_info.dart';
 abstract class SuscripcionRepository {
   Future<SuscripcionInfo> getSuscripcion();
   Future<List<Plan>> getPlanes();
-  Future<bool> suscribirse(PlanTipo tipo, {required bool esAnual});
+  Future<Map<String, dynamic>> confirmarPago({
+    required String paymentIntentId,
+    required String planId,
+    required int monto,
+    required String moneda,
+  });
 }

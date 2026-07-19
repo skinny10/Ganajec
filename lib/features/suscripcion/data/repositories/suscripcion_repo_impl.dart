@@ -1,19 +1,35 @@
 import 'package:ganajec/share/domain/entities/plan.dart';
 import 'package:ganajec/share/domain/entities/suscripcion_info.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/features/suscripcion/domain/repositories/suscripcion_repository.dart';
 import 'package:ganajec/features/suscripcion/data/datasource/suscripcion_remote_ds.dart';
+import 'package:ganajec/features/suscripcion/data/datasource/payment_remote_ds.dart';
 
 class SuscripcionRepositoryImpl implements SuscripcionRepository {
-  final SuscripcionRemoteDataSource _ds;
-  SuscripcionRepositoryImpl(this._ds);
+  final SuscripcionRemoteDataSource _suscripcionDs;
+  final PaymentRemoteDataSource _paymentDs;
+  SuscripcionRepositoryImpl(this._suscripcionDs, this._paymentDs);
 
   @override
-  Future<SuscripcionInfo> getSuscripcion() => _ds.getSuscripcion();
+  Future<SuscripcionInfo> getSuscripcion() => _suscripcionDs.getSuscripcion();
 
   @override
-  Future<List<Plan>> getPlanes() => _ds.getPlanes();
+  Future<List<Plan>> getPlanes() => _suscripcionDs.getPlanes();
 
   @override
-  Future<bool> suscribirse(PlanTipo tipo, {required bool esAnual}) =>
-      _ds.suscribirse(tipo, esAnual: esAnual);
+  Future<Map<String, dynamic>> confirmarPago({
+    required String paymentIntentId,
+    required String planId,
+    required int monto,
+    required String moneda,
+  }) {
+    final duenoId = TokenStorage.userId ?? '';
+    return _paymentDs.confirmarSuscripcion(
+      duenoId: duenoId,
+      paymentIntentId: paymentIntentId,
+      planId: planId,
+      monto: monto,
+      moneda: moneda,
+    );
+  }
 }

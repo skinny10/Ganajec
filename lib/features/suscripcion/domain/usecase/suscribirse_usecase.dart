@@ -1,9 +1,19 @@
-import 'package:ganajec/share/domain/entities/plan.dart';
 import '../repositories/suscripcion_repository.dart';
 
 class SuscribirseUseCase {
   final SuscripcionRepository _repo;
   SuscribirseUseCase(this._repo);
-  Future<bool> call(PlanTipo tipo, {required bool esAnual}) =>
-      _repo.suscribirse(tipo, esAnual: esAnual);
+
+  Future<Map<String, dynamic>> call({
+    required String paymentIntentId,
+    required String planId,
+    required int monto,
+    required String moneda,
+  }) =>
+      _repo.confirmarPago(
+        paymentIntentId: paymentIntentId,
+        planId: planId,
+        monto: monto,
+        moneda: moneda,
+      );
 }
