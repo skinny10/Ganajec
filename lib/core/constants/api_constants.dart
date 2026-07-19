@@ -8,7 +8,7 @@ class ApiConstants {
 
 
 
-  static const String baseUrl = 'http://192.168.1.40:8000/api';
+  static const String baseUrl = 'http://192.168.0.23:8000/api';
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
@@ -171,4 +171,23 @@ static const String planesBackend = '/payments/planes';
 /// POST /dueno/{dueno_id}/suscripcion — confirmar suscripción tras pago
 static String confirmarSuscripcion(String duenoId) =>
     '/dueno/$duenoId/suscripcion';
+
+// ── Admin ──────────────────────────────────────────────────────────────────
+/// GET /admin/usuarios — lista todos los usuarios
+static const String adminUsuarios = '/admin/usuarios';
+
+/// PUT /admin/usuarios/{id} — editar usuario
+static String adminUsuario(String id) => '/admin/usuarios/$id';
+
+/// DELETE /admin/usuarios/{id} — eliminar usuario
+/// (usa el mismo adminUsuario)
+
+/// GET /admin/ranchos — lista todos los ranchos
+static const String adminRanchos = '/admin/ranchos';
+
+/// GET /admin/sistema/estado — estado del sistema
+static const String adminSistemaEstado = '/admin/sistema/estado';
+
+/// GET /admin/{admin_id} — perfil del admin
+static String adminPerfil(String adminId) => '/admin/$adminId';
 }

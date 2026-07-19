@@ -67,6 +67,12 @@ import 'package:ganajec/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:ganajec/features/auth/data/datasources/auth_remote_ds.dart';
 import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:ganajec/share/domain/entities/plan.dart';
+import 'package:ganajec/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:ganajec/features/admin/presentation/screens/admin_usuarios_screen.dart';
+import 'package:ganajec/features/admin/presentation/screens/admin_ranchos_screen.dart';
+import 'package:ganajec/features/admin/presentation/viewmodels/admin_usuarios_viewmodel.dart';
+import 'package:ganajec/features/admin/presentation/viewmodels/admin_ranchos_viewmodel.dart';
+import 'package:ganajec/features/admin/presentation/viewmodels/admin_dashboard_viewmodel.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -97,6 +103,11 @@ class AppRoutes {
   static const String verificarEmail = '/verificar-email';
   static const String solicitarCodigo = '/solicitar-codigo';
   static const String nuevaContrasena = '/nueva-contrasena';
+
+  // ── Admin ──────────────────────────────────────────────────────────────
+  static const String adminDashboard = '/admin-dashboard';
+  static const String adminUsuarios = '/admin-usuarios';
+  static const String adminRanchos = '/admin-ranchos';
 }
 
 class AppRouter {
@@ -358,6 +369,29 @@ class AppRouter {
             child: const ElegirPlanScreen(),
           );
         },
+      ),
+
+      // ── Admin ──────────────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.adminDashboard,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => AdminDashboardViewModel(),
+          child: const AdminDashboardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.adminUsuarios,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => AdminUsuariosViewModel(),
+          child: const AdminUsuariosScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.adminRanchos,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => AdminRanchosViewModel(),
+          child: const AdminRanchosScreen(),
+        ),
       ),
     ],
   );
