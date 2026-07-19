@@ -73,7 +73,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (vm.estado != null) ...[
-                    _MetricasGrid(estado: vm.estado!),
+                    _MetricasGrid(
+                      estado: vm.estado!,
+                      totalGanaderos: vm.totalGanaderos,
+                      totalDuenos: vm.totalDuenos,
+                      totalAdmins: vm.totalAdmins,
+                    ),
                     const SizedBox(height: 24),
                   ],
                   Text(
@@ -107,7 +112,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
 class _MetricasGrid extends StatelessWidget {
   final dynamic estado;
-  const _MetricasGrid({required this.estado});
+  final int totalGanaderos;
+  final int totalDuenos;
+  final int totalAdmins;
+
+  const _MetricasGrid({
+    required this.estado,
+    required this.totalGanaderos,
+    required this.totalDuenos,
+    required this.totalAdmins,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +152,24 @@ class _MetricasGrid extends StatelessWidget {
         valor: '${estado.totalBovinos}',
         icono: Icons.pets_outlined,
         color: cs.error,
+      ),
+      _Metrica(
+        titulo: 'Ganaderos',
+        valor: '$totalGanaderos',
+        icono: Icons.agriculture_outlined,
+        color: const Color(0xFF6D4C41),
+      ),
+      _Metrica(
+        titulo: 'Dueños',
+        valor: '$totalDuenos',
+        icono: Icons.business_center_outlined,
+        color: const Color(0xFF00796B),
+      ),
+      _Metrica(
+        titulo: 'Admins',
+        valor: '$totalAdmins',
+        icono: Icons.admin_panel_settings_outlined,
+        color: const Color(0xFFC62828),
       ),
     ];
 

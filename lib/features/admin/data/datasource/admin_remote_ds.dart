@@ -44,6 +44,6 @@ class AdminRemoteDataSource {
 
   Future<SistemaEstado> getEstadoSistema() async {
     final res = await _dio.get(ApiConstants.adminSistemaEstado);
-    return SistemaEstado.fromJson(res.data as Map<String, dynamic>);
+    return SistemaEstado.fromJson(res.data['estadisticas'] as Map<String, dynamic>);
   }
 }
