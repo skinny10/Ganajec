@@ -100,19 +100,56 @@ class FcmService {
     if (token != null) {
       await enviarTokenAlBackend(token);
     }
+
+    final yaNotificado = TokenStorage.notifBienvenida;
+    final role = TokenStorage.role;
+    final uid = TokenStorage.userId ?? '';
+    debugPrint('[FCM] registrar -> role=$role ya=$yaNotificado uid=$uid');
+
+    if (role == 'ganadero' && !yaNotificado && uid.isNotEmpty) {
+      try {
+        debugPrint('[FCM] Consultando perfil del ganadero para notificación...');
+        final res = await _dio.get('/ganadero/$uid');
+        final data = res.data as Map<String, dynamic>;
+        debugPrint('[FCM] Respuesta perfil: ${data.toString().length} chars');
+
+        String? ranchoName;
+        final ranchos = data['ranchos'] as List?;
+        if (ranchos != null && ranchos.isNotEmpty) {
+          final r = ranchos.first as Map<String, dynamic>;
+          ranchoName = r['nombre'] as String?;
+        } else {
+          final inline = data['rancho'] as Map<String, dynamic>?;
+          ranchoName = inline?['nombre'] as String?;
+        }
+
+        debugPrint('[FCM] ranchoName=$ranchoName');
+        if (ranchoName != null && ranchoName.isNotEmpty && ranchoName != '—') {
+          final body = 'Has sido asignado al rancho $ranchoName';
+          await showLocalNotification('GANAJEC', body);
+        }
+      } catch (e) {
+        debugPrint('[FCM] Error consultando rancho: $e');
+      }
+      await TokenStorage.setNotifBienvenida(true);
+    }
   }
 
   static Future<void> mostrarBienvenidaSiAplica() async {
     final yaNotificado = TokenStorage.notifBienvenida;
     final role = TokenStorage.role;
-    if (role != 'ganadero' || yaNotificado) return;
     final ranchoNombre = TokenStorage.ranchoNombre;
+    final ranchoId = TokenStorage.ranchoId;
+    debugPrint('[FCM] mostrarBienvenidaSiAplica -> role=$role ya=$yaNotificado ranchoId=$ranchoId ranchoNombre=$ranchoNombre');
+    if (role != 'ganadero' || yaNotificado) return;
     if (ranchoNombre == null || ranchoNombre.isEmpty || ranchoNombre == '—') return;
+    debugPrint('[FCM] Mostrando notificación de bienvenida...');
     await showLocalNotification(
       'GANAJEC',
       'Has sido asignado al rancho $ranchoNombre',
     );
     await TokenStorage.setNotifBienvenida(true);
+    debugPrint('[FCM] Notificación de bienvenida marcada como mostrada');
   }
 
   static Future<void> initHandlers() async {
