@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
@@ -122,6 +123,22 @@ class AppRouter {
   static final router = GoRouter(
     initialLocation: AppRoutes.login,
     observers: [routeObserver],
+    redirect: (context, state) {
+      final role = TokenStorage.role;
+      final path = state.matchedLocation;
+
+      final adminRoutes = [
+        AppRoutes.adminDashboard,
+        AppRoutes.adminUsuarios,
+        AppRoutes.adminRanchos,
+        AppRoutes.adminAuditoria,
+      ];
+
+      if (adminRoutes.contains(path) && role != 'admin') {
+        return AppRoutes.login;
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.login,
