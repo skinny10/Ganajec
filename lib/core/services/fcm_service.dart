@@ -130,11 +130,11 @@ class FcmService {
         if (ranchoName != null && ranchoName.isNotEmpty && ranchoName != '—') {
           final body = 'Has sido asignado al rancho $ranchoName';
           await showLocalNotification('GANAJEC', body);
+          await TokenStorage.setNotifBienvenida(true);
         }
       } catch (e) {
         debugPrint('[FCM] Error consultando rancho: $e');
       }
-      await TokenStorage.setNotifBienvenida(true);
     }
   }
 
