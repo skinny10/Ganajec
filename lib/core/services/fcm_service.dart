@@ -34,10 +34,13 @@ Future<void> _initLocalNotif() async {
       AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(androidChannel);
 }
 
+int _notifId = 0;
+
 Future<void> showLocalNotification(String title, String body) async {
   try {
+    _notifId = (_notifId + 1) % 2147483647;
     await _localNotif.show(
-      DateTime.now().millisecondsSinceEpoch,
+      _notifId,
       title,
       body,
       const NotificationDetails(
