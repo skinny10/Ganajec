@@ -34,7 +34,7 @@ Future<void> _initLocalNotif() async {
       AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(androidChannel);
 }
 
-Future<void> _showNotification(String title, String body) async {
+Future<void> showLocalNotification(String title, String body) async {
   try {
     await _localNotif.show(
       DateTime.now().millisecondsSinceEpoch,
@@ -100,29 +100,19 @@ class FcmService {
     if (token != null) {
       await enviarTokenAlBackend(token);
     }
+  }
 
+  static Future<void> mostrarBienvenidaSiAplica() async {
     final yaNotificado = TokenStorage.notifBienvenida;
     final role = TokenStorage.role;
-    final uid = TokenStorage.userId ?? '';
-
-    if (role == 'ganadero' && !yaNotificado && uid.isNotEmpty) {
-      try {
-        final res = await _dio.get('/ganadero/$uid');
-        final data = res.data as Map<String, dynamic>;
-        final ranchos = data['ranchos'] as List?;
-        if (ranchos != null && ranchos.isNotEmpty) {
-          final r = ranchos.first as Map<String, dynamic>;
-          final ranchoName = r['nombre'] as String? ?? '';
-          final body = ranchoName.isNotEmpty
-              ? 'Has sido asignado al rancho $ranchoName'
-              : 'Has sido asignado a un rancho';
-          await _showNotification('GANAJEC', body);
-        }
-      } catch (e) {
-        debugPrint('[FCM] Error verificando rancho para notificación: $e');
-      }
-      await TokenStorage.setNotifBienvenida(true);
-    }
+    if (role != 'ganadero' || yaNotificado) return;
+    final ranchoNombre = TokenStorage.ranchoNombre;
+    if (ranchoNombre == null || ranchoNombre.isEmpty || ranchoNombre == '—') return;
+    await showLocalNotification(
+      'GANAJEC',
+      'Has sido asignado al rancho $ranchoNombre',
+    );
+    await TokenStorage.setNotifBienvenida(true);
   }
 
   static Future<void> initHandlers() async {
@@ -145,7 +135,7 @@ class FcmService {
           ?? message.data['message']
           ?? '';
 
-      _showNotification(title, body);
+      showLocalNotification(title, body);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {

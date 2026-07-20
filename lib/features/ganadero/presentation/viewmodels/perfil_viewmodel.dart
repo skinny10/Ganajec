@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/core/network/token_storage.dart';
+import 'package:ganajec/core/services/fcm_service.dart';
 import 'package:ganajec/features/auth/domain/entities/user.dart';
 import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:ganajec/share/domain/entities/rancho.dart';
@@ -226,6 +227,8 @@ class PerfilViewModel extends ChangeNotifier {
       _status = PerfilStatus.error;
     }
     notifyListeners();
+    // Mostrar notificación de bienvenida si aplica (después de cargar rancho)
+    FcmService.mostrarBienvenidaSiAplica();
   }
 
   // ── Toggles de notificaciones ─────────────────────────────────────────────
