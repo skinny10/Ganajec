@@ -8,7 +8,7 @@ class ApiConstants {
 
 
 
-  static const String baseUrl = 'http://192.168.0.23:8000/api';
+  static const String baseUrl = 'http://10.71.62.231:8000/api';
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
@@ -20,6 +20,8 @@ class ApiConstants {
   static const String verificarEmail = '/auth/verificar-email';
   static const String solicitarRecuperacion = '/auth/solicitar-recuperacion';
   static const String restablecerPassword = '/auth/restablecer-password';
+  /// PUT /auth/fcm-token  { fcm_token }
+  static const String actualizarFcmToken = '/auth/fcm-token';
 
   // ── Ganadero — perfil ────────────────────────────────────────────────────────
   /// GET /ganadero/{ganadero_id}

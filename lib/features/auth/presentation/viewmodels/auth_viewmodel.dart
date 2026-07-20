@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:ganajec/core/services/fcm_service.dart';
 import 'package:ganajec/features/auth/domain/entities/user.dart';
 import 'package:ganajec/features/auth/domain/usecase/login_usecase.dart';
 import 'package:ganajec/features/auth/domain/usecase/logout_usecase.dart';
@@ -37,6 +39,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       _user = await _loginUseCase(email: email, password: password);
       _setStatus(AuthStatus.success);
+      unawaited(FcmService().registrar());
     } catch (e) {
       _errorMessage = _mapLoginError(e);
       _setStatus(AuthStatus.error);
