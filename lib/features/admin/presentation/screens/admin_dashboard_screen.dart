@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 import 'package:ganajec/core/router/app_router.dart';
 import '../viewmodels/admin_dashboard_viewmodel.dart';
 
@@ -30,19 +31,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => context.go(AppRoutes.home),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Icon(Icons.chevron_left_rounded,
-                color: cs.onSurface, size: 20),
-          ),
-        ),
         centerTitle: true,
         title: Text(
           'Panel de administración',
@@ -57,6 +45,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             onPressed: () => context.read<AdminDashboardViewModel>().cargar(),
             icon: Icon(Icons.refresh_outlined,
                 color: cs.onSurfaceVariant, size: 20),
+          ),
+          IconButton(
+            onPressed: () async {
+              await TokenStorage.clear();
+              if (context.mounted) context.go(AppRoutes.login);
+            },
+            icon: Icon(Icons.logout_outlined,
+                color: cs.error, size: 20),
           ),
         ],
         bottom: PreferredSize(
