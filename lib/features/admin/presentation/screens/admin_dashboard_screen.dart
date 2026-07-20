@@ -103,6 +103,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     subtitulo: 'Ver todos los ranchos registrados',
                     onTap: () => context.push(AppRoutes.adminRanchos),
                   ),
+                  const SizedBox(height: 10),
+                  _AccesoRapido(
+                    icon: Icons.history_outlined,
+                    titulo: 'Ver auditoría',
+                    subtitulo: 'Historial de acciones del sistema',
+                    onTap: () => context.push(AppRoutes.adminAuditoria),
+                  ),
                 ],
               ),
             ),

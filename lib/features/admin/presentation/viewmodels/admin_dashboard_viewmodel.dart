@@ -19,6 +19,7 @@ class AdminDashboardViewModel extends ChangeNotifier {
   String? get error => _error;
   bool get isLoading => _status == AdminDashboardStatus.loading;
   SistemaEstado? get estado => _estado;
+  List<AuditLog> get logs => _estado?.logs ?? [];
   int get totalGanaderos => _totalGanaderos;
   int get totalDuenos => _totalDuenos;
   int get totalAdmins => _totalAdmins;

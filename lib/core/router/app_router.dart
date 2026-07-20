@@ -70,6 +70,7 @@ import 'package:ganajec/share/domain/entities/plan.dart';
 import 'package:ganajec/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:ganajec/features/admin/presentation/screens/admin_usuarios_screen.dart';
 import 'package:ganajec/features/admin/presentation/screens/admin_ranchos_screen.dart';
+import 'package:ganajec/features/admin/presentation/screens/admin_auditoria_screen.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_usuarios_viewmodel.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_ranchos_viewmodel.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_dashboard_viewmodel.dart';
@@ -108,6 +109,7 @@ class AppRoutes {
   static const String adminDashboard = '/admin-dashboard';
   static const String adminUsuarios = '/admin-usuarios';
   static const String adminRanchos = '/admin-ranchos';
+  static const String adminAuditoria = '/admin-auditoria';
 }
 
 class AppRouter {
@@ -391,6 +393,13 @@ class AppRouter {
         builder: (context, state) => ChangeNotifierProvider(
           create: (_) => AdminRanchosViewModel(),
           child: const AdminRanchosScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.adminAuditoria,
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => AdminDashboardViewModel(),
+          child: const AdminAuditoriaScreen(),
         ),
       ),
     ],
