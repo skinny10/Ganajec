@@ -16,7 +16,7 @@ class TokenStorage {
   static const _kRole         = 'user_role';
   static const _kName         = 'user_name';
   static const _kEmail        = 'user_email';
-  static const _kNotifBienvenida = 'notif_bienvenida';
+  static const _kNotifBienvenida = 'notif_bienvenida_v2';
 
   // ── Inicialización ────────────────────────────────────────────────────────────
   static Future<void> init() async {
