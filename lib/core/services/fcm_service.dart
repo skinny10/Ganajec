@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:ganajec/core/constants/api_constants.dart';
 import 'package:ganajec/core/network/api_client.dart';
+import 'package:ganajec/core/network/token_storage.dart';
 
 final FlutterLocalNotificationsPlugin _localNotif = FlutterLocalNotificationsPlugin();
 bool _initialized = false;
@@ -98,6 +99,29 @@ class FcmService {
     final token = await getToken();
     if (token != null) {
       await enviarTokenAlBackend(token);
+    }
+
+    final yaNotificado = TokenStorage.notifBienvenida;
+    final role = TokenStorage.role;
+    final uid = TokenStorage.userId ?? '';
+
+    if (role == 'ganadero' && !yaNotificado && uid.isNotEmpty) {
+      try {
+        final res = await _dio.get('/ganadero/$uid');
+        final data = res.data as Map<String, dynamic>;
+        final ranchos = data['ranchos'] as List?;
+        if (ranchos != null && ranchos.isNotEmpty) {
+          final r = ranchos.first as Map<String, dynamic>;
+          final ranchoName = r['nombre'] as String? ?? '';
+          final body = ranchoName.isNotEmpty
+              ? 'Has sido asignado al rancho $ranchoName'
+              : 'Has sido asignado a un rancho';
+          await _showNotification('GANAJEC', body);
+        }
+      } catch (e) {
+        debugPrint('[FCM] Error verificando rancho para notificación: $e');
+      }
+      await TokenStorage.setNotifBienvenida(true);
     }
   }
 

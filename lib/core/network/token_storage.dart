@@ -16,6 +16,7 @@ class TokenStorage {
   static const _kRole         = 'user_role';
   static const _kName         = 'user_name';
   static const _kEmail        = 'user_email';
+  static const _kNotifBienvenida = 'notif_bienvenida';
 
   // ── Inicialización ────────────────────────────────────────────────────────────
   static Future<void> init() async {
@@ -32,6 +33,11 @@ class TokenStorage {
   static String? get role         => _prefs?.getString(_kRole);
   static String? get userName     => _prefs?.getString(_kName);
   static String? get email        => _prefs?.getString(_kEmail);
+  static bool get notifBienvenida => _prefs?.getBool(_kNotifBienvenida) ?? false;
+
+  static Future<void> setNotifBienvenida(bool value) async {
+    await _prefs?.setBool(_kNotifBienvenida, value);
+  }
 
   static bool get isLoggedIn {
     final t = token;
@@ -95,6 +101,7 @@ class TokenStorage {
       _prefs!.remove(_kRole),
       _prefs!.remove(_kName),
       _prefs!.remove(_kEmail),
+      _prefs!.remove(_kNotifBienvenida),
     ]);
   }
 }
