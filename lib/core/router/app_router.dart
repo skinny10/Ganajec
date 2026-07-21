@@ -75,6 +75,7 @@ import 'package:ganajec/features/admin/presentation/screens/admin_auditoria_scre
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_usuarios_viewmodel.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_ranchos_viewmodel.dart';
 import 'package:ganajec/features/admin/presentation/viewmodels/admin_dashboard_viewmodel.dart';
+import 'package:ganajec/features/seguridad/presentation/screens/prueba_conexion_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -111,6 +112,9 @@ class AppRoutes {
   static const String adminUsuarios = '/admin-usuarios';
   static const String adminRanchos = '/admin-ranchos';
   static const String adminAuditoria = '/admin-auditoria';
+
+  // ── Seguridad ───────────────────────────────────────────────────────────
+  static const String pruebaConexion = '/prueba-conexion';
 }
 
 class AppRouter {
@@ -418,6 +422,10 @@ class AppRouter {
           create: (_) => AdminDashboardViewModel(),
           child: const AdminAuditoriaScreen(),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.pruebaConexion,
+        builder: (_, __) => const PruebaConexionScreen(),
       ),
     ],
   );

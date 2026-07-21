@@ -9,6 +9,8 @@ class PrediccionModel extends Prediccion {
     required super.confianza,
     required super.fecha,
     super.animalIdExterno,
+    super.severidad,
+    super.sintomasNlp,
   });
 
   /// Parsea un elemento de la lista `predicciones` de la API.
@@ -21,6 +23,7 @@ class PrediccionModel extends Prediccion {
     Map<String, dynamic> json, {
     String? animalId,
     String? animalNombre,
+    List<String>? sintomasNlp,
   }) {
     final bovino = json['bovino'] as Map<String, dynamic>?;
     return PrediccionModel(
@@ -31,12 +34,14 @@ class PrediccionModel extends Prediccion {
       animalIdExterno: bovino?['id_externo'] as String? ?? '',
       enfermedad: json['enfermedad'] as String? ?? 'Sin diagnóstico',
       confianza: (json['confianza'] as num? ?? 0).toDouble(),
+      severidad: json['severidad'] as String? ?? '',
       // v2: POST /registros-sintomas tampoco devuelve generado_en
       fecha: json['generado_en'] != null
           ? DateTime.parse(json['generado_en'] as String)
           : json['fecha'] != null
               ? DateTime.parse(json['fecha'] as String)
               : DateTime.now(),
+      sintomasNlp: sintomasNlp ?? const [],
     );
   }
 
