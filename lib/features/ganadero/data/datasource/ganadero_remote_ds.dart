@@ -203,10 +203,15 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
     final res =
         await _dio.post(ApiConstants.registroSintomas, data: body);
     final pred = res.data['prediccion'] as Map<String, dynamic>;
+    // Lee los síntomas que extrajo el NLP de la API (BETO).
+    // La API devuelve "sintomas_nlp": ["fiebre", "diarrea", ...]
+    final sintomasNlpRaw = res.data['sintomas_nlp'] as List<dynamic>? ?? [];
+    final sintomasNlp = sintomasNlpRaw.map((e) => e.toString()).toList();
     return PrediccionModel.fromJson(
       pred,
       animalId: registro.animalId,
       animalNombre: '',
+      sintomasNlp: sintomasNlp,
     );
   }
 
@@ -307,36 +312,47 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
   }
 
   // ────────────────────────────────────────────────────────────────────────────
-  // HISTORIAL PRODUCTIVO — MOCK (no existe endpoint en la API)
+  // HISTORIAL PRODUCTIVO — GET /ganadero/bovinos/{id}/graficas
   // ────────────────────────────────────────────────────────────────────────────
 
   @override
   Future<List<HistorialProductivoModel>> getHistorialAnimal(
       String animalId) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    final now = DateTime.now();
+    final res = await _dio.get(ApiConstants.graficasBovino(animalId));
+    final graficas = res.data['graficas'] as Map<String, dynamic>? ?? {};
 
-    if (animalId == '1') {
-      return [
-        HistorialProductivoModel(id: 'h1', animalId: animalId, fecha: now.subtract(const Duration(days: 6)), litrosLeche: 18.5, kgAlimento: 12.0, temperatura: 38.5, anomaliaDetectada: false),
-        HistorialProductivoModel(id: 'h2', animalId: animalId, fecha: now.subtract(const Duration(days: 5)), litrosLeche: 18.0, kgAlimento: 12.0, temperatura: 38.4, anomaliaDetectada: false),
-        HistorialProductivoModel(id: 'h3', animalId: animalId, fecha: now.subtract(const Duration(days: 4)), litrosLeche: 17.5, kgAlimento: 11.8, temperatura: 38.6, anomaliaDetectada: false),
-        HistorialProductivoModel(id: 'h4', animalId: animalId, fecha: now.subtract(const Duration(days: 3)), litrosLeche: 19.0, kgAlimento: 12.2, temperatura: 38.3, anomaliaDetectada: false),
-        HistorialProductivoModel(id: 'h5', animalId: animalId, fecha: now.subtract(const Duration(days: 2)), litrosLeche: 12.0, kgAlimento: 10.5, temperatura: 39.2, anomaliaDetectada: true),
-        HistorialProductivoModel(id: 'h6', animalId: animalId, fecha: now.subtract(const Duration(days: 1)), litrosLeche: 8.0, kgAlimento: 9.0, temperatura: 39.5, anomaliaDetectada: true),
-        HistorialProductivoModel(id: 'h7', animalId: animalId, fecha: now, litrosLeche: 5.0, kgAlimento: 8.5, temperatura: 39.8, anomaliaDetectada: true),
-      ];
+    // Construye un mapa fecha → {temperatura, leche, alimento}
+    // para unir las tres series en registros individuales.
+    final Map<String, Map<String, double>> byFecha = {};
+
+    void _merge(String serieKey, String field) {
+      final list = graficas[serieKey] as List<dynamic>? ?? [];
+      for (final item in list) {
+        final m = item as Map<String, dynamic>;
+        final fecha = m['fecha'] as String;
+        byFecha.putIfAbsent(fecha, () => {});
+        final valor = (m['valor'] as num?)?.toDouble();
+        if (valor != null) byFecha[fecha]![field] = valor;
+      }
     }
 
-    return List.generate(7, (i) {
-      final liters = 14.0 + (i % 3) * 1.5;
+    _merge('temperatura_corporal',    'temperatura');
+    _merge('produccion_leche_litros', 'leche');
+    _merge('consumo_alimento_kg',     'alimento');
+
+    final fechas = byFecha.keys.toList()..sort();
+    return fechas.asMap().entries.map((e) {
+      final vals = byFecha[e.value]!;
       return HistorialProductivoModel(
-        id: 'h_${animalId}_$i', animalId: animalId,
-        fecha: now.subtract(Duration(days: 6 - i)),
-        litrosLeche: liters, kgAlimento: 11.0, temperatura: 38.5,
-        anomaliaDetectada: false,
+        id: 'r_${animalId}_${e.key}',
+        animalId: animalId,
+        fecha: DateTime.parse(e.value),
+        litrosLeche:      vals['leche']      ?? 0.0,
+        kgAlimento:       vals['alimento']   ?? 0.0,
+        temperatura:      vals['temperatura'] ?? 38.5,
+        anomaliaDetectada: false, // la API devuelve anomalías por alerta, no por registro
       );
-    });
+    }).toList();
   }
 
   // ────────────────────────────────────────────────────────────────────────────

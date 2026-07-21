@@ -32,7 +32,8 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
     final tt = Theme.of(context).textTheme;
     final p = _a.prediccion;
     final sev = severidadLabel(p);
-    final sintomasNLP = sintomasNLPDe(_a.descripcion);
+    // Síntomas reales del NLP de la API (BETO), no una función local.
+    final sintomasNLP = _a.sintomasNlp;
     final alternativas = alternativasDe(p.enfermedad);
     final pasos = pasosDe(p.enfermedad, _a.animal.nombre);
 
