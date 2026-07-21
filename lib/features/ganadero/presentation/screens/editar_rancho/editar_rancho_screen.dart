@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:ganajec/core/services/mexico_geo_service.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_rancho_viewmodel.dart';
 
 class EditarRanchoScreen extends StatefulWidget {
@@ -12,10 +13,14 @@ class EditarRanchoScreen extends StatefulWidget {
 }
 
 class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
-  // Geo data
-  Map<String, List<String>> _geoData = {};
-  bool _geoLoading = true;
+  // Estados desde la API
+  List<String> _estados = [];
+  bool _estadosLoading = true;
   String? _geoError;
+
+  // Municipios desde la API (cargados al seleccionar estado)
+  List<String> _municipios = [];
+  bool _municipiosLoading = false;
 
   // Selección actual
   String? _estadoSel;
@@ -25,7 +30,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
   void initState() {
     super.initState();
     context.read<EditarRanchoViewModel>().addListener(_onVmChange);
-    _cargarGeo();
+    _cargarEstados();
   }
 
   @override
@@ -34,55 +39,116 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
     super.dispose();
   }
 
-  Future<void> _cargarGeo() async {
+  Future<void> _cargarEstados() async {
     try {
-      final data = await MexicoGeoService.cargar();
+      final res = await ApiClient.instance.get(ApiConstants.ubicacionEstados);
+      final data = res.data;
+
+      List<String> estados = [];
+      if (data is List) {
+        estados = data.map((e) => e.toString()).toList();
+      } else if (data is Map && data['estados'] is List) {
+        estados = (data['estados'] as List).map((e) => e.toString()).toList();
+      }
+
+      estados.sort((a, b) => a.compareTo(b));
+
       if (!mounted) return;
       final vm = context.read<EditarRanchoViewModel>();
 
       // Pre-seleccionar con los valores actuales del rancho
       final estadoActual = vm.estadoCtrl.text.trim();
-      final municipioActual = vm.municipioCtrl.text.trim();
-
       String? estadoMatch;
-      String? municipioMatch;
 
       if (estadoActual.isNotEmpty) {
-        // Buscar coincidencia exacta o parcial (case-insensitive)
-        for (final k in data.keys) {
+        for (final k in estados) {
           if (k.toLowerCase() == estadoActual.toLowerCase()) {
             estadoMatch = k;
             break;
           }
         }
-        estadoMatch ??= data.keys.firstWhere(
+        estadoMatch ??= estados.firstWhere(
           (k) => k.toLowerCase().contains(estadoActual.toLowerCase()),
           orElse: () => '',
         );
-        if (estadoMatch!.isEmpty) estadoMatch = null;
+        if (estadoMatch.isEmpty) estadoMatch = null;
       }
 
-      if (estadoMatch != null && municipioActual.isNotEmpty) {
-        final mpios = data[estadoMatch] ?? [];
-        for (final m in mpios) {
-          if (m.toLowerCase() == municipioActual.toLowerCase()) {
-            municipioMatch = m;
-            break;
+      setState(() {
+        _estados = estados;
+        _estadosLoading = false;
+        _estadoSel = estadoMatch;
+      });
+
+      // Si se pre-seleccionó un estado, cargar sus municipios
+      if (estadoMatch != null) {
+        await _cargarMunicipios(estadoMatch, preSeleccionar: true);
+      } else {
+        setState(() {
+          _estadosLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _estadosLoading = false;
+        _geoError = 'No se pudo cargar la lista de estados';
+      });
+    }
+  }
+
+  Future<void> _cargarMunicipios(String estado, {bool preSeleccionar = false}) async {
+    setState(() {
+      _municipiosLoading = true;
+      _municipios = [];
+    });
+
+    try {
+      final res = await ApiClient.instance.get(
+        ApiConstants.ubicacionMunicipios(estado),
+      );
+      final data = res.data;
+
+      List<String> municipios = [];
+      if (data is List) {
+        municipios = data.map((e) => e.toString()).toList();
+      } else if (data is Map && data['municipios'] is List) {
+        municipios = (data['municipios'] as List).map((e) => e.toString()).toList();
+      }
+
+      municipios.sort((a, b) => a.compareTo(b));
+
+      if (!mounted) return;
+
+      String? municipioMatch;
+      if (preSeleccionar) {
+        final vm = context.read<EditarRanchoViewModel>();
+        final municipioActual = vm.municipioCtrl.text.trim();
+        if (municipioActual.isNotEmpty) {
+          for (final m in municipios) {
+            if (m.toLowerCase() == municipioActual.toLowerCase()) {
+              municipioMatch = m;
+              break;
+            }
           }
         }
       }
 
       setState(() {
-        _geoData = data;
-        _geoLoading = false;
-        _estadoSel = estadoMatch;
+        _municipios = municipios;
+        _municipiosLoading = false;
         _municipioSel = municipioMatch;
       });
+
+      if (preSeleccionar && municipioMatch != null) {
+        final vm = context.read<EditarRanchoViewModel>();
+        vm.municipioCtrl.text = municipioMatch;
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _geoLoading = false;
-        _geoError = 'No se pudo cargar la lista de estados';
+        _municipiosLoading = false;
+        _municipios = [];
       });
     }
   }
@@ -100,11 +166,6 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
         ),
       );
     }
-  }
-
-  List<String> get _municipiosDisponibles {
-    if (_estadoSel == null) return [];
-    return _geoData[_estadoSel!] ?? [];
   }
 
   @override
@@ -190,24 +251,23 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
             // ── Estado (dropdown) ───────────────────────────────────────────
             _DropdownLabel(label: 'Estado', icon: Icons.map_outlined),
             const SizedBox(height: 7),
-            _geoLoading
-                ? _LoadingDropdown()
+            _estadosLoading
+                ? _LoadingDropdown(label: 'Cargando estados...')
                 : _geoError != null
                     ? _ErrorDropdown(
                         error: _geoError!,
                         onRetry: () {
                           setState(() {
-                            _geoLoading = true;
+                            _estadosLoading = true;
                             _geoError = null;
                           });
-                          MexicoGeoService.limpiarCache();
-                          _cargarGeo();
+                          _cargarEstados();
                         },
                       )
                     : _StyledDropdown<String>(
                         hint: 'Selecciona un estado',
                         value: _estadoSel,
-                        items: _geoData.keys.toList(),
+                        items: _estados,
                         onChanged: (v) {
                           setState(() {
                             _estadoSel = v;
@@ -215,6 +275,9 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
                             vm.estadoCtrl.text = v ?? '';
                             vm.municipioCtrl.text = '';
                           });
+                          if (v != null) {
+                            _cargarMunicipios(v);
+                          }
                         },
                       ),
 
@@ -223,15 +286,17 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
             // ── Municipio (dropdown dependiente) ───────────────────────────
             _DropdownLabel(label: 'Municipio', icon: Icons.location_city_outlined),
             const SizedBox(height: 7),
-            _geoLoading
-                ? _LoadingDropdown()
+            _municipiosLoading
+                ? _LoadingDropdown(label: 'Cargando municipios...')
                 : _StyledDropdown<String>(
                     hint: _estadoSel == null
                         ? 'Primero selecciona un estado'
-                        : 'Selecciona un municipio',
+                        : _municipios.isEmpty
+                            ? 'Sin municipios disponibles'
+                            : 'Selecciona un municipio',
                     value: _municipioSel,
-                    items: _municipiosDisponibles,
-                    enabled: _estadoSel != null && _municipiosDisponibles.isNotEmpty,
+                    items: _municipios,
+                    enabled: _estadoSel != null && _municipios.isNotEmpty,
                     onChanged: (v) {
                       setState(() {
                         _municipioSel = v;
@@ -447,6 +512,8 @@ class _StyledDropdown<T> extends StatelessWidget {
 }
 
 class _LoadingDropdown extends StatelessWidget {
+  final String label;
+  const _LoadingDropdown({this.label = 'Cargando...'});
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -470,7 +537,7 @@ class _LoadingDropdown extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            'Cargando estados...',
+            label,
             style: TextStyle(color: cs.outline, fontSize: 14),
           ),
         ],

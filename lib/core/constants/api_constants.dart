@@ -8,7 +8,7 @@ class ApiConstants {
 
 
 
-  static const String baseUrl = 'http://192.168.1.40:8000/api';
+  static const String baseUrl = 'http://172.20.10.4:8000/api';
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
@@ -192,4 +192,12 @@ static const String adminSistemaEstado = '/admin/sistema/estado';
 
 /// GET /admin/{admin_id} — perfil del admin
 static String adminPerfil(String adminId) => '/admin/$adminId';
+
+// ── Ubicación (estados y municipios) ────────────────────────────────────────
+/// GET /ubicacion/estados — lista de estados de México
+static const String ubicacionEstados = '/ubicacion/estados';
+
+/// GET /ubicacion/municipios/{nombre_estado} — municipios de un estado
+static String ubicacionMunicipios(String nombreEstado) =>
+    '/ubicacion/municipios/$nombreEstado';
 }
