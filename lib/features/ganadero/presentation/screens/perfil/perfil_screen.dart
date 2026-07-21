@@ -99,7 +99,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<PerfilViewModel>();
-    final notif = vm.notificaciones;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
@@ -303,37 +302,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       onTap: vm.usuario.role == 'dueno'
                           ? () => context.push(AppRoutes.veterinarios)
                           : () => _mostrarVetGanadero(context),
-                    ),
-                  ],
-                ),
-
-                // ── Notificaciones ────────────────────────────────────────────
-                PerfilSection(
-                  label: 'Notificaciones',
-                  children: [
-                    PerfilToggleRow(
-                      icon: SettingIcon(emoji: '⚠️', bg: cs.tertiaryContainer),
-                      name: 'Alertas de predicción',
-                      desc: 'Cuando se detecta una enfermedad',
-                      value: notif.alertasPrediccion,
-                      accentColor: const Color(0xFFA32D2D),
-                      onChanged: (_) => context.read<PerfilViewModel>().toggleAlertasPrediccion(),
-                    ),
-                    PerfilToggleRow(
-                      icon: SettingIcon(emoji: '📈', bg: cs.tertiaryContainer),
-                      name: 'Anomalías productivas',
-                      desc: 'Caídas detectadas por Isolation Forest',
-                      value: notif.anomaliasProductivas,
-                      accentColor: const Color(0xFF3B6D11),
-                      onChanged: (_) => context.read<PerfilViewModel>().toggleAnomaliasProductivas(),
-                    ),
-                    PerfilToggleRow(
-                      icon: SettingIcon(emoji: '📊', bg: cs.surfaceContainerLow),
-                      name: 'Resumen semanal',
-                      desc: 'Reporte de producción cada lunes',
-                      value: notif.resumenSemanal,
-                      accentColor: const Color(0xFF854F0B),
-                      onChanged: (_) => context.read<PerfilViewModel>().toggleResumenSemanal(),
                     ),
                   ],
                 ),

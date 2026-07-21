@@ -34,10 +34,6 @@ dependencies:
   # Pagos
   flutter_stripe: ^12.0.2
 
-  # Seguridad — SSL Certificate Pinning
-  http_certificate_pinning: ^3.0.0
-  crypto: ^3.0.3
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
