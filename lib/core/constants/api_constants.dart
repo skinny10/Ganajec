@@ -8,7 +8,8 @@ class ApiConstants {
 
 
 
-  static const String baseUrl = 'http://192.168.0.31:8000/api';
+  static const String baseUrl = 'http://192.168.3.216:8000/api';
+  static const String baseUrl = 'http://192.168.3.216:8000/api';
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
