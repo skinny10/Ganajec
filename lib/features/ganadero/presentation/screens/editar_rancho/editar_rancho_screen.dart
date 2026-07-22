@@ -52,13 +52,6 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
     return item.toString();
   }
 
-  _EstadoInfo? _buscarEstadoPorNombre(String nombre) {
-    for (final e in _estadosInfo) {
-      if (e.nombre.toLowerCase() == nombre.toLowerCase()) return e;
-    }
-    return null;
-  }
-
   Future<void> _cargarEstados() async {
     try {
       final res = await ApiClient.instance.get(ApiConstants.ubicacionEstados);
@@ -109,7 +102,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
       });
 
       if (estadoMatch != null) {
-        await _cargarMunicipios(estadoMatch.cveEnt, preSeleccionar: true);
+        await _cargarMunicipios(estadoMatch.nombre, preSeleccionar: true);
       }
     } catch (e) {
       if (!mounted) return;
@@ -120,7 +113,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
     }
   }
 
-  Future<void> _cargarMunicipios(String cveEnt, {bool preSeleccionar = false}) async {
+  Future<void> _cargarMunicipios(String estadoNombre, {bool preSeleccionar = false}) async {
     setState(() {
       _municipiosLoading = true;
       _municipios = [];
@@ -128,7 +121,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
 
     try {
       final res = await ApiClient.instance.get(
-        ApiConstants.ubicacionMunicipios(cveEnt),
+        ApiConstants.ubicacionMunicipios(estadoNombre),
       );
       final data = res.data;
 
@@ -302,10 +295,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
                             vm.municipioCtrl.text = '';
                           });
                           if (v != null) {
-                            final info = _buscarEstadoPorNombre(v);
-                            if (info != null) {
-                              _cargarMunicipios(info.cveEnt);
-                            }
+                            _cargarMunicipios(v);
                           }
                         },
                       ),
