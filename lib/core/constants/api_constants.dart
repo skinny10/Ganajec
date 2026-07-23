@@ -2,13 +2,11 @@
 ///
 /// Dev local  → http://192.168.1.17:8000/api  (tu IP LAN, para emulador/físico)
 /// Emulador   → http://10.0.2.2:8000/api      (alias de localhost en AVD)
-/// Producción → http://44.193.46.236:8000/api
+/// Producción → http://100.58.10.101/api       (EC2 + Nginx)
 class ApiConstants {
   ApiConstants._();
 
-
-
-  static const String baseUrl = 'http://192.168.3.103:8000/api';
+  static const String baseUrl = 'http://100.58.10.101/api';
 
 
 
