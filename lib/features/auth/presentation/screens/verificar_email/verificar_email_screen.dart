@@ -107,50 +107,49 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Hero ─────────────────────────────────────────────────────
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Email icon + green check badge
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.email_outlined,
-                                color: cs.primary, size: 26),
-                          ),
-                          Positioned(
-                            bottom: -2,
-                            right: -2,
-                            child: Container(
-                              width: 20,
-                              height: 20,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Email icon + green check badge
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
                               decoration: BoxDecoration(
-                                color: cs.tertiary,
+                                color: cs.primaryContainer,
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: cs.surface, width: 2),
                               ),
-                              child: Icon(Icons.check,
-                                  color: cs.onTertiary, size: 11),
+                              child: Icon(Icons.email_outlined,
+                                  color: cs.primary, size: 26),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.52,
-                        child: Text(
+                            Positioned(
+                              bottom: -2,
+                              right: -2,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: cs.tertiary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: cs.surface, width: 2),
+                                ),
+                                child: Icon(Icons.check,
+                                    color: cs.onTertiary, size: 11),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
                           'Revisa\ntu correo',
                           style: tt.headlineSmall?.copyWith(
                             fontSize: 28,
@@ -160,11 +159,8 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
                             letterSpacing: -0.8,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.52,
-                        child: Text(
+                        const SizedBox(height: 8),
+                        Text(
                           'Hemos enviado un código de 6 dígitos a tu correo.',
                           style: tt.bodySmall?.copyWith(
                             fontSize: 13,
@@ -172,22 +168,22 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
                             height: 1.4,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 52),
-                    ],
+                        const SizedBox(height: 52),
+                      ],
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 20,
-                  right: -10,
-                  child: Image.asset(
-                    'assets/images/vaca.png',
-                    width: 130,
-                    height: 130,
-                    fit: BoxFit.contain,
+                  const SizedBox(width: 16),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Image.asset(
+                      'assets/images/vacaas.png',
+                      width: 140,
+                      height: 140,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             // ── Info card ─────────────────────────────────────────────────
