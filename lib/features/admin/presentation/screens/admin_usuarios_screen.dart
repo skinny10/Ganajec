@@ -308,25 +308,6 @@ class _UsuarioTileState extends State<_UsuarioTile> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: u.isActive
-                            ? const Color(0xFF2E7D32).withOpacity(0.1)
-                            : cs.error.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        u.isActive ? 'Activo' : 'Inactivo',
-                        style: tt.labelSmall?.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: u.isActive ? const Color(0xFF2E7D32) : cs.error,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
                     PopupMenuButton<String>(
                       icon: Icon(Icons.more_vert_outlined,
                           color: cs.onSurfaceVariant, size: 18),
@@ -564,25 +545,6 @@ class _UsuarioFormModalState extends State<_UsuarioFormModal> {
                       onChanged: (v) => setState(() => _rol = v ?? _rol),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Text(
-                      'Activo',
-                      style: tt.labelSmall?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const Spacer(),
-                    Switch(
-                      value: _isActive,
-                      onChanged: (v) => setState(() => _isActive = v),
-                      activeColor: cs.tertiary,
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 24),
                 Row(

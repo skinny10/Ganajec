@@ -967,7 +967,7 @@ class _ResumenGridState extends State<_ResumenGrid> {
                                   icon: Icons.home_outlined,
                                   color: const Color(0xFFE53935),
                                   valor: '${widget.estado.totalRanchos}',
-                                  label: 'Activos',
+                                  label: 'Ranchos',
                                 ),
                               ),
                             ),
@@ -987,7 +987,7 @@ class _ResumenGridState extends State<_ResumenGrid> {
                                   icon: Icons.business_center_outlined,
                                   color: const Color(0xFF00897B),
                                   valor: '${widget.totalDuenos}',
-                                  label: 'Activos',
+                                  label: 'Dueños',
                                 ),
                               ),
                             ),
@@ -997,11 +997,20 @@ class _ResumenGridState extends State<_ResumenGrid> {
                             child: _AnimatedCard(
                               animation: _cardAnimation(4),
                               child: _HoverCard(
-                                child: _ResumenMiniCard(
-                                  icon: Icons.verified_outlined,
-                                  color: const Color(0xFF43A047),
-                                  valor: '${widget.estado.usuariosActivos}',
-                                  label: 'Actualmente',
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: cs.outlineVariant.withOpacity(0.6)),
+                                  ),
+                                  padding: const EdgeInsets.all(10),
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/icon.png',
+                                      height: 50,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
