@@ -7,7 +7,10 @@ class ApiConstants {
   ApiConstants._();
 
 
+
   static const String baseUrl = 'http://192.168.3.235:8000/api';
+
+
 
 
   // ── Autenticación ────────────────────────────────────────────────────────────
@@ -19,6 +22,8 @@ class ApiConstants {
   static const String verificarEmail = '/auth/verificar-email';
   static const String solicitarRecuperacion = '/auth/solicitar-recuperacion';
   static const String restablecerPassword = '/auth/restablecer-password';
+  /// PUT /auth/fcm-token  { fcm_token }
+  static const String actualizarFcmToken = '/auth/fcm-token';
 
   // ── Ganadero — perfil ────────────────────────────────────────────────────────
   /// GET /ganadero/{ganadero_id}
@@ -189,4 +194,12 @@ static const String adminSistemaEstado = '/admin/sistema/estado';
 
 /// GET /admin/{admin_id} — perfil del admin
 static String adminPerfil(String adminId) => '/admin/$adminId';
+
+// ── Ubicación (estados y municipios) ────────────────────────────────────────
+/// GET /ubicacion/estados — lista de estados de México
+static const String ubicacionEstados = '/ubicacion/estados';
+
+/// GET /ubicacion/municipios/{nombre_estado} — municipios de un estado
+static String ubicacionMunicipios(String nombreEstado) =>
+    '/ubicacion/municipios/$nombreEstado';
 }

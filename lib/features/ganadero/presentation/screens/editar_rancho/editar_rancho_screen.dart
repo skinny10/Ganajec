@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:ganajec/core/services/mexico_geo_service.dart';
+import 'package:ganajec/core/constants/api_constants.dart';
+import 'package:ganajec/core/network/api_client.dart';
 import 'package:ganajec/features/ganadero/presentation/viewmodels/editar_rancho_viewmodel.dart';
 
 class EditarRanchoScreen extends StatefulWidget {
@@ -12,12 +13,15 @@ class EditarRanchoScreen extends StatefulWidget {
 }
 
 class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
-  // Geo data
-  Map<String, List<String>> _geoData = {};
-  bool _geoLoading = true;
+  final List<_EstadoInfo> _estadosInfo = [];
+  bool _estadosLoading = true;
   String? _geoError;
 
-  // Selección actual
+  List<String> get _estados => _estadosInfo.map((e) => e.nombre).toList();
+
+  List<String> _municipios = [];
+  bool _municipiosLoading = false;
+
   String? _estadoSel;
   String? _municipioSel;
 
@@ -25,7 +29,7 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
   void initState() {
     super.initState();
     context.read<EditarRanchoViewModel>().addListener(_onVmChange);
-    _cargarGeo();
+    _cargarEstados();
   }
 
   @override
@@ -34,55 +38,139 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
     super.dispose();
   }
 
-  Future<void> _cargarGeo() async {
+  String _extraerNombre(dynamic item) {
+    if (item is Map) {
+      return (item['nombre'] ?? item['name'] ?? '').toString();
+    }
+    return item.toString();
+  }
+
+  String _extraerCveEnt(dynamic item) {
+    if (item is Map) {
+      return (item['cve_ent'] ?? item['clave'] ?? '').toString();
+    }
+    return item.toString();
+  }
+
+  Future<void> _cargarEstados() async {
     try {
-      final data = await MexicoGeoService.cargar();
+      final res = await ApiClient.instance.get(ApiConstants.ubicacionEstados);
+      final data = res.data;
+
+      final List<dynamic> rawList;
+      if (data is List) {
+        rawList = data;
+      } else if (data is Map && data['estados'] is List) {
+        rawList = data['estados'] as List;
+      } else {
+        rawList = [];
+      }
+
+      final info = rawList
+          .map((e) => _EstadoInfo(
+                nombre: _extraerNombre(e),
+                cveEnt: _extraerCveEnt(e),
+              ))
+          .where((e) => e.nombre.isNotEmpty)
+          .toList()
+        ..sort((a, b) => a.nombre.compareTo(b.nombre));
+
       if (!mounted) return;
       final vm = context.read<EditarRanchoViewModel>();
 
-      // Pre-seleccionar con los valores actuales del rancho
       final estadoActual = vm.estadoCtrl.text.trim();
-      final municipioActual = vm.municipioCtrl.text.trim();
-
-      String? estadoMatch;
-      String? municipioMatch;
+      _EstadoInfo? estadoMatch;
 
       if (estadoActual.isNotEmpty) {
-        // Buscar coincidencia exacta o parcial (case-insensitive)
-        for (final k in data.keys) {
-          if (k.toLowerCase() == estadoActual.toLowerCase()) {
-            estadoMatch = k;
+        for (final e in info) {
+          if (e.nombre.toLowerCase() == estadoActual.toLowerCase()) {
+            estadoMatch = e;
             break;
           }
         }
-        estadoMatch ??= data.keys.firstWhere(
-          (k) => k.toLowerCase().contains(estadoActual.toLowerCase()),
-          orElse: () => '',
+        estadoMatch ??= info.firstWhere(
+          (e) => e.nombre.toLowerCase().contains(estadoActual.toLowerCase()),
+          orElse: () => _EstadoInfo(nombre: '', cveEnt: ''),
         );
-        if (estadoMatch!.isEmpty) estadoMatch = null;
-      }
-
-      if (estadoMatch != null && municipioActual.isNotEmpty) {
-        final mpios = data[estadoMatch] ?? [];
-        for (final m in mpios) {
-          if (m.toLowerCase() == municipioActual.toLowerCase()) {
-            municipioMatch = m;
-            break;
-          }
-        }
+        if (estadoMatch.nombre.isEmpty) estadoMatch = null;
       }
 
       setState(() {
-        _geoData = data;
-        _geoLoading = false;
-        _estadoSel = estadoMatch;
-        _municipioSel = municipioMatch;
+        _estadosInfo.addAll(info);
+        _estadosLoading = false;
+        _estadoSel = estadoMatch?.nombre;
       });
+
+      if (estadoMatch != null) {
+        await _cargarMunicipios(estadoMatch.nombre, preSeleccionar: true);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _geoLoading = false;
+        _estadosLoading = false;
         _geoError = 'No se pudo cargar la lista de estados';
+      });
+    }
+  }
+
+  Future<void> _cargarMunicipios(String estadoNombre, {bool preSeleccionar = false}) async {
+    setState(() {
+      _municipiosLoading = true;
+      _municipios = [];
+    });
+
+    try {
+      final res = await ApiClient.instance.get(
+        ApiConstants.ubicacionMunicipios(estadoNombre),
+      );
+      final data = res.data;
+
+      final List<dynamic> rawList;
+      if (data is List) {
+        rawList = data;
+      } else if (data is Map && data['municipios'] is List) {
+        rawList = data['municipios'] as List;
+      } else {
+        rawList = [];
+      }
+
+      final municipios = rawList
+          .map((e) => _extraerNombre(e))
+          .where((n) => n.isNotEmpty)
+          .toList()
+        ..sort((a, b) => a.compareTo(b));
+
+      if (!mounted) return;
+
+      String? municipioMatch;
+      if (preSeleccionar) {
+        final vm = context.read<EditarRanchoViewModel>();
+        final municipioActual = vm.municipioCtrl.text.trim();
+        if (municipioActual.isNotEmpty) {
+          for (final m in municipios) {
+            if (m.toLowerCase() == municipioActual.toLowerCase()) {
+              municipioMatch = m;
+              break;
+            }
+          }
+        }
+      }
+
+      setState(() {
+        _municipios = municipios;
+        _municipiosLoading = false;
+        _municipioSel = municipioMatch;
+      });
+
+      if (preSeleccionar && municipioMatch != null) {
+        final vm = context.read<EditarRanchoViewModel>();
+        vm.municipioCtrl.text = municipioMatch;
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _municipiosLoading = false;
+        _municipios = [];
       });
     }
   }
@@ -100,11 +188,6 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
         ),
       );
     }
-  }
-
-  List<String> get _municipiosDisponibles {
-    if (_estadoSel == null) return [];
-    return _geoData[_estadoSel!] ?? [];
   }
 
   @override
@@ -151,7 +234,6 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Error banner API
             if (vm.error != null) ...[
               Container(
                 padding: const EdgeInsets.all(12),
@@ -178,7 +260,6 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
               const SizedBox(height: 16),
             ],
 
-            // Nombre del rancho (texto libre)
             _Field(
               label: 'Nombre del rancho',
               ctrl: vm.nombreCtrl,
@@ -187,27 +268,25 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ── Estado (dropdown) ───────────────────────────────────────────
             _DropdownLabel(label: 'Estado', icon: Icons.map_outlined),
             const SizedBox(height: 7),
-            _geoLoading
-                ? _LoadingDropdown()
+            _estadosLoading
+                ? const _LoadingDropdown(label: 'Cargando estados...')
                 : _geoError != null
                     ? _ErrorDropdown(
                         error: _geoError!,
                         onRetry: () {
                           setState(() {
-                            _geoLoading = true;
+                            _estadosLoading = true;
                             _geoError = null;
                           });
-                          MexicoGeoService.limpiarCache();
-                          _cargarGeo();
+                          _cargarEstados();
                         },
                       )
                     : _StyledDropdown<String>(
                         hint: 'Selecciona un estado',
                         value: _estadoSel,
-                        items: _geoData.keys.toList(),
+                        items: _estados,
                         onChanged: (v) {
                           setState(() {
                             _estadoSel = v;
@@ -215,23 +294,27 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
                             vm.estadoCtrl.text = v ?? '';
                             vm.municipioCtrl.text = '';
                           });
+                          if (v != null) {
+                            _cargarMunicipios(v);
+                          }
                         },
                       ),
 
             const SizedBox(height: 16),
 
-            // ── Municipio (dropdown dependiente) ───────────────────────────
             _DropdownLabel(label: 'Municipio', icon: Icons.location_city_outlined),
             const SizedBox(height: 7),
-            _geoLoading
-                ? _LoadingDropdown()
+            _municipiosLoading
+                ? const _LoadingDropdown(label: 'Cargando municipios...')
                 : _StyledDropdown<String>(
                     hint: _estadoSel == null
                         ? 'Primero selecciona un estado'
-                        : 'Selecciona un municipio',
+                        : _municipios.isEmpty
+                            ? 'Sin municipios disponibles'
+                            : 'Selecciona un municipio',
                     value: _municipioSel,
-                    items: _municipiosDisponibles,
-                    enabled: _estadoSel != null && _municipiosDisponibles.isNotEmpty,
+                    items: _municipios,
+                    enabled: _estadoSel != null && _municipios.isNotEmpty,
                     onChanged: (v) {
                       setState(() {
                         _municipioSel = v;
@@ -284,7 +367,11 @@ class _EditarRanchoScreenState extends State<EditarRanchoScreen> {
   }
 }
 
-// ─── Widgets auxiliares ───────────────────────────────────────────────────────
+class _EstadoInfo {
+  final String nombre;
+  final String cveEnt;
+  const _EstadoInfo({required this.nombre, required this.cveEnt});
+}
 
 class _Field extends StatelessWidget {
   final String label;
@@ -405,7 +492,7 @@ class _StyledDropdown<T> extends StatelessWidget {
         filled: true,
         fillColor: enabled
             ? cs.surfaceContainerLowest
-            : cs.surfaceContainerLowest.withOpacity(0.5),
+            : cs.surfaceContainerLowest.withValues(alpha: 0.5),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
@@ -422,7 +509,7 @@ class _StyledDropdown<T> extends StatelessWidget {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5)),
+          borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
       ),
       hint: Text(
@@ -447,6 +534,9 @@ class _StyledDropdown<T> extends StatelessWidget {
 }
 
 class _LoadingDropdown extends StatelessWidget {
+  final String label;
+  const _LoadingDropdown({this.label = 'Cargando...'});
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -470,7 +560,7 @@ class _LoadingDropdown extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            'Cargando estados...',
+            label,
             style: TextStyle(color: cs.outline, fontSize: 14),
           ),
         ],
@@ -490,9 +580,9 @@ class _ErrorDropdown extends StatelessWidget {
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: cs.errorContainer.withOpacity(0.3),
+        color: cs.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.error.withOpacity(0.3)),
+        border: Border.all(color: cs.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
