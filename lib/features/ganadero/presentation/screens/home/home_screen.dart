@@ -201,9 +201,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 ),
               ),
             ),
-      bottomNavigationBar: _esDueno
-          ? _buildDuenoNav(context, cs, tt)
-          : _buildGanaderoNav(context, cs, tt),
+      bottomNavigationBar: MediaQuery.of(context).size.width >= 768
+          ? null
+          : (_esDueno
+              ? _buildDuenoNav(context, cs, tt)
+              : _buildGanaderoNav(context, cs, tt)),
     );
   }
 
@@ -230,9 +232,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          // Overlay muy suave — no lava las manchas escasas del borde izq.
+          // Overlay para dar contraste al texto sobre el patrón
           Positioned.fill(
-            child: ColoredBox(color: Color.fromRGBO(255, 255, 255, 0.15)),
+            child: ColoredBox(color: Color.fromRGBO(255, 255, 255, 0.55)),
           ),
           // Greeting content
           Positioned(
@@ -245,8 +247,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 Text(
                   vm.saludo,
                   style: tt.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
+                    color: const Color(0xFF5C3820),
                     fontSize: 13.5,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -255,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   style: tt.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     fontSize: 34,
-                    color: cs.onSurface,
+                    color: const Color(0xFF3d2b1f),
                     letterSpacing: -0.6,
                   ),
                   maxLines: 1,

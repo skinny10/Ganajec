@@ -16,6 +16,10 @@ class Prediccion {
   /// Solo se popula en la respuesta de POST /registros-sintomas.
   final List<String> sintomasNlp;
 
+  /// Concordancia entre los síntomas detectados por NLP y la enfermedad
+  /// predicha por Random Forest. Rango 0.0–1.0.
+  final double concordanciaNlp;
+
   const Prediccion({
     required this.id,
     required this.animalId,
@@ -28,5 +32,6 @@ class Prediccion {
     this.ganaderoNombre = '',
     this.severidad = '',
     this.sintomasNlp = const [],
+    this.concordanciaNlp = 0.0,
   });
 }

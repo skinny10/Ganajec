@@ -754,8 +754,13 @@ class _Leyenda extends StatelessWidget {
 
 class ResultadoNLPBox extends StatelessWidget {
   final String descripcion;
+  final double concordancia;
 
-  const ResultadoNLPBox({super.key, required this.descripcion});
+  const ResultadoNLPBox({
+    super.key,
+    required this.descripcion,
+    this.concordancia = 0.0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -766,6 +771,13 @@ class ResultadoNLPBox extends StatelessWidget {
         ? '${descripcion.substring(0, 80)}…'
         : descripcion;
 
+    final pct = (concordancia * 100).round();
+    final Color concordColor = pct >= 70
+        ? const Color(0xFF2E7D32)
+        : pct >= 40
+            ? const Color(0xFFF57F17)
+            : cs.error;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -773,37 +785,69 @@ class ResultadoNLPBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(13),
         border: Border.all(color: cs.secondary.withOpacity(0.4)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🧠', style: TextStyle(fontSize: 18)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: tt.bodySmall?.copyWith(
-                  fontSize: 11.5,
-                  color: cs.onSecondaryContainer,
-                  fontWeight: FontWeight.w300,
-                  height: 1.6,
-                ),
-                children: [
-                  const TextSpan(text: 'El módulo NLP procesó: '),
-                  TextSpan(
-                    text: '"$preview"',
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('🧠', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: tt.bodySmall?.copyWith(
+                      fontSize: 11.5,
                       color: cs.onSecondaryContainer,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w300,
+                      height: 1.6,
+                    ),
+                    children: [
+                      const TextSpan(text: 'El módulo NLP procesó: '),
+                      TextSpan(
+                        text: '"$preview"',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: cs.onSecondaryContainer,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: ' — extrayendo señales clínicas adicionales.',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (concordancia > 0) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: concordancia.clamp(0.0, 1.0),
+                      backgroundColor: cs.secondary.withOpacity(0.15),
+                      valueColor: AlwaysStoppedAnimation<Color>(concordColor),
+                      minHeight: 5,
                     ),
                   ),
-                  const TextSpan(
-                    text: ' — extrayendo señales clínicas adicionales.',
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '$pct% concordancia NLP',
+                  style: tt.labelSmall?.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: concordColor,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );

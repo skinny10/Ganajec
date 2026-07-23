@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/router/app_router.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../../viewmodels/historial_dueno_viewmodel.dart';
 
 class HistorialDuenoScreen extends StatefulWidget {
@@ -25,6 +28,140 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _descargarPdf(HistorialDuenoViewModel vm) async {
+    final doc = pw.Document();
+
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        header: (_) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('GANAJEC AI — Historial de Predicciones',
+                style: pw.TextStyle(
+                    fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              'Generado: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+            ),
+            pw.Divider(),
+            pw.SizedBox(height: 4),
+          ],
+        ),
+        build: (_) {
+          final widgets = <pw.Widget>[];
+
+          for (final rancho in vm.ranchos) {
+            widgets.add(
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 6),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.brown100,
+                  borderRadius: pw.BorderRadius.circular(6),
+                ),
+                child: pw.Text(
+                  '🏡  ${rancho.ranchoNombre}',
+                  style: pw.TextStyle(
+                      fontSize: 12, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+            );
+            widgets.add(pw.SizedBox(height: 6));
+
+            for (final ganadero in rancho.ganaderos) {
+              widgets.add(
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 12, bottom: 4),
+                  child: pw.Text(
+                    '👤  ${ganadero.ganaderoNombre}',
+                    style: pw.TextStyle(
+                        fontSize: 11, fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.brown700),
+                  ),
+                ),
+              );
+
+              for (final bovino in ganadero.bovinos) {
+                widgets.add(
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(left: 24, bottom: 2),
+                    child: pw.Text(
+                      '🐄  ${bovino.nombre} · ${bovino.categoria} · ${bovino.totalRegistros} registro(s)',
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                  ),
+                );
+
+                for (final r in bovino.registros) {
+                  final fecha =
+                      '${r.registradoEn.day.toString().padLeft(2, '0')}/'
+                      '${r.registradoEn.month.toString().padLeft(2, '0')}/'
+                      '${r.registradoEn.year}';
+                  final enf = r.tienePrediccion
+                      ? '${r.enfermedad} (${r.confianzaPct}% conf · ${r.severidad})'
+                      : 'Sin predicción';
+
+                  widgets.add(
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 36, bottom: 4),
+                      child: pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Container(
+                            width: 3,
+                            height: 30,
+                            margin: const pw.EdgeInsets.only(right: 8, top: 2),
+                            color: r.severidad == 'alta'
+                                ? PdfColors.red
+                                : r.severidad == 'media'
+                                    ? PdfColors.orange
+                                    : PdfColors.green700,
+                          ),
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(enf,
+                                    style: pw.TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: pw.FontWeight.bold)),
+                                if (r.textoLibre.isNotEmpty)
+                                  pw.Text(r.textoLibre,
+                                      style: const pw.TextStyle(
+                                          fontSize: 8,
+                                          color: PdfColors.grey700),
+                                      maxLines: 2),
+                                pw.Text(fecha,
+                                    style: const pw.TextStyle(
+                                        fontSize: 8,
+                                        color: PdfColors.grey500)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              }
+              widgets.add(pw.SizedBox(height: 8));
+            }
+            widgets.add(pw.SizedBox(height: 12));
+          }
+
+          return widgets;
+        },
+      ),
+    );
+
+    await Printing.sharePdf(
+      bytes: await doc.save(),
+      filename: 'historial_ganajec_${DateTime.now().millisecondsSinceEpoch}.pdf',
+    );
   }
 
   @override
@@ -62,6 +199,35 @@ class _HistorialDuenoScreenState extends State<HistorialDuenoScreen> {
             letterSpacing: -0.3,
           ),
         ),
+        actions: [
+          if (!vm.isEmpty)
+            GestureDetector(
+              onTap: () => _descargarPdf(vm),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(0, 8, 16, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: cs.primary.withOpacity(0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.picture_as_pdf_rounded,
+                        size: 14, color: cs.primary),
+                    const SizedBox(width: 5),
+                    Text('PDF',
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: cs.primary,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(height: 1, color: cs.outlineVariant),

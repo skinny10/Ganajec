@@ -158,7 +158,9 @@ class PerfilRanchoCard extends StatelessWidget {
   final String estado;
   final String duenoNombre;
   final int totalBovinos;
+  final bool isDueno;
   final VoidCallback? onUnirseRancho;
+  final VoidCallback? onCrearRancho;
   final VoidCallback? onMisGanaderos;
   final VoidCallback? onVerColegas;
   final String ganaderosBtnLabel;
@@ -170,7 +172,9 @@ class PerfilRanchoCard extends StatelessWidget {
     required this.estado,
     this.duenoNombre = '',
     required this.totalBovinos,
+    this.isDueno = false,
     this.onUnirseRancho,
+    this.onCrearRancho,
     this.onMisGanaderos,
     this.onVerColegas,
     this.ganaderosBtnLabel = 'Ver ganaderos del rancho',
@@ -237,7 +241,7 @@ class PerfilRanchoCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _tieneRancho ? nombre : 'Sin rancho asignado',
+                          _tieneRancho ? nombre : (isDueno ? 'Sin rancho creado' : 'Sin rancho asignado'),
                           style: tt.bodyMedium?.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -248,7 +252,9 @@ class PerfilRanchoCard extends StatelessWidget {
                         Text(
                           _tieneRancho
                               ? '📍 $municipio, $estado'
-                              : 'Únete o crea un rancho para comenzar',
+                              : (isDueno
+                                  ? 'Crea tu rancho para comenzar'
+                                  : 'Únete o crea un rancho para comenzar'),
                           style: tt.bodySmall?.copyWith(
                             fontSize: 12,
                             color: Colors.white.withOpacity(0.8),
@@ -341,11 +347,12 @@ class PerfilRanchoCard extends StatelessWidget {
               ],
 
               if (onUnirseRancho != null ||
+                  onCrearRancho != null ||
                   onMisGanaderos != null ||
                   onVerColegas != null) ...[
                 const SizedBox(height: 14),
                 GestureDetector(
-                  onTap: onUnirseRancho ?? onMisGanaderos ?? onVerColegas,
+                  onTap: onCrearRancho ?? onUnirseRancho ?? onMisGanaderos ?? onVerColegas,
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -355,11 +362,13 @@ class PerfilRanchoCard extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        onUnirseRancho != null
-                            ? '🏡 Unirse o crear rancho'
-                            : onVerColegas != null
-                                ? '👥 Ver colegas del rancho'
-                                : '👥 $ganaderosBtnLabel',
+                        onCrearRancho != null
+                            ? '🏡 Crear rancho'
+                            : onUnirseRancho != null
+                                ? '🏡 Unirse a un rancho'
+                                : onVerColegas != null
+                                    ? '👥 Ver colegas del rancho'
+                                    : '👥 $ganaderosBtnLabel',
                         style: tt.labelLarge?.copyWith(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,

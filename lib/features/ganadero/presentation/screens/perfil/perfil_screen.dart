@@ -24,11 +24,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
     super.initState();
     Future.microtask(() async {
       await context.read<PerfilViewModel>().cargarPerfil();
-      if (mounted && !context.read<PerfilViewModel>().tieneRancho) {
-        final joined = await mostrarRanchoModal(context);
-        if (joined && mounted) {
-          context.read<PerfilViewModel>().cargarPerfil();
-        }
+      final vm = context.read<PerfilViewModel>();
+      if (mounted && !vm.tieneRancho && vm.usuario.role == 'dueno') {
+        final joined = await mostrarRanchoModal(context, initialTab: 1);
+        if (joined && mounted) vm.cargarPerfil();
       }
     });
   }
@@ -161,20 +160,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.only(top: 20, bottom: 40),
+              padding: const EdgeInsets.only(top: 12, bottom: 40),
               children: [
                 PerfilHeroCard(
                   iniciales: vm.iniciales,
                   nombre: vm.usuario.name,
                   email: vm.usuario.email,
                   plan: vm.plan,
-                  onEditarPerfil: () => context
-                      .push(AppRoutes.editarPerfil)
-                      .then((_) {
+                  onEditarPerfil: () => context.push(AppRoutes.editarPerfil).then((_) {
                     if (mounted) context.read<PerfilViewModel>().cargarPerfil();
                   }),
                 ),
-
                 PerfilRanchoCard(
                   nombre: vm.rancho.nombre,
                   municipio: vm.rancho.municipio,
@@ -182,9 +178,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   duenoNombre: vm.rancho.duenoNombre,
                   totalBovinos: vm.totalBovinos,
                   ganaderosBtnLabel: 'Ver ganaderos del rancho',
-                  onUnirseRancho: !vm.tieneRancho
+                  isDueno: vm.usuario.role == 'dueno',
+                  onUnirseRancho: (!vm.tieneRancho && vm.usuario.role != 'dueno')
                       ? () async {
                           final ok = await mostrarRanchoModal(context);
+                          if (ok && context.mounted) {
+                            context.read<PerfilViewModel>().cargarPerfil();
+                          }
+                        }
+                      : null,
+                  onCrearRancho: (!vm.tieneRancho && vm.usuario.role == 'dueno')
+                      ? () async {
+                          final ok = await mostrarRanchoModal(context, initialTab: 1);
                           if (ok && context.mounted) {
                             context.read<PerfilViewModel>().cargarPerfil();
                           }

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ganajec/core/network/token_storage.dart';
+import 'package:ganajec/core/shell/desktop_shell.dart';
 import 'package:ganajec/share/domain/entities/animal.dart';
 import 'package:ganajec/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:ganajec/features/auth/presentation/screens/register/register_screen.dart';
@@ -144,6 +145,7 @@ class AppRouter {
       return null;
     },
     routes: [
+      // ── Auth (fuera del shell) ─────────────────────────────────────────
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
@@ -170,15 +172,11 @@ class AppRouter {
         path: AppRoutes.nuevaContrasena,
         builder: (context, state) {
           final args = state.extra as Map<String, String>;
-          return NuevaContrasenaScreen(
-            email: args['email']!,
-          );
+          return NuevaContrasenaScreen(email: args['email']!);
         },
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
-      ),
+
+      // ── Flujos de detalle (full-screen, sin sidebar) ───────────────────
       GoRoute(
         path: AppRoutes.registroBovino,
         builder: (context, state) => const RegistroBovinoScreen(),
@@ -214,19 +212,6 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRoutes.perfil,
-        builder: (context, state) {
-          final authDs = AuthRemoteDataSourceImpl();
-          final authRepo = AuthRepositoryImpl(authDs);
-          return ChangeNotifierProvider(
-            create: (_) => PerfilViewModel(
-              logoutUseCase: LogoutUseCase(authRepo),
-            ),
-            child: const PerfilScreen(),
-          );
-        },
-      ),
-      GoRoute(
         path: AppRoutes.registrarSintomas,
         builder: (context, state) {
           final animal = state.extra as Animal;
@@ -247,126 +232,6 @@ class AppRouter {
           final args = state.extra as ResultadoPrediccionArgs;
           return ResultadoPrediccionScreen(args: args);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.alertas,
-        builder: (context, state) {
-          final ds = GanaderoRemoteDataSourceImpl();
-          final repo = GanaderoRepositoryImpl(ds);
-          return ChangeNotifierProvider(
-            create: (_) => AlertasViewModel(
-              getAlertas: GetAlertasUseCase(repo),
-              marcarLeida: MarcarAlertaLeidaUseCase(repo),
-              marcarTodas: MarcarTodasAlertasLeidasUseCase(repo),
-            ),
-            child: const AlertasScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.historial,
-        builder: (context, state) {
-          final ds = GanaderoRemoteDataSourceImpl();
-          final repo = GanaderoRepositoryImpl(ds);
-          return ChangeNotifierProvider(
-            create: (_) => HistorialViewModel(
-              getHistorial: GetHistorialGanaderoUseCase(repo),
-            ),
-            child: const HistorialScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.miPlan,
-        builder: (context, state) {
-          final ds = SuscripcionRemoteDataSourceImpl();
-          final repo = SuscripcionRepositoryImpl(ds, PaymentRemoteDataSourceImpl());
-          return ChangeNotifierProvider(
-            create: (_) => MiPlanViewModel(
-              getSuscripcion: GetSuscripcionUseCase(repo),
-              getPlanes: GetPlanesUseCase(repo),
-            ),
-            child: const MiPlanScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.editarPerfil,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => EditarPerfilViewModel(),
-          child: const EditarPerfilScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.misGanaderos,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => MisGanaderosViewModel(),
-          child: const MisGanaderosScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.ranchoDashboard,
-        builder: (context, state) {
-          final rancho = state.extra as RanchoInfo;
-          return ChangeNotifierProvider(
-            create: (_) =>
-                RanchoDashboardViewModel(initialRancho: rancho),
-            child: const RanchoDashboardScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.editarRancho,
-        builder: (context, state) {
-          final rancho = state.extra as RanchoInfo;
-          return ChangeNotifierProvider(
-            create: (_) =>
-                EditarRanchoViewModel(ranchoActual: rancho),
-            child: const EditarRanchoScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.registrarGanadero,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => RegistrarGanaderoViewModel(),
-          child: const RegistrarGanaderoScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.cambiarContrasena,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => CambiarContrasenaViewModel(),
-          child: const CambiarContrasenaScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.colegas,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => ColegasViewModel(),
-          child: const ColegasScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.historialDueno,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => HistorialDuenoViewModel(),
-          child: const HistorialDuenoScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.todosBovinos,
-        builder: (context, state) {
-          final args = state.extra as TodosBovinosArgs;
-          return TodosBovinosScreen(args: args);
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.veterinarios,
-        builder: (context, state) => ChangeNotifierProvider(
-          create: (_) => VeterinarioViewModel(),
-          child: const VeterinariosScreen(),
-        ),
       ),
       GoRoute(
         path: AppRoutes.elegirPlan,
@@ -394,7 +259,7 @@ class AppRouter {
         },
       ),
 
-      // ── Admin ──────────────────────────────────────────────────────────
+      // ── Admin (fuera del shell) ────────────────────────────────────────
       GoRoute(
         path: AppRoutes.adminDashboard,
         builder: (context, state) => ChangeNotifierProvider(
@@ -423,9 +288,157 @@ class AppRouter {
           child: const AdminAuditoriaScreen(),
         ),
       ),
-      GoRoute(
-        path: AppRoutes.pruebaConexion,
-        builder: (_, __) => const PruebaConexionScreen(),
+
+      // ── Shell principal (sidebar en desktop ≥ 768 px) ─────────────────
+      ShellRoute(
+        builder: (context, state, child) => DesktopShell(
+          currentPath: state.matchedLocation,
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.alertas,
+            builder: (context, state) {
+              final ds = GanaderoRemoteDataSourceImpl();
+              final repo = GanaderoRepositoryImpl(ds);
+              return ChangeNotifierProvider(
+                create: (_) => AlertasViewModel(
+                  getAlertas: GetAlertasUseCase(repo),
+                  marcarLeida: MarcarAlertaLeidaUseCase(repo),
+                  marcarTodas: MarcarTodasAlertasLeidasUseCase(repo),
+                ),
+                child: const AlertasScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.historial,
+            builder: (context, state) {
+              final ds = GanaderoRemoteDataSourceImpl();
+              final repo = GanaderoRepositoryImpl(ds);
+              return ChangeNotifierProvider(
+                create: (_) => HistorialViewModel(
+                  getHistorial: GetHistorialGanaderoUseCase(repo),
+                ),
+                child: const HistorialScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.historialDueno,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => HistorialDuenoViewModel(),
+              child: const HistorialDuenoScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.perfil,
+            builder: (context, state) {
+              final authDs = AuthRemoteDataSourceImpl();
+              final authRepo = AuthRepositoryImpl(authDs);
+              return ChangeNotifierProvider(
+                create: (_) => PerfilViewModel(
+                  logoutUseCase: LogoutUseCase(authRepo),
+                ),
+                child: const PerfilScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.editarPerfil,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => EditarPerfilViewModel(),
+              child: const EditarPerfilScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.cambiarContrasena,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => CambiarContrasenaViewModel(),
+              child: const CambiarContrasenaScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.misGanaderos,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => MisGanaderosViewModel(),
+              child: const MisGanaderosScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.ranchoDashboard,
+            builder: (context, state) {
+              final rancho = state.extra as RanchoInfo;
+              return ChangeNotifierProvider(
+                create: (_) =>
+                    RanchoDashboardViewModel(initialRancho: rancho),
+                child: const RanchoDashboardScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.editarRancho,
+            builder: (context, state) {
+              final rancho = state.extra as RanchoInfo;
+              return ChangeNotifierProvider(
+                create: (_) =>
+                    EditarRanchoViewModel(ranchoActual: rancho),
+                child: const EditarRanchoScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.registrarGanadero,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => RegistrarGanaderoViewModel(),
+              child: const RegistrarGanaderoScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.colegas,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => ColegasViewModel(),
+              child: const ColegasScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.todosBovinos,
+            builder: (context, state) {
+              final args = state.extra as TodosBovinosArgs;
+              return TodosBovinosScreen(args: args);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.veterinarios,
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => VeterinarioViewModel(),
+              child: const VeterinariosScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.miPlan,
+            builder: (context, state) {
+              final ds = SuscripcionRemoteDataSourceImpl();
+              final repo = SuscripcionRepositoryImpl(
+                  ds, PaymentRemoteDataSourceImpl());
+              return ChangeNotifierProvider(
+                create: (_) => MiPlanViewModel(
+                  getSuscripcion: GetSuscripcionUseCase(repo),
+                  getPlanes: GetPlanesUseCase(repo),
+                ),
+                child: const MiPlanScreen(),
+              );
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.pruebaConexion,
+            builder: (_, __) => const PruebaConexionScreen(),
+          ),
+        ],
       ),
     ],
   );

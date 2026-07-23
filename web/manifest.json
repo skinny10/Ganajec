@@ -1,12 +1,12 @@
 {
-    "name": "ganajec",
-    "short_name": "ganajec",
+    "name": "GANAJEC AI",
+    "short_name": "GANAJEC",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#FAFAF9",
+    "theme_color": "#1A1A1A",
+    "description": "Plataforma inteligente de predicción de enfermedades bovinas con IA y NLP.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

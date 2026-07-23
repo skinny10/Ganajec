@@ -104,7 +104,10 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
                 ),
                 const SizedBox(height: 12),
                 if (_a.descripcion.trim().isNotEmpty)
-                  ResultadoNLPBox(descripcion: _a.descripcion),
+                  ResultadoNLPBox(
+                    descripcion: _a.descripcion,
+                    concordancia: _a.concordanciaNlp,
+                  ),
               ],
             ),
           ),
@@ -154,7 +157,7 @@ class _ResultadoPrediccionScreenState extends State<ResultadoPrediccionScreen> {
             children: [
               // Ver historial
               GestureDetector(
-                onTap: () => context.push(AppRoutes.historial),
+                onTap: () => context.go(AppRoutes.historial),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),

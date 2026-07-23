@@ -11,6 +11,7 @@ class PrediccionModel extends Prediccion {
     super.animalIdExterno,
     super.severidad,
     super.sintomasNlp,
+    super.concordanciaNlp,
   });
 
   /// Parsea un elemento de la lista `predicciones` de la API.
@@ -24,7 +25,21 @@ class PrediccionModel extends Prediccion {
     String? animalId,
     String? animalNombre,
     List<String>? sintomasNlp,
+    double? concordanciaNlp,
   }) {
+    // features_nlp viene en la respuesta de POST /registros-sintomas
+    final featuresNlp = json['features_nlp'] as Map<String, dynamic>? ?? {};
+    final analisisTexto = featuresNlp['analisis_texto'] as Map<String, dynamic>? ?? {};
+
+    // Síntomas detectados por NLP (se usa si no se pasan explícitamente)
+    final sintomasFromFeatures = (analisisTexto['sintomas_detectados'] as List<dynamic>? ?? [])
+        .map((e) => e.toString())
+        .toList();
+
+    // Concordancia NLP–RF (0.0 a 1.0)
+    final concordanciaFromFeatures =
+        (analisisTexto['concordancia_con_prediccion'] as num?)?.toDouble() ?? 0.0;
+
     final bovino = json['bovino'] as Map<String, dynamic>?;
     return PrediccionModel(
       // v2: POST /registros-sintomas ya no devuelve id en la prediccion
@@ -41,7 +56,8 @@ class PrediccionModel extends Prediccion {
           : json['fecha'] != null
               ? DateTime.parse(json['fecha'] as String)
               : DateTime.now(),
-      sintomasNlp: sintomasNlp ?? const [],
+      sintomasNlp: sintomasNlp ?? sintomasFromFeatures,
+      concordanciaNlp: concordanciaNlp ?? concordanciaFromFeatures,
     );
   }
 

@@ -48,6 +48,7 @@ class _RegistrarSintomasScreenState extends State<RegistrarSintomasScreen> {
           prediccion: vm.resultado!,
           sintomasFormulario: vm.seleccionados.toList(),
           sintomasNlp: vm.resultado!.sintomasNlp,
+          concordanciaNlp: vm.resultado!.concordanciaNlp,
           descripcion: vm.descripcion,
           temperatura: vm.temperatura,
           litrosLeche: vm.leche,

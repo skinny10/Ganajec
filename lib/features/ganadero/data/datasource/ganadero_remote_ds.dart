@@ -203,15 +203,12 @@ class GanaderoRemoteDataSourceImpl implements GanaderoRemoteDataSource {
     final res =
         await _dio.post(ApiConstants.registroSintomas, data: body);
     final pred = res.data['prediccion'] as Map<String, dynamic>;
-    // Lee los síntomas que extrajo el NLP de la API (BETO).
-    // La API devuelve "sintomas_nlp": ["fiebre", "diarrea", ...]
-    final sintomasNlpRaw = res.data['sintomas_nlp'] as List<dynamic>? ?? [];
-    final sintomasNlp = sintomasNlpRaw.map((e) => e.toString()).toList();
+    // Los síntomas NLP y la concordancia vienen dentro de
+    // prediccion.features_nlp.analisis_texto — PrediccionModel.fromJson los extrae.
     return PrediccionModel.fromJson(
       pred,
       animalId: registro.animalId,
       animalNombre: '',
-      sintomasNlp: sintomasNlp,
     );
   }
 
