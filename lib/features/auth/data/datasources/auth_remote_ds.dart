@@ -54,6 +54,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return null;
   }
 
+
   @override
   Future<void> logout() => TokenStorage.clear();
 }
