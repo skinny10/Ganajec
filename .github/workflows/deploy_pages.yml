@@ -27,8 +27,9 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        # Cambia "ganajec" por el nombre exacto de tu repositorio en GitHub
-        run: flutter build web --release --base-href /ganajec/
+        # Cambia /Ganajec/ por el nombre exacto de tu repo en GitHub (case-sensitive)
+        # API_URL debe ser HTTPS para que el navegador permita las peticiones
+        run: flutter build web --release --base-href /Ganajec/ --dart-define=API_URL=https://ganajec.duckdns.org/api
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

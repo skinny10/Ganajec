@@ -1,12 +1,22 @@
 /// Centraliza la URL base y todos los paths de la API GANAJEC AI.
 ///
-/// Dev local  → http://192.168.1.17:8000/api  (tu IP LAN, para emulador/físico)
-/// Emulador   → http://10.0.2.2:8000/api      (alias de localhost en AVD)
-/// Producción → http://100.58.10.101/api       (EC2 + Nginx)
+/// La URL se inyecta en tiempo de compilación con --dart-define:
+///
+///   APK Android / Web (producción):
+///     flutter build apk --dart-define=API_URL=https://ganajec.duckdns.org/api
+///     flutter build web --dart-define=API_URL=https://ganajec.duckdns.org/api
+///
+///   Dev local:
+///     flutter run --dart-define=API_URL=http://192.168.3.103:8000/api
+///
+/// Si no se pasa --dart-define cae al fallback de producción (Android).
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://100.58.10.101/api';
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://ganajec.duckdns.org/api',
+  );
 
 
 
