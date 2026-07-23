@@ -178,12 +178,12 @@ class _VerificarEmailScreenState extends State<VerificarEmailScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 0,
-                  right: 0,
+                  top: 20,
+                  right: -10,
                   child: Image.asset(
                     'assets/images/vaca.png',
-                    width: 160,
-                    height: 160,
+                    width: 130,
+                    height: 130,
                     fit: BoxFit.contain,
                   ),
                 ),
