@@ -109,6 +109,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                               estado: vm.estado!,
                               totalGanaderos: vm.totalGanaderos,
                               totalDuenos: vm.totalDuenos,
+                              totalVeterinarios: vm.totalVeterinarios,
                               animation: _resumenAC,
                             ),
                             const SizedBox(height: 12),
@@ -738,12 +739,14 @@ class _ResumenGrid extends StatefulWidget {
   final SistemaEstado estado;
   final int totalGanaderos;
   final int totalDuenos;
+  final int totalVeterinarios;
   final AnimationController animation;
 
   _ResumenGrid({
     required this.estado,
     required this.totalGanaderos,
     required this.totalDuenos,
+    required this.totalVeterinarios,
     required this.animation,
   });
 
@@ -953,7 +956,7 @@ class _ResumenGridState extends State<_ResumenGrid> {
                                   icon: Icons.people_outline,
                                   color: cs.primary,
                                   valor: '${widget.estado.totalUsuarios}',
-                                  label: 'Registrados',
+                                  label: 'Usuarios',
                                 ),
                               ),
                             ),
@@ -967,7 +970,7 @@ class _ResumenGridState extends State<_ResumenGrid> {
                                   icon: Icons.home_outlined,
                                   color: const Color(0xFFE53935),
                                   valor: '${widget.estado.totalRanchos}',
-                                  label: 'Activos',
+                                  label: 'Ranchos',
                                 ),
                               ),
                             ),
@@ -984,10 +987,10 @@ class _ResumenGridState extends State<_ResumenGrid> {
                               animation: _cardAnimation(3),
                               child: _HoverCard(
                                 child: _ResumenMiniCard(
-                                  icon: Icons.business_center_outlined,
-                                  color: const Color(0xFF00897B),
-                                  valor: '${widget.totalDuenos}',
-                                  label: 'Activos',
+                                  icon: Icons.agriculture_outlined,
+                                  color: const Color(0xFF8B5E3C),
+                                  valor: '${widget.totalGanaderos}',
+                                  label: 'Ganaderos',
                                 ),
                               ),
                             ),
@@ -998,10 +1001,10 @@ class _ResumenGridState extends State<_ResumenGrid> {
                               animation: _cardAnimation(4),
                               child: _HoverCard(
                                 child: _ResumenMiniCard(
-                                  icon: Icons.verified_outlined,
-                                  color: const Color(0xFF43A047),
-                                  valor: '${widget.estado.usuariosActivos}',
-                                  label: 'Actualmente',
+                                  icon: Icons.business_center_outlined,
+                                  color: const Color(0xFF00897B),
+                                  valor: '${widget.totalDuenos}',
+                                  label: 'Dueños',
                                 ),
                               ),
                             ),
@@ -1018,47 +1021,48 @@ class _ResumenGridState extends State<_ResumenGrid> {
 
         const SizedBox(height: 10),
 
-        // ── Ganaderos card ──
-        _AnimatedCard(
-          animation: _cardAnimation(5),
-          child: _HoverCard(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant.withOpacity(0.6)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8D5C0),
-                      borderRadius: BorderRadius.circular(10),
+        // ── Veterinarios card (solo si hay) ──
+        if (widget.totalVeterinarios > 0)
+          _AnimatedCard(
+            animation: _cardAnimation(5),
+            child: _HoverCard(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: cs.outlineVariant.withOpacity(0.6)),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDE7F6),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.medical_services_outlined,
+                        color: Color(0xFF7B1FA2),
+                        size: 20,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.agriculture_outlined,
-                      color: Color(0xFF6D4C41),
-                      size: 20,
+                    const SizedBox(width: 14),
+                    Text(
+                      '${widget.totalVeterinarios} Veterinarios Registrados',
+                      style: tt.bodyMedium?.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Text(
-                    '${widget.totalGanaderos} Ganaderos Registrados',
-                    style: tt.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

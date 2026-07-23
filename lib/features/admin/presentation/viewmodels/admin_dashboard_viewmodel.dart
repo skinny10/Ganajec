@@ -14,6 +14,7 @@ class AdminDashboardViewModel extends ChangeNotifier {
   int _totalGanaderos = 0;
   int _totalDuenos = 0;
   int _totalAdmins = 0;
+  int _totalVeterinarios = 0;
 
   AdminDashboardStatus get status => _status;
   String? get error => _error;
@@ -23,6 +24,7 @@ class AdminDashboardViewModel extends ChangeNotifier {
   int get totalGanaderos => _totalGanaderos;
   int get totalDuenos => _totalDuenos;
   int get totalAdmins => _totalAdmins;
+  int get totalVeterinarios => _totalVeterinarios;
 
   Future<void> cargar() async {
     _status = AdminDashboardStatus.loading;
@@ -41,6 +43,7 @@ class AdminDashboardViewModel extends ChangeNotifier {
       _totalGanaderos = usuarios.where((u) => u.rol == 'ganadero').length;
       _totalDuenos = usuarios.where((u) => u.rol == 'dueno').length;
       _totalAdmins = usuarios.where((u) => u.rol == 'admin').length;
+      _totalVeterinarios = usuarios.where((u) => u.rol == 'veterinario').length;
 
       _status = AdminDashboardStatus.success;
     } catch (e) {
