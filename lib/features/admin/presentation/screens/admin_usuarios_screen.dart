@@ -145,7 +145,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
   }
 }
 
-class _UsuarioTile extends StatelessWidget {
+class _UsuarioTile extends StatefulWidget {
   final AdminUsuario usuario;
   final VoidCallback onEditar;
   final VoidCallback onEliminar;
@@ -157,147 +157,213 @@ class _UsuarioTile extends StatelessWidget {
   });
 
   @override
+  State<_UsuarioTile> createState() => _UsuarioTileState();
+}
+
+class _UsuarioTileState extends State<_UsuarioTile> {
+  bool _hovered = false;
+
+  static const _rolColors = {
+    'ganadero': Color(0xFF8B5E3C),
+    'dueno': Color(0xFF5FA56D),
+    'admin': Color(0xFF3D7EBF),
+  };
+
+  static const _tileBg = {
+    'ganadero': Color(0xFFF5EDE6),
+    'dueno': Color(0xFFE8F5EE),
+    'admin': Color(0xFFE8EFF5),
+  };
+
+  static const _tileBgHover = {
+    'ganadero': Color(0xFFE8DED0),
+    'dueno': Color(0xFFD4EADB),
+    'admin': Color(0xFFD4DEE8),
+  };
+
+  Color get _rolColor => _rolColors[widget.usuario.rol] ?? _rolColors['ganadero']!;
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-
-    final rolColor = usuario.rol == 'admin'
-        ? cs.error
-        : usuario.rol == 'dueno'
-            ? cs.tertiary
-            : cs.primary;
+    final u = widget.usuario;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cs.outlineVariant),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: rolColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(
-                    usuario.nombre.isNotEmpty
-                        ? usuario.nombre[0].toUpperCase()
-                        : '?',
-                    style: tt.bodyMedium?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: rolColor,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      usuario.nombre,
-                      style: tt.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? _tileBgHover[widget.usuario.rol] ?? _tileBgHover['ganadero']!
+                : _tileBg[widget.usuario.rol] ?? _tileBg['ganadero']!,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: _rolColor,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            u.nombre.isNotEmpty
+                                ? u.nombre[0].toUpperCase()
+                                : '?',
+                            style: tt.bodyMedium?.copyWith(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      usuario.email,
-                      style: tt.bodySmall?.copyWith(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: rolColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      usuario.rol.toUpperCase(),
-                      style: tt.labelSmall?.copyWith(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: rolColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: usuario.isActive
-                          ? Colors.green.withOpacity(0.12)
-                          : cs.error.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      usuario.isActive ? 'Activo' : 'Inactivo',
-                      style: tt.labelSmall?.copyWith(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: usuario.isActive ? Colors.green : cs.error,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert_outlined,
-                        color: cs.onSurfaceVariant, size: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    onSelected: (v) {
-                      if (v == 'editar') onEditar();
-                      if (v == 'eliminar') onEliminar();
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'editar',
-                        child: Row(children: [
-                          Icon(Icons.edit_outlined,
-                              size: 16, color: cs.onSurface),
-                          const SizedBox(width: 8),
-                          Text('Editar',
-                              style: tt.bodySmall?.copyWith(fontSize: 13)),
-                        ]),
-                      ),
-                      PopupMenuItem(
-                        value: 'eliminar',
-                        child: Row(children: [
-                          Icon(Icons.delete_outline,
-                              size: 16, color: cs.error),
-                          const SizedBox(width: 8),
-                          Text('Eliminar',
-                              style: tt.bodySmall?.copyWith(
-                                  fontSize: 13, color: cs.error)),
-                        ]),
+                      Positioned(
+                        right: -4,
+                        bottom: -4,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            u.rol == 'ganadero'
+                                ? Icons.agriculture_rounded
+                                : u.rol == 'dueno'
+                                    ? Icons.storefront_rounded
+                                    : Icons.admin_panel_settings_rounded,
+                            size: 12,
+                            color: _rolColor,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        u.nombre,
+                        style: tt.bodyMedium?.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        u.email,
+                        style: tt.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: _rolColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        u.rol.toUpperCase(),
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _rolColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: u.isActive
+                            ? const Color(0xFF2E7D32).withOpacity(0.1)
+                            : cs.error.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        u.isActive ? 'Activo' : 'Inactivo',
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: u.isActive ? const Color(0xFF2E7D32) : cs.error,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert_outlined,
+                          color: cs.onSurfaceVariant, size: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      onSelected: (v) {
+                        if (v == 'editar') widget.onEditar();
+                        if (v == 'eliminar') widget.onEliminar();
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: 'editar',
+                          child: Row(children: [
+                            Icon(Icons.edit_outlined,
+                                size: 16, color: cs.onSurface),
+                            const SizedBox(width: 8),
+                            Text('Editar',
+                                style: tt.bodySmall?.copyWith(fontSize: 13)),
+                          ]),
+                        ),
+                        PopupMenuItem(
+                          value: 'eliminar',
+                          child: Row(children: [
+                            Icon(Icons.delete_outline,
+                                size: 16, color: cs.error),
+                            const SizedBox(width: 8),
+                            Text('Eliminar',
+                                style: tt.bodySmall?.copyWith(
+                                    fontSize: 13, color: cs.error)),
+                          ]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
