@@ -25,7 +25,10 @@ void main() async {
   await TokenStorage.init();
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
+      // Activo siempre en Web (incluye el build de GitHub Pages, que se
+      // compila en --release) y en debug de cualquier plataforma.
+      // Queda desactivado en release nativo (APK/IPA reales de la app).
+      enabled: kIsWeb || !kReleaseMode,
       builder: (context) => const GanajecApp(),
     ),
   );
